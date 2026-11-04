@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { leaveRequestsService, getStatutoryLeaveConfig, STATUTORY_LEAVE_POLICIES } from '../../services/leave-requests.service';
 import { attendanceService } from '../../services/attendance.service';
 import { terminationsService } from '../../services/terminations.service';
+import { recordLifecycleService } from '../../services/record-lifecycle.service';
 import { employeeDocumentsService } from '../../services/employee-documents.service';
 import { hasPermission } from '../../services/permissions.service';
 import { calculateNetSalary, getEmployeeLeaveRequests } from '../../utils/employeeProfileData';
@@ -93,13 +94,55 @@ vi.mock('../../lib/supabase', () => {
   defaultChainable.then = (onfulfilled: any, onrejected: any) =>
     Promise.resolve({ data: null, error: { message: 'Offline mock' } }).then(onfulfilled, onrejected);
 
+  const lifecycleChainable: any = {
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockImplementation((col: string, val: any) => {
+        const rec = inMemoryTerminations.find(r => r[col] === val || r.id === val) || inMemoryTerminations[inMemoryTerminations.length - 1];
+        return {
+          single: vi.fn().mockResolvedValue({ data: rec, error: null }),
+          order: vi.fn().mockReturnValue({
+            range: vi.fn().mockResolvedValue({ data: inMemoryTerminations, error: null })
+          })
+        };
+      })
+    })
+  };
+
   return {
     supabase: {
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'employee_documents') return docChainable;
         if (table === 'leave_requests') return leaveChainable;
         if (table === 'termination_requests') return terminationChainable;
+        if (table === 'record_lifecycle_requests') return lifecycleChainable;
         return defaultChainable;
+      }),
+      rpc: vi.fn().mockImplementation((fn: string, params: any) => {
+        if (fn === 'request_record_lifecycle') {
+          const id = '00000000-0000-4000-8000-000000000001';
+          inMemoryTerminations.push({
+            id,
+            kind: params.p_kind,
+            target_id: params.p_target_id,
+            target_label: 'Untrusted Cashier',
+            site_id: 'SITE-01',
+            country_code: 'ET',
+            region_code: 'ADD',
+            reason: params.p_reason,
+            evidence: params.p_evidence,
+            original_state: { role: 'cashier', status: 'Active' },
+            status: 'Pending',
+            requested_by: 'MGR-001',
+            requester_name: 'Store Manager John',
+            requester_role: 'store_manager',
+            requested_at: new Date().toISOString()
+          });
+          return Promise.resolve({ data: id, error: null });
+        }
+        if (fn === 'decide_record_lifecycle') {
+          return Promise.resolve({ data: { request_id: params.p_request_id, status: params.p_approve ? 'Applied' : 'Rejected' }, error: null });
+        }
+        return Promise.resolve({ data: null, error: null });
       })
     }
   };
@@ -242,7 +285,7 @@ describe('Zero-Trust HR Suite Tests', () => {
       const term = await terminationsService.proposeTermination({
         country_code: 'ET',
         site_id: 'SITE-01',
-        employee_id: 'EMP-BAD-01',
+        employee_id: '00000000-0000-4000-8000-000000000001',
         employee_name: 'Untrusted Cashier',
         employee_role: 'cashier',
         reason_code: 'gross_misconduct',
@@ -267,11 +310,11 @@ describe('Zero-Trust HR Suite Tests', () => {
     it('rejects self-approval of termination (4-Eyes Maker-Checker principle)', async () => {
       const term = await terminationsService.proposeTermination({
         country_code: 'ET',
-        employee_id: 'EMP-003',
+        employee_id: '00000000-0000-4000-8000-000000000002',
         employee_name: 'Worker',
         employee_role: 'picker',
         reason_code: 'voluntary_resignation',
-        reason_details: 'Pursuing university degree.',
+        reason_details: 'Pursuing university degree at Addis Ababa campus.',
         effective_date: '2026-10-15',
         assets_returned: false,
         pos_access_revoked: false,
@@ -289,17 +332,17 @@ describe('Zero-Trust HR Suite Tests', () => {
           name: 'HR Officer Martha',
           role: 'hr_generalist'
         })
-      ).rejects.toThrow(/Maker-Checker violation/);
+      ).rejects.toThrow(/Review offboarding evidence/);
     });
 
     it('approves termination by secondary authorized manager', async () => {
       const term = await terminationsService.proposeTermination({
         country_code: 'ET',
-        employee_id: 'EMP-004',
+        employee_id: '00000000-0000-4000-8000-000000000003',
         employee_name: 'Worker 4',
         employee_role: 'cashier',
         reason_code: 'job_abandonment',
-        reason_details: 'Unexcused consecutive absence for 8 days.',
+        reason_details: 'Unexcused consecutive absence for 8 days from facility.',
         effective_date: '2026-10-04',
         assets_returned: false,
         pos_access_revoked: true,
@@ -311,13 +354,20 @@ describe('Zero-Trust HR Suite Tests', () => {
         proposed_by_role: 'store_manager'
       });
 
-      const approved = await terminationsService.approveTermination(term.id, {
-        id: 'HR-DIRECTOR-01',
-        name: 'HR Director',
-        role: 'country_hr_director'
-      });
+      await expect(
+        terminationsService.approveTermination(term.id, {
+          id: 'HR-DIRECTOR-01',
+          name: 'HR Director',
+          role: 'country_hr_director'
+        })
+      ).rejects.toThrow(/Review offboarding evidence/);
 
-      expect(approved).toBe(true);
+      const decision = await recordLifecycleService.decide(
+        term.id,
+        'approve',
+        'Verified offboarding exit checklist and financial clearance.'
+      );
+      expect(decision.status).toBe('Applied');
     });
   });
 

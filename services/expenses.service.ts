@@ -227,6 +227,10 @@ export const expensesService = {
             throw new Error(`Role "${approver.role}" is not authorized to approve operating expenses.`);
         }
 
+        if ((existing.escalatedToCeo || (existing as any).escalated_to_ceo) && !isGroupExec) {
+            throw new Error('Executive Authorization required: Group Finance or CEO required for escalated expenses.');
+        }
+
         const { data, error } = await supabase.rpc('decide_expense', { p_expense_id: id, p_decision: 'Approved', p_reason: approver.notes?.trim() || 'Expense approval' });
         if (error) throw error;
         if (!data?.success || data.status !== 'Approved') throw new Error('Expense approval was not confirmed.');

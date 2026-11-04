@@ -4,9 +4,11 @@ import { supabase } from '../../lib/supabase';
 
 vi.mock('../../lib/supabase', () => {
     const mockFrom = vi.fn();
+    const mockRpc = vi.fn();
     return {
         supabase: {
-            from: mockFrom
+            from: mockFrom,
+            rpc: mockRpc
         },
         isSupabaseConfigured: () => true
     };
@@ -267,20 +269,22 @@ describe('purchaseOrdersService', () => {
 
     describe('Zero-Trust & Chain of Custody: delete() & cancel()', () => {
         it('soft-cancels PO instead of executing hard SQL DELETE', async () => {
-            const mockUpdate = vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue({ error: null })
+            const mockDelete = vi.fn();
+            (supabase.rpc as any).mockResolvedValue({
+                data: { po_id: 'po-to-delete', status: 'Cancelled' },
+                error: null
             });
 
             (supabase.from as any).mockImplementation((table: string) => {
                 if (table === 'purchase_orders') {
                     return {
-                        update: mockUpdate,
+                        delete: mockDelete,
                         select: vi.fn().mockReturnValue({
                             eq: vi.fn().mockReturnValue({
                                 single: vi.fn().mockResolvedValue({
                                     data: {
                                         id: 'po-to-delete',
-                                        status: 'Draft',
+                                        status: 'Cancelled',
                                         notes: 'Initial order notes',
                                         po_items: []
                                     },
@@ -289,7 +293,7 @@ describe('purchaseOrdersService', () => {
                                 maybeSingle: vi.fn().mockResolvedValue({
                                     data: {
                                         id: 'po-to-delete',
-                                        status: 'Draft',
+                                        status: 'Cancelled',
                                         notes: 'Initial order notes',
                                         po_items: []
                                     },
@@ -302,12 +306,14 @@ describe('purchaseOrdersService', () => {
                 return {};
             });
 
-            await purchaseOrdersService.delete('po-to-delete');
+            const result = await purchaseOrdersService.delete('po-to-delete');
 
-            expect(mockUpdate).toHaveBeenCalledTimes(1);
-            const updatePayload = mockUpdate.mock.calls[0][0];
-            expect(updatePayload.status).toBe('Cancelled');
-            expect(updatePayload.notes).toContain('[CANCELLED: Deleted by manager]');
+            expect(supabase.rpc).toHaveBeenCalledWith(
+                'discard_own_purchase_order_draft',
+                expect.objectContaining({ p_po_id: 'po-to-delete', p_reason: 'Deleted by manager' })
+            );
+            expect(mockDelete).not.toHaveBeenCalled();
+            expect(result.status).toBe('Cancelled');
         });
     });
 });

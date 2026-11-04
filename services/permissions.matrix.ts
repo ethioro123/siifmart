@@ -60,7 +60,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ),
     area_operations_manager: [
         'dashboard.view', 'pos.view', 'inventory.view', 'inventory.transfer',
-        'sales.view', 'sales.view_reports', 'procurement.view', 'pricing.view',
+        'sales.view', 'sales.view_reports', 'procurement.view', 'procurement.approve_po', 'pricing.view',
         'employees.view'
     ],
 
