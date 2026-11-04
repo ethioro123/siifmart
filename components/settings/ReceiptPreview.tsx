@@ -3,6 +3,7 @@ import { SystemConfig } from '../../types';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { formatDateTime } from '../../utils/formatting';
 import { generateQRCodeSyncSvg } from '../../utils/qrCodeGenerator';
+import { sanitizePreviewHTML } from '../../utils/printHelper';
 
 interface ReceiptPreviewProps {
   settings: Partial<SystemConfig> & { country?: Country };
@@ -216,7 +217,7 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
   return (
     <div className={`bg-white shadow-md rounded-xl overflow-hidden border border-[var(--theme-border)] flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}>
       <iframe
-        srcDoc={html}
+        srcDoc={sanitizePreviewHTML(html)}
         title="Receipt Preview"
         className="w-full h-full border-none"
       />

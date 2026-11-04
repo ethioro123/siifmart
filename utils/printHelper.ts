@@ -322,3 +322,16 @@ export const printHtmlContent = async (htmlContent: string): Promise<{ success: 
         return { success: false, error: err?.message || 'Browser print failed' };
     }
 };
+
+/**
+ * Sanitizes HTML content for sandboxed preview iframes by stripping
+ * non-previewable scripts, inline event handlers (e.g. onclick="window.print()"),
+ * and redundant print action controls that trigger browser sandbox warnings.
+ */
+export const sanitizePreviewHTML = (rawHtml: string): string => {
+    if (!rawHtml) return '';
+    return rawHtml
+        .replace(/<div\b[^>]*class=["'][^"']*no-print[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+        .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+};

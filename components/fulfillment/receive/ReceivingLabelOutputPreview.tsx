@@ -3,6 +3,7 @@ import { generateInboundPutawayLabelHTML } from '../../../utils/labels/InboundPu
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
 import { buildReceivingPalletLabels, type ReceivingPrintItem } from '../../../utils/receivingLabelData';
 import { getLabelDimensions, normalizeLabelSize } from '../../../utils/labels/types';
+import { sanitizePreviewHTML } from '../../../utils/printHelper';
 interface Props {
     item: ReceivingPrintItem; type: 'LPN' | 'ITEM'; size: string; format: 'QR' | 'Barcode' | 'Both';
     showPrice: boolean; showCategory: boolean; showName: boolean; currency?: string;
@@ -22,7 +23,7 @@ export function ReceivingLabelOutputPreview({ item, type, size, format, showPric
                     ? await generateInboundPutawayLabelHTML(buildReceivingPalletLabels([{ ...item, copies: 1 }]), { size: outputSize, format })
                     : await generateUnifiedBatchLabelsHTML([{ value: item.sku, sku: item.sku, label: item.name, quantity: 1,
                         price: String(item.price ?? ''), category: item.category, date: item.expiry }], { size: outputSize, format, showPrice, showCategory, showName, currency });
-                if (current) setHtml(output.replace('</head>', '<style>.no-print{display:none!important}html,body{margin:0!important;padding:0!important}</style></head>'));
+                if (current) setHtml(sanitizePreviewHTML(output).replace('</head>', '<style>.no-print{display:none!important}html,body{margin:0!important;padding:0!important}</style></head>'));
             } catch { if (current) setFailed(true); }
         };
         void generate();

@@ -3,6 +3,7 @@ import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import { Printer, Receipt } from 'lucide-react';
+import { sanitizePreviewHTML } from '../../../utils/printHelper';
 
 export const ReceiptPreviewModal: React.FC = () => {
     const { t } = useLanguage();
@@ -29,7 +30,7 @@ export const ReceiptPreviewModal: React.FC = () => {
                         
                         {receiptPreviewHTML ? (
                             <iframe
-                                srcDoc={receiptPreviewHTML}
+                                srcDoc={sanitizePreviewHTML(receiptPreviewHTML)}
                                 title={t('pos.receiptPreview')}
                                 className="w-full h-[460px] border-none bg-white block"
                             />

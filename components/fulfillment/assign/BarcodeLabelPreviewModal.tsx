@@ -3,6 +3,7 @@ import { X, Printer, CheckCircle2, AlertTriangle, Copy, Check, QrCode, ScanLine,
 import { BarcodeLabelPreviewCardProps } from './BarcodeLabelPreviewCard';
 import { getLabelDimensions } from '../../../utils/labels/types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { sanitizePreviewHTML } from '../../../utils/printHelper';
 
 interface BarcodeLabelPreviewModalProps {
     isOpen: boolean;
@@ -38,7 +39,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
         setOutputHtml('');
         setOutputError(false);
         void buildOutput().then(html => {
-            if (active) setOutputHtml(html);
+            if (active) setOutputHtml(sanitizePreviewHTML(html));
         }).catch(() => {
             if (active) setOutputError(true);
         });
