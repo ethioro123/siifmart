@@ -1,4 +1,4 @@
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { InventoryLocationDropdown } from './InventoryLocationDropdown';
 import { InventoryPriceReadiness } from './InventoryPriceReadiness';
 import React from 'react';
 import {
@@ -53,7 +53,6 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
     currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
-    const { t } = useLanguage();
     const showCostPrice = canViewCostPrice(user?.role);
 
     return (
@@ -218,7 +217,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
                             {/* Location */}
                             <td className="py-4 px-4">
-                                {product.inventorySummary ? <button type="button" className="min-h-[44px] text-left text-sm underline" onClick={event=>{event.stopPropagation();setSelectedViewProduct(product);}}>{product.inventorySummary.locationCount > 1 ? t('warehouse.locationsCount', { count: product.inventorySummary.locationCount }) : product.location || t('inventory.locationUnassigned')}</button> : (!activeSite || isReadOnly) ? (
+                                {product.inventorySummary ? <InventoryLocationDropdown key={product.id} product={product} /> : (!activeSite || isReadOnly) ? (
                                     (() => {
                                         const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
                                         const otherLocs = getOtherLocationsForSku(product.sku, product.id, product.siteId || (product as any).site_id);

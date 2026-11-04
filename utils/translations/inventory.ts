@@ -1,6 +1,7 @@
 import { TranslationBlock } from './types';
 
 export const inventory: TranslationBlock = {
+    emptyLocations: { en: 'Empty locations', am: 'ባዶ ቦታዎች', or: 'Bakkeewwan duwwaa' },
     stockLocations: { en: 'Stock by location and batch', am: 'ክምችት በቦታ እና በሎት', or: 'Kuusaa bakkaafi lootiin' },
     matchingProducts: { en: '{count} matching products', am: '{count} ተዛማጅ ምርቶች', or: 'Oomishaalee walsiman {count}' },
     inventorySummaryHint: { en: 'One row per product; quantities include every location at this facility.', am: 'ለእያንዳንዱ ምርት አንድ ረድፍ፤ ብዛቱ በዚህ ተቋም ያሉትን ሁሉንም ቦታዎች ያካትታል።', or: 'Oomisha tokkoof tarree tokko; baayʼinni bakka hunda kan giddugala kanaa hammata.' },

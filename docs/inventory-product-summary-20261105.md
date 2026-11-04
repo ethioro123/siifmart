@@ -26,3 +26,7 @@ Live staging verification returned Bullo Dishes ETDI001 once at Adama Industrial
 - SQL rollback regression passed after both migrations: one summary for multiple lots/locations and an empty placeholder, correct sum and location count, searchable secondary bin, original records retained, invoker RLS country isolation and no anonymous SELECT grant. Fixtures rolled back.
 - Service/UI regressions cover grouped query scope and pagination, distinct source versus total quantities, bounded requests, on-demand location evidence, query errors and location-specific adjustment identity.
 - Security advisor ran without findings referencing the new views. Browser rendering was not manually verified.
+
+## Stock-list location dropdown
+
+The Location cell now opens a body-level anchored dropdown directly on desktop and mobile. It loads the same scoped, paginated location/lot evidence on demand without opening the product modal. Nonzero stock is listed first; zero-stock records remain available under Empty locations. The panel uses semantic translated controls, stays inside the viewport, closes on outside pointer/focus or Escape, and returns focus on Escape/Close. Country changes dismiss it. No database migration was needed for this UI change. Regression coverage includes direct table-cell opening, suppressed row navigation, pagination, failed reads/retry, empty-record disclosure and focus restoration. The complete regression suite passed 2,735 tests across 428 files; TypeScript and file-size checks passed.
