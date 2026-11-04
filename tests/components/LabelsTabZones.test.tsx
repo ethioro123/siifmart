@@ -15,8 +15,8 @@ it('renders safely without zones and enables configured bays after zones load',(
  state.value={filteredProducts:[],addNotification:vi.fn(),t:(s:string)=>s,user:null,activeSite:{id:'wh',code:'ET-ADD-DC-01',country:'ET'}};
  const {rerender}=render(<LabelsTab/>);
  fireEvent.click(screen.getAllByRole('button',{name:'Bays'})[0]);
- expect(screen.queryByRole('button',{name:'GENERATE LOCATION LABEL'})).toBeNull();
- expect(screen.queryByTitle('Zone')).toBeNull();
+ expect((screen.getByRole('button',{name:'GENERATE LOCATION LABEL'}) as HTMLButtonElement).disabled).toBe(true);
+ expect(screen.getByTitle('Zone')).toBeTruthy();
  state.value={...state.value,zones:[{id:'zone',name:'Zone B',siteId:'wh'}]};
  rerender(<LabelsTab/>);
  expect((screen.getByTitle('Zone') as HTMLSelectElement).value).toBe('B');

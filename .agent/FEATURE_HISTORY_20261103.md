@@ -17,3 +17,5 @@
 - Remaining deletion-security gaps: current active UUID identity replaces stale role/email shortcuts; scoped avatar uploads retain earlier versions; product references, personnel documents, receiving evidence, warehouse attribution and general logs are protected; unused zero-stock cleanup is audited; ordinary public-table TRUNCATE grants are removed. Final migrations applied to staging and production; verification: `docs/remaining-deletion-security-verification-20261103.md`.
 
 - Location label empty state (4 November): hide unusable location selectors, previews and print actions until facility zones exist; allow narrow-screen selector stacking and preview toolbar wrapping; translate live status in en/am/or.
+
+- Location label correction (4 November): restored visible zone, aisle, bay and preview controls at user request, retaining responsive spacing and existing configured-zone print validation.
