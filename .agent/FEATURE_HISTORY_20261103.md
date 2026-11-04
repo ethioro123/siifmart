@@ -15,3 +15,5 @@
 - 2026-11-03: Calibrated transfer request creation permissions in `guard_wms_transfer_approval` to include store managers, replenishment planners, and operations leadership while auto-populating `country_code` and requester fields. Applied migration `20261103_guard_wms_transfer_creation_roles.sql` to staging. Safe logging applied in `products-replenish.ts`.
 
 - Remaining deletion-security gaps: current active UUID identity replaces stale role/email shortcuts; scoped avatar uploads retain earlier versions; product references, personnel documents, receiving evidence, warehouse attribution and general logs are protected; unused zero-stock cleanup is audited; ordinary public-table TRUNCATE grants are removed. Final migrations applied to staging and production; verification: `docs/remaining-deletion-security-verification-20261103.md`.
+
+- Location label empty state (4 November): hide unusable location selectors, previews and print actions until facility zones exist; allow narrow-screen selector stacking and preview toolbar wrapping; translate live status in en/am/or.

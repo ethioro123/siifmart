@@ -256,6 +256,9 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         {labelMode === 'BAY' ? (
                             /* BAY LOGIC — Location Label Printing */
                             <div className="space-y-6">
+                                {!zoneLetters.length ? (
+                                    <p role="status" className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-4 text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>
+                                ) : <>
                                 <AssignBayLocationSelector
                                     bayConfig={bayConfig}
                                     setBayConfig={setBayConfig}
@@ -264,13 +267,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     maxBays={maxBays}
                                 />
 
-                                {!zoneLetters.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>}
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
                                         <div className="text-xs text-[var(--theme-text-muted)] uppercase font-semibold flex items-center gap-2">
                                             {t('warehouse.liveLocationPreview')}
-                                            <span className="text-[11px] text-[var(--theme-accent)] font-bold animate-pulse">LIVE</span>
+                                            <span className="text-[11px] text-[var(--theme-accent)] font-bold ">{t('warehouse.livePreviewStatus')}</span>
                                         </div>
                                         <button
                                             type="button"
@@ -316,6 +318,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         <span>{t('warehouse.generateLocationLabelButton')}</span>
                                     </button>
                                 </div>
+                                </>}
                             </div>
                         ) : (
                             /* PRODUCT LOGIC */

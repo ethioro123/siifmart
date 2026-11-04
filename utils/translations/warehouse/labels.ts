@@ -6,6 +6,11 @@ export const labels: any = {
     am: 'መለያዎች',
     or: 'Mallattoo Meeshaa',
 
+    livePreviewStatus: {
+        en: 'Live',
+        am: 'ቀጥታ',
+        or: 'Kallattiin'
+    },
     // Hub Header & Modes
     labelPrintingHub: {
         en: 'Label Printing Hub',

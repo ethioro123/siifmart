@@ -18,7 +18,7 @@ export const AssignBayLocationSelector: React.FC<AssignBayLocationSelectorProps>
 }) => {
     const { t } = useLanguage();
     return (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-3">
             <div>
                 <label className="text-xs uppercase font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
                     {t('warehouse.zoneFieldLabel', { min: zoneLetters[0] || 'A', max: zoneLetters[zoneLetters.length - 1] || 'Z' })}

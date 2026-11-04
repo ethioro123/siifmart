@@ -21,6 +21,7 @@ describe('labels hub controls',()=>{
  });
  it('does not offer printable fabricated default zones',()=>{
   setup();fireEvent.click(screen.getAllByRole('button',{name:'Bays'})[0]);
-  expect((screen.getByRole('button',{name:'GENERATE LOCATION LABEL'}) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.queryByRole('button',{name:'GENERATE LOCATION LABEL'})).toBeNull();
+ expect(screen.queryByTitle('Zone')).toBeNull();
  });
 });
