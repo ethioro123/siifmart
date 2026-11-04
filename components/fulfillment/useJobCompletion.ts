@@ -123,10 +123,9 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
                 await wmsJobsService.update(jobId, {
                     status: 'Completed',
-                    lineItems: itemsToValidate.map((i: any) => ({
+                    lineItems: itemsToValidate.map(({ originalIndex: _originalIndex, ...i }: any) => ({
                         ...i,
                         status: (i.status === 'Short' ? 'Short' : 'Completed') as JobItem['status'],
-
                     })),
                     completedBy: completedByValue,
                     completedAt: timestamp || new Date().toISOString()
