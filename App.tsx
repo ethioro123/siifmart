@@ -33,46 +33,6 @@ const LocationSelect = lazy(() => import('./pages/LocationSelect'));
 const Profile = lazy(() => import('./pages/Profile'));
 const MigrationPanel = lazy(() => import('./pages/MigrationPanel'));
 
-/**
- * Minimal Apple boot-style progress indicator.
- * Progressively and smoothly advances forward, syncing with real data hydration.
- */
-function AppleBootProgress({ realProgress }: { realProgress: number }) {
-  const [progress, setProgress] = React.useState(8);
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress(prev => {
-        // If real data progress is higher, smoothly catch up towards it
-        if (realProgress > 0 && realProgress > prev) {
-          return Math.min(100, prev + Math.max(2, (realProgress - prev) * 0.35));
-        }
-        // Continuous organic Apple startup pacing
-        if (prev < 35) return prev + 2.5;
-        if (prev < 65) return prev + 1.8;
-        if (prev < 85) return prev + 1.0;
-        if (prev < 95) return prev + 0.3;
-        return prev;
-      });
-    }, 70);
-
-    return () => clearInterval(timer);
-  }, [realProgress]);
-
-  const activePercent = Math.min(100, Math.max(progress, realProgress || 0));
-
-  return (
-    <div className="w-48 sm:w-56 mt-10">
-      <div className="w-full h-[3px] bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] rounded-full overflow-hidden">
-        <div
-          style={{ width: `${activePercent}%` }}
-          className="h-full bg-[var(--theme-primary)] rounded-full transition-all duration-200 ease-out"
-        />
-      </div>
-    </div>
-  );
-}
-
 // Fallback loader for code splitting
 function ModuleLoader() {
   return (
@@ -97,12 +57,12 @@ import { useData } from './contexts/DataContext';
 import { systemConfigService } from './services/supabase.service';
 import { initializeAvatarsBucket } from './services/imageStorage.service';
 import StagingEnvironmentBanner from './components/StagingEnvironmentBanner';
-import Logo from './components/Logo';
+import BrandBootScreen from './components/BrandBootScreen';
 
 export default function App() {
   useCapacitor();
   const { user, loading } = useStore();
-  const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress, settings } = useData();
+  const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, settings } = useData();
 
   React.useEffect(() => {
     const isStaging = import.meta.env.MODE === 'staging';
@@ -170,35 +130,7 @@ export default function App() {
   }, []);
   // Initial Auth/Data Loading State
   if (loading || (user && isDataInitialLoading)) {
-    // Calculate progress based on entities loaded
-    const progressPercent = loadingProgress?.total > 0
-      ? Math.round((loadingProgress.loaded / loadingProgress.total) * 100)
-      : 0;
-
-    return (
-      <div className="min-h-screen bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] flex flex-col items-center justify-center p-6 select-none transition-colors duration-200">
-        {/* Brand Display — Pure, Simple, Elegant Apple Presentation */}
-        <div className="flex flex-col items-center text-center">
-          <Logo variant="stacked" size={36} />
-        </div>
-
-        {/* Minimal Apple Precision Progress Bar */}
-        <AppleBootProgress realProgress={progressPercent} />
-
-        {/* Error Display with Retry */}
-        {loadError && (
-          <div className="mt-8 p-4 border border-[var(--theme-status-danger-border)] rounded-2xl max-w-sm w-full text-center">
-            <p className="text-xs text-[var(--theme-status-danger-text)] mb-2">{loadError}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-lg transition-opacity hover:bg-[var(--theme-primary-hover)] active:scale-95 cursor-pointer"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-      </div>
-    );
+    return <BrandBootScreen error={loadError} />;
   }
 
   return (

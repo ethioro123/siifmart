@@ -19,3 +19,5 @@
 - Location label empty state (4 November): hide unusable location selectors, previews and print actions until facility zones exist; allow narrow-screen selector stacking and preview toolbar wrapping; translate live status in en/am/or.
 
 - Location label correction (4 November): restored visible zone, aisle, bay and preview controls at user request, retaining responsive spacing and existing configured-zone print validation.
+
+- Brand startup screen (4 November): centered SIIFMART identity, soft theme-aware ambient light, transform/opacity reveal and indeterminate loading motion from first HTML paint through authentication startup. Removed timer-generated progress percentages; retained error/retry behavior with translated copy and reduced-motion/forced-color fallbacks. No minimum display delay or new animation dependency.

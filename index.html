@@ -17,6 +17,7 @@
     document.documentElement.style.colorScheme = initialTheme;
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   </script>
+  <link rel="stylesheet" href="/brand-boot.css" />
   <title>SIIFMART | Retail & Warehouse System</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" type="image/png" href="/favicon.png" />
@@ -27,7 +28,18 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="brand-boot" role="status" aria-label="SIIFMART">
+      <div class="brand-boot__aura" aria-hidden="true"></div>
+      <div class="brand-boot__content">
+        <div class="brand-boot__identity">
+          <span class="brand-boot__static-mark" aria-hidden="true"></span>
+          <span class="brand-boot__static-name">SIIFMART</span>
+        </div>
+        <div class="brand-boot__loading" aria-hidden="true"><div class="brand-boot__track"><span></span></div></div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/index.tsx"></script>
 </body>
 

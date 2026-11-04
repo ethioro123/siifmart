@@ -1,6 +1,7 @@
 import { TranslationBlock } from './types';
 
 export const common: TranslationBlock = {
+    retry: { en: 'Retry', am: 'እንደገና ሞክር', or: 'Irra deebiʼii yaali' },
     search: { en: 'Search', am: 'ፈልግ', or: 'Barbaadi' },
     cancel: { en: 'Cancel', am: 'ሰርዝ', or: 'Haqi' },
     confirm: { en: 'Confirm', am: 'አረጋግጥ', or: 'Mirkaneessi' },
