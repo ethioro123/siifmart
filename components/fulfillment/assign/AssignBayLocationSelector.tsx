@@ -42,10 +42,7 @@ export const AssignBayLocationSelector: React.FC<AssignBayLocationSelectorProps>
                             const name = item.name.trim().toUpperCase();
                             return name.startsWith(`ZONE ${z}`) || name.startsWith(z);
                         });
-                        const descriptive = matched?.name
-                            ? ` (${matched.name.replace(/^Zone\s+[A-Z]\s*[-:(]?\s*/i, '').replace(/[)]$/, '')})`
-                            : '';
-                        return <option key={z} value={z}>{z}{descriptive}</option>;
+                        return <option key={z} value={z}>{matched?.name || z}</option>;
                     })}
                 </select>
             </div>
