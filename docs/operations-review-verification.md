@@ -85,3 +85,7 @@ Saved and applied `migrations/20261104_receiving_review_putaway_job_number.sql` 
 ### Job and PO reference correction
 
 The preceding PO-as-job fallback was incorrect. `migrations/20261104_review_distinct_job_and_po_numbers.sql` restores the WMS reference (stored job number, otherwise order reference) for rows and related putaway evidence. Both UI entry points use the existing WMS formatter: the reported job displays 9165FB, while its resolved PO business reference remains AAAA0033. Reuses the synchronized en/am/or Job number label. Applied to staging `utykzifrblpyxlvlknsm`; regression checks keep these identifiers separate.
+
+### Receiving completion timeout — 5 November 2026
+
+Staging PostgREST logs identified employee identity/code lookups scanning employee policies during RECEIVE completion. Applied `20261105_employee_identity_indexed_lookup.sql` and `20261105_employee_code_indexed_lookup.sql` to `utykzifrblpyxlvlknsm`; both retain SECURITY INVOKER and employee RLS, use the authenticated subject primary key and reject inactive employees. Combined lookup measured 5.192 ms. A rollback-only authenticated completion of the reported RECEIVE job succeeded under a 3-second timeout. `tests/sql/receiving_completion_identity.sql` covers valid, missing and anonymous subjects. Client completion now propagates failed writes and reflects only saved server jobs. Localhost serves the product-sync-free split hook; the pasted line-243 warning belongs to the earlier module.
