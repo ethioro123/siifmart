@@ -46,3 +46,11 @@ it('does not accept a different SKU just because punctuation was removed',async(
  const {result,stock}=setup();await expect(result.current.handleScanItem('ET-001',10)).rejects.toThrow('Wrong item');
  expect(stock).not.toHaveBeenCalled();
 });
+
+it('tells the worker to choose another bin for an occupied incompatible lot',async()=>{
+ const {PutawayBinLotConflictError}=await import('../../utils/putawayErrors');
+ const notify=vi.fn();
+ const {result}=setup({putawayStock:vi.fn().mockRejectedValue(new PutawayBinLotConflictError()),addNotification:notify});
+ await expect(result.current.handleScanItem('ET001',3)).rejects.toThrow('different batch or expiry');
+ expect(notify).toHaveBeenCalledWith('alert','This bin contains the same product with a different batch or expiry. Scan another compatible bin.');
+});

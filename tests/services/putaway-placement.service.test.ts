@@ -22,3 +22,9 @@ describe('job-authorized atomic putaway',()=>{
   await expect(putawayPlacementService.place('job',0,10,'A-01-01')).rejects.toThrow('did not confirm');
  });
 });
+
+it('preserves an explicit incompatible-lot reason for translated recovery',async()=>{
+ const {PutawayBinLotConflictError}=await import('../../utils/putawayErrors');
+ vi.mocked(supabase.rpc).mockResolvedValue({data:null,error:{message:'Bin contains a different lot',details:'PUTAWAY_BIN_LOT_CONFLICT'}} as never);
+ await expect(putawayPlacementService.place('job',0,10,'A-01-01')).rejects.toBeInstanceOf(PutawayBinLotConflictError);
+});

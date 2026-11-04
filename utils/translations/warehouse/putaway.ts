@@ -3,6 +3,12 @@ import { TranslationBlock } from '../types';
 export const putaway: TranslationBlock = {
     assignedCategoryAisle: { en: 'Assigned category aisle', am: 'ለምድቡ የተመደበ መተላለፊያ', or: 'Daandii ramaddiif ramadame' },
     assignedCategoryZone: { en: 'Assigned category zone', am: 'ለምድቡ የተመደበ ዞን', or: 'Zoonii ramaddiif ramadame' },
+    binLotConflict: {
+        en: 'This bin contains the same product with a different batch or expiry. Scan another compatible bin.',
+        am: 'ይህ ቦታ ተመሳሳይ ምርት በተለየ ባች ወይም የማብቂያ ቀን ይዟል። ሌላ ተስማሚ ቦታ ይቃኙ።',
+        or: 'Bakki kun oomisha walfakkaatu lottii ykn guyyaa yeroon itti darbu adda taʼe qaba. Bakka mijatu biraa iskaanii godhi.'
+    },
+    placementFailed: { en: 'Stock placement was not confirmed.', am: 'ምርቱን ማስቀመጥ አልተረጋገጠም።', or: 'Kaawwisni meeshaa hin mirkanoofne.' },
     // PUTAWAY Tab UI
     syncOperations: { en: 'Sync Operations', am: 'ተግባራትን አስተካክል', or: 'Hojiiwwan Walsimsiisi' },
     noSku: { en: 'No SKU', am: 'SKU የለም', or: 'SKU Hin Jiru' },

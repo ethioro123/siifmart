@@ -1,3 +1,5 @@
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import { PutawayBinLotConflictError } from '../../../../utils/putawayErrors';
 import { logger } from '../../../../utils/logger';
 import { normalizeLocation } from '../../../../utils/locationTracking';
 import { WMSJob, JobItem, Product } from '../../../../types';
@@ -24,6 +26,7 @@ interface UsePutawayScanningDeps {
 }
 
 export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
+    const { t } = useLanguage();
     const {
         selectedJob,
         currentItem,
@@ -201,7 +204,9 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
 
         } catch (e) {
             logger.error('PutawayTab', '❌ [PUTAWAY] Error:', e);
-            addNotification('alert', 'Error processing putaway');
+            const message = e instanceof PutawayBinLotConflictError ? t('warehouse.putaway.binLotConflict') : t('warehouse.putaway.placementFailed');
+            addNotification('alert', message);
+            if (e instanceof PutawayBinLotConflictError) throw new Error(message);
             throw e;
         } finally {
             if (isSubmittingRef.current !== undefined) {
