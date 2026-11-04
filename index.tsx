@@ -123,15 +123,15 @@ root.render(
     >
       <StoreProvider>
         <DataProvider>
-          <FulfillmentDataProvider>
-            <RosterProvider>
-              <GamificationProvider>
-                <LanguageProvider>
+          <LanguageProvider>
+            <FulfillmentDataProvider>
+              <RosterProvider>
+                <GamificationProvider>
                   <App />
-                </LanguageProvider>
-              </GamificationProvider>
-            </RosterProvider>
-          </FulfillmentDataProvider>
+                </GamificationProvider>
+              </RosterProvider>
+            </FulfillmentDataProvider>
+          </LanguageProvider>
         </DataProvider>
       </StoreProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
