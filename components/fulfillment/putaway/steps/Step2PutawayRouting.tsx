@@ -25,7 +25,7 @@ export const Step2PutawayRouting: React.FC<Step2PutawayRoutingProps> = ({ job, t
             <p className="text-xs text-[var(--theme-text-secondary)]">
                 {['Picked', 'Completed', 'Short'].includes(item.status)
                     ? (t('warehouse.putaway.recordedBin', { bin: item.location || '—' }) || `Recorded bin: ${item.location || '—'}`)
-                    : (t('warehouse.putaway.routingStrategyDesc') || 'Same SKU and lot first, then a compatible bin near this category.')}
+                    : (t('warehouse.putaway.routingStrategyDesc') || 'Configured category aisles and zones first; consolidate matching SKU and lot only in a compatible location.')}
             </p>
             <p className="text-xs text-[var(--theme-text-primary)]">
                 {item.status === 'Picked' || item.status === 'Completed'

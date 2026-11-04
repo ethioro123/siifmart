@@ -6,11 +6,12 @@ export interface RoutingStock {
 }
 export interface RoutingZone {
     id: string; siteId: string; name: string; type: string; temperature?: string;
+    acceptedCategories?: string[]; aisleCategories?: Record<string, string[]>; zoneType?: string;
     capacity: number; occupied: number; isLocked: boolean; allowPutaway: boolean;
 }
 export interface RoutingMapping { siteId: string; category: string; defaultZone: string }
 export interface PutawaySuggestion {
-    location: string; type: 'SUGGESTED'; label: string; reason: string; existingUnits: number;
+    location: string; type: 'SUGGESTED'; label: string; labelKey?: string; reason: string; existingUnits: number;
 }
 export interface RoutingInput {
     siteId: string; sku: string; category?: string; quantity: number; batchNumber?: string;
@@ -19,7 +20,14 @@ export interface RoutingInput {
 const key = (v?: string) => (v || '').trim().toLowerCase();
 const code = (v?: string) => normalizeLocation(v || '');
 const zoneCode = (v: string) => v.trim().toUpperCase().match(/^(?:ZONE\s+)?([A-Z])(?:$|[\s-])/i)?.[1];
-const storage = (v?: string) => /froz/i.test(v || '') ? 'frozen' : /chill|cold|refriger/i.test(v || '') ? 'chilled' : 'ambient';
+const storage = (v?: string) => {
+    const value = (v || '').trim();
+    const temperature = /^(-?\d+(?:\.\d+)?)\s*°?C$/i.exec(value);
+    if (temperature) return Number(temperature[1]) <= -10 ? 'frozen' : Number(temperature[1]) <= 8 ? 'chilled' : 'ambient';
+    return /froz|freez/i.test(value) ? 'frozen' : /chill|cold|refriger/i.test(value) ? 'chilled' : 'ambient';
+};
+const accepts = (categories: string[] | undefined, category: string | undefined) =>
+    !categories?.length || categories.some(c => key(c) === key(category));
 
 /** Advisory routing only: no stock or capacity mutations; an encoded physical bin scan is still required. */
 export function rankPutawayLocations(input: RoutingInput, stock: RoutingStock[], zones: RoutingZone[], mappings: RoutingMapping[], excluded: string[] = []): PutawaySuggestion[] {
@@ -35,7 +43,9 @@ export function rankPutawayLocations(input: RoutingInput, stock: RoutingStock[],
         if (!loc || /-00/.test(loc) || (!ignoreExcluded && blocked.has(loc))) return false;
         const zone = zoneFor(loc[0]);
         if (zone) {
-            if (zone.isLocked || !zone.allowPutaway || ['Staging','Damaged','Secure'].includes(zone.type)) return false;
+            if (zone.isLocked || !zone.allowPutaway || ['Staging','Damaged','Secure'].includes(zone.type)
+                || /^(QUARANTINE|DAMAGED|STAGING)$/i.test(zone.zoneType || '')) return false;
+            if (!accepts(zone.acceptedCategories, input.category) || !accepts(zone.aisleCategories?.[loc.slice(2, 4)], input.category)) return false;
             const contents = local.filter(p => p.zoneId === zone.id || code(p.location)?.startsWith(loc[0] + '-'));
             const used = Math.max(zone.occupied, contents.reduce((sum, p) => sum + p.stock, 0));
             if (zone.capacity > 0 && used + input.quantity > zone.capacity) return false;
@@ -60,17 +70,26 @@ export function rankPutawayLocations(input: RoutingInput, stock: RoutingStock[],
         const consolidation = occupants.length > 0;
         const aisleWeight = categoryAisles.get(loc.slice(0, 4)) || 0;
         const mappedZone = preferredZone === loc[0];
+        const assigned = zoneFor(loc[0])?.aisleCategories?.[loc.slice(2, 4)]?.some(c => key(c) === key(input.category));
+        const assignedZone = zoneFor(loc[0])?.acceptedCategories?.some(c => key(c) === key(input.category));
         const hinted = code(input.suggestedLocation) === loc;
-        const score = (consolidation ? 10000 : 0) + (aisleWeight ? 2000 + Math.min(aisleWeight, 100) : 0) + (mappedZone ? 1000 : 0) + (hinted ? 100 : 0);
-        const label = consolidation ? 'Consolidate same SKU and lot' : aisleWeight ? 'New bin near this category' : mappedZone ? 'Category storage zone' : 'Compatible storage area';
+        const score = (assigned ? 30000 : 0) + (assignedZone ? 15000 : 0) + (consolidation ? 10000 : 0) + (aisleWeight ? 2000 + Math.min(aisleWeight, 100) : 0) + (mappedZone ? 1000 : 0) + (hinted ? 100 : 0);
+        const label = assigned ? 'Assigned category aisle' : assignedZone ? 'Assigned category zone' : consolidation ? 'Consolidate same SKU and lot' : aisleWeight ? 'New bin near this category' : mappedZone ? 'Category storage zone' : 'Compatible storage area';
         const reason = consolidation ? 'Matching SKU, batch and expiry are already here.' : 'Keep this lot separate from other stock.';
-        candidates.set(loc, { score, suggestion: { location: loc, type: 'SUGGESTED', label, existingUnits: occupants.reduce((s, p) => s + p.stock, 0), reason: `${reason} ${proposed ? 'Proposed bin: verify it exists and has room.' : 'Bin capacity is not configured: verify physical space.'}` } });
+        candidates.set(loc, { score, suggestion: { location: loc, type: 'SUGGESTED', label, labelKey: assigned ? 'warehouse.putaway.assignedCategoryAisle' : assignedZone ? 'warehouse.putaway.assignedCategoryZone' : undefined, existingUnits: occupants.reduce((s, p) => s + p.stock, 0), reason: `${reason} ${proposed ? 'Proposed bin: verify it exists and has room.' : 'Bin capacity is not configured: verify physical space.'}` } });
     };
     grouped.forEach((_, loc) => add(loc));
     if (code(input.suggestedLocation)) add(code(input.suggestedLocation)!, !grouped.has(code(input.suggestedLocation)!));
     const anchors = new Set<string>([...categoryAisles.keys(), ...local.filter(sameSku).map(p => code(p.location)!.slice(0, 4))]);
     if (preferredZone) anchors.add(`${preferredZone}-01`);
-    localZones.forEach(z => { const letter = zoneCode(z.name); if (letter) anchors.add(`${letter}-01`); });
+    localZones.forEach(z => {
+        const letter = zoneCode(z.name);
+        if (!letter) return;
+        anchors.add(`${letter}-01`);
+        Object.entries(z.aisleCategories || {}).forEach(([aisle, categories]) => {
+            if (/^(0[1-9]|[1-9][0-9])$/.test(aisle) && categories.some(c => key(c) === key(input.category))) anchors.add(`${letter}-${aisle}`);
+        });
+    });
     if (anchors.size === 0 && localZones.length === 0 && required === 'ambient') anchors.add('A-01');
     anchors.forEach(anchor => {
         if (!eligible(`${anchor}-01`, true)) return;

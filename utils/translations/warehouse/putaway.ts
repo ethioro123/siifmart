@@ -1,6 +1,8 @@
 import { TranslationBlock } from '../types';
 
 export const putaway: TranslationBlock = {
+    assignedCategoryAisle: { en: 'Assigned category aisle', am: 'ለምድቡ የተመደበ መተላለፊያ', or: 'Daandii ramaddiif ramadame' },
+    assignedCategoryZone: { en: 'Assigned category zone', am: 'ለምድቡ የተመደበ ዞን', or: 'Zoonii ramaddiif ramadame' },
     // PUTAWAY Tab UI
     syncOperations: { en: 'Sync Operations', am: 'ተግባራትን አስተካክል', or: 'Hojiiwwan Walsimsiisi' },
     noSku: { en: 'No SKU', am: 'SKU የለም', or: 'SKU Hin Jiru' },
@@ -108,9 +110,9 @@ export const putaway: TranslationBlock = {
     },
     recordedBin: { en: 'Recorded bin: {bin}', am: 'የተመዘገበ ቦታ፡ {bin}', or: 'Bakka galmaa\'e: {bin}' },
     routingStrategyDesc: {
-        en: 'Same SKU and lot first, then a compatible bin near this category.',
-        am: 'ተመሳሳይ SKU እና ሎት መጀመሪያ፣ ከዚያም ከዚህ ምድብ አጠገብ ተስማሚ ቦታ።',
-        or: 'Dura SKU fi lottii walfakkaatu, itti aansuun bakka oomisha kanaaf mijatu.'
+        en: 'Configured category aisles and zones first; consolidate matching SKU and lot only in a compatible location.',
+        am: 'በምድብ የተመደቡ መተላለፊያዎችና ዞኖች መጀመሪያ፤ ተመሳሳይ SKU እና ሎት በተስማሚ ቦታ ብቻ ይጣመራሉ።',
+        or: 'Dura daandii fi zoonii ramaddiif ramadame; SKU fi lottii walfakkaatu bakka mijatutti qofa walitti qabi.'
     },
     placementRecorded: { en: 'Placement recorded', am: 'ማስቀመጥ ተመዝግቧል', or: 'Kaawwisni galmaa\'eera' },
     shortPlacementRecorded: { en: 'Short placement recorded', am: 'የጎደለ ማስቀመጥ ተመዝግቧል', or: 'Kaawwisni hir\'uu galmaa\'eera' },

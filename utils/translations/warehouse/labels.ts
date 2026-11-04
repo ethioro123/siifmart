@@ -1,6 +1,8 @@
+import { categoryRouting } from './categoryRouting';
 import { TranslationBlock } from '../types';
 
 export const labels: any = {
+    ...categoryRouting,
     // Leaf translation for the key "labels" itself (e.g. t('warehouse.labels'))
     en: 'Labels',
     am: 'መለያዎች',

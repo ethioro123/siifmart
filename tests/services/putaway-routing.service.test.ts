@@ -20,6 +20,15 @@ describe('live site Putaway routing snapshot', () => {
         expect(query.select).not.toHaveBeenCalledWith('*');
         expect(query.gt).toHaveBeenCalledWith('stock', 0);
     });
+    it('loads category assignments and quarantine status from the current facility snapshot', async () => {
+        const query = setup([[]]);
+        query.limit.mockResolvedValueOnce({ data: [{ id: 'z', site_id: 'et-dc', name: 'Zone B', zone_type: 'STANDARD',
+            accepted_categories: ['Baby'], aisle_categories: { '02': ['Baby'] }, capacity: 100, occupied: 0 }] as never[], error: null })
+            .mockResolvedValueOnce({ data: [], error: null });
+        const snapshot = await putawayRoutingService.load('et-dc');
+        expect(snapshot.zones[0]).toMatchObject({ siteId: 'et-dc', zoneType: 'STANDARD',
+            acceptedCategories: ['Baby'], aisleCategories: { '02': ['Baby'] } });
+    });
     it('fails closed rather than recommending from a partial failed snapshot', async () => {
         setup([[]], { message: 'Access denied' });
         await expect(putawayRoutingService.load('et-dc')).rejects.toEqual({ message: 'Access denied' });

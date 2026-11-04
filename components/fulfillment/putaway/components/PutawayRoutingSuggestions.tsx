@@ -7,7 +7,7 @@ export function PutawayRoutingSuggestions({ routing, t }: { routing: PutawayRout
     const primary = routing.suggestions[0];
     return <section aria-label={tr('warehouse.putaway.livePutawayRouting', 'Live putaway routing')} className="mt-3 space-y-2 text-left text-xs min-w-0 break-words text-[var(--theme-text-secondary)]">
         {routing.error ? <p role="alert">{tr('warehouse.putaway.routingError', 'Could not refresh routing. Scan and verify a suitable bin, or retry.')}</p> : routing.loading ? <p role="status">{tr('warehouse.putaway.routingLoading', 'Checking current site stock and storage zones…')}</p> : primary ? <>
-            <p className="font-semibold text-[var(--theme-text-primary)]">{primary.label}</p>
+            <p className="font-semibold text-[var(--theme-text-primary)]">{primary.labelKey ? tr(primary.labelKey, primary.label) : primary.label}</p>
             <p>{primary.reason}</p>
             {primary.existingUnits > 0 && <p>{tr('warehouse.putaway.unitsRecordedInSnapshot', `${primary.existingUnits} units recorded in this stock snapshot.`, { count: primary.existingUnits })}</p>}
             {routing.suggestions.length > 1 && <p>{tr('warehouse.putaway.alternatives', 'Alternatives:')} {routing.suggestions.slice(1, 4).map(s => s.location).join(' · ')}</p>}

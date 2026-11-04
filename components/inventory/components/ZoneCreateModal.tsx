@@ -1,3 +1,4 @@
+import { ZoneCategoryAssignments } from './ZoneCategoryAssignments';
 import { ZoneSpecializationFields } from './ZoneSpecializationFields';
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
@@ -9,6 +10,8 @@ interface ZoneCreateModalProps {
     onClose: () => void;
     onSubmit: (data: {
         name: string;
+        acceptedCategories: string[];
+        aisleCategories: Record<string, string[]>;
         specialization: string;
         aisleSpecializations: Record<string, string>;
         type: 'Dry' | 'Cold' | 'Secure';
@@ -31,6 +34,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
 }) => {
     const { t } = useLanguage();
 
+    const [acceptedCategories, setAcceptedCategories] = useState<string[]>([]);
+    const [aisleCategories, setAisleCategories] = useState<Record<string, string[]>>({});
     const [specialization, setSpecialization] = useState('');
     const [aisleSpecializations, setAisleSpecializations] = useState<Record<string, string>>({});
     const [zoneName, setZoneName] = useState('');
@@ -48,6 +53,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
         e.preventDefault();
         await onSubmit({
             name: zoneName,
+            acceptedCategories,
+            aisleCategories,
             specialization,
             aisleSpecializations,
             type: zoneType,
@@ -61,6 +68,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
         // Reset
         setZoneName('');
         setSpecialization('');
+        setAcceptedCategories([]);
+        setAisleCategories({});
         setAisleSpecializations({});
         setZoneType('Dry');
         setZoneSubtype('STANDARD');
@@ -85,6 +94,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
                 </div>
 
                 <div className="space-y-4 text-left">
+                    <ZoneCategoryAssignments accepted={acceptedCategories} aisles={aisleCategories} maxAisles={maxAisles} onChange={(accepted, aisles) => { setAcceptedCategories(accepted); setAisleCategories(aisles); }} />
                     <ZoneSpecializationFields maxAisles={maxAisles} specialization={specialization} aisles={aisleSpecializations} onSpecialization={setSpecialization} onAisles={setAisleSpecializations} />
                     <div className="space-y-1.5">
                         <label htmlFor="create-zone-name" className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Zone Name</label>

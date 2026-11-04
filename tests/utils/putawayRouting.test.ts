@@ -50,3 +50,42 @@ describe('dynamic Putaway routing', () => {
         expect(rankPutawayLocations({ ...input, condition: 'Damaged' }, [product()], [], [])).toEqual([]);
     });
 });
+
+describe('explicit zone and aisle category routing', () => {
+    const assignedZone = (changes: Partial<RoutingZone> = {}) => zone({
+        acceptedCategories: ['Baby', 'Pantry'],
+        aisleCategories: { '01': ['Pantry'], '02': ['Baby'] },
+        ...changes
+    });
+    it('prefers an explicitly assigned aisle over a legacy zone default or inferred consolidation', () => {
+        const stock = [product({ location: 'C-01-01' })];
+        const result = rankPutawayLocations(input, stock, [assignedZone(), zone({ id: 'c', name: 'C' })],
+            [{ siteId: 'et-dc', category: 'Baby', defaultZone: 'C' }]);
+        expect(result[0].location).toBe('B-02-01');
+        expect(result[0].labelKey).toBe('warehouse.putaway.assignedCategoryAisle');
+        expect(result.some(r => r.location.startsWith('B-01-'))).toBe(false);
+    });
+    it('excludes zones assigned to other categories even for matching stock', () => {
+        expect(rankPutawayLocations(input, [product()], [assignedZone({ acceptedCategories: ['Pantry'], aisleCategories: {} })], [])).toEqual([]);
+    });
+    it.each([{ isLocked: true }, { allowPutaway: false }, { capacity: 1 }, { zoneType: 'QUARANTINE' }])('preserves storage restrictions %j', changes => {
+        expect(rankPutawayLocations(input, [], [assignedZone(changes)], [])).toEqual([]);
+    });
+    it('recognizes numeric freezer temperatures without accepting chilled goods', () => {
+        const freezer = assignedZone({ type: 'Cold', temperature: '-18°C' });
+        expect(rankPutawayLocations({ ...input, storageType: 'Frozen' }, [], [freezer], [])[0].location).toBe('B-02-01');
+        expect(rankPutawayLocations({ ...input, storageType: 'Chilled' }, [], [freezer], [])).toEqual([]);
+    });
+    it('ignores worker text descriptions and other facilities', () => {
+        const result = rankPutawayLocations(input, [], [assignedZone({ siteId: 'foreign' }), zone({ name: 'C' })], []);
+        expect(result[0].location).toBe('C-01-01');
+    });
+    it('skips reported full assigned bins and never mixes lots', () => {
+        const result = rankPutawayLocations(input, [product({ location: 'B-02-01', batchNumber: 'OTHER' })],
+            [assignedZone()], [], ['B-02-02']);
+        expect(result[0].location).toBe('B-02-03');
+    });
+    it('withholds placement when no configured category zone accepts the product', () => {
+        expect(rankPutawayLocations({ ...input, category: 'Unknown' }, [], [assignedZone()], [])).toEqual([]);
+    });
+});

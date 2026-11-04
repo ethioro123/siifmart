@@ -5,7 +5,7 @@ import { logger } from '../utils/logger';
 export const warehouseZonesService = {
     async getAll(siteId?: string) {
         try {
-            let query = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations');
+            let query = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations,accepted_categories,aisle_categories');
             if (siteId) query = query.eq('site_id', siteId);
 
             const { data, error } = await query.order('picking_priority', { ascending: true });
@@ -18,7 +18,7 @@ export const warehouseZonesService = {
 
                 if (isColumnError) {
                     logger.warn('warehouseZonesService', 'Schema mismatch in warehouse_zones: fallback query without picking_priority order.');
-                    let retryQuery = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations');
+                    let retryQuery = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations,accepted_categories,aisle_categories');
                     if (siteId) retryQuery = retryQuery.eq('site_id', siteId);
                     const { data: retryData, error: retryError } = await retryQuery;
                     if (retryError) throw retryError;
@@ -26,6 +26,8 @@ export const warehouseZonesService = {
                         ...z,
                         siteId: z.site_id,
                         specialization: z.specialization ?? null,
+                        acceptedCategories: z.accepted_categories ?? [],
+                        aisleCategories: z.aisle_categories ?? {},
                         aisleSpecializations: z.aisle_specializations ?? {},
                         pickingPriority: z.picking_priority ?? 10,
                         zoneType: z.zone_type || 'STANDARD',
@@ -39,6 +41,8 @@ export const warehouseZonesService = {
                 ...z,
                 siteId: z.site_id,
                         specialization: z.specialization ?? null,
+                        acceptedCategories: z.accepted_categories ?? [],
+                        aisleCategories: z.aisle_categories ?? {},
                         aisleSpecializations: z.aisle_specializations ?? {},
                 pickingPriority: z.picking_priority ?? 10,
                 zoneType: z.zone_type || 'STANDARD',
@@ -62,6 +66,8 @@ export const warehouseZonesService = {
 
     async update(id: string, updates: Partial<WarehouseZone>) {
         const dbUpdates: Record<string, unknown> = {};
+        if (updates.acceptedCategories !== undefined) dbUpdates.accepted_categories = updates.acceptedCategories;
+        if (updates.aisleCategories !== undefined) dbUpdates.aisle_categories = updates.aisleCategories;
         if (updates.specialization !== undefined) dbUpdates.specialization = updates.specialization?.trim() || null;
         if (updates.aisleSpecializations !== undefined) dbUpdates.aisle_specializations = updates.aisleSpecializations;
 
@@ -84,7 +90,7 @@ export const warehouseZonesService = {
             .update(dbUpdates)
             .eq('id', id);
 
-        if (error && (updates.specialization !== undefined || updates.aisleSpecializations !== undefined)) throw error;
+        if (error && (updates.specialization !== undefined || updates.aisleSpecializations !== undefined || updates.acceptedCategories !== undefined || updates.aisleCategories !== undefined)) throw error;
         if (error) {
             // If extended columns cause an error, fallback to core fields
             const isColumnError = error.message?.toLowerCase().includes('column') ||
@@ -117,6 +123,8 @@ export const warehouseZonesService = {
             id: zoneId,
             name: zone.name,
             specialization: zone.specialization?.trim() || null,
+            accepted_categories: zone.acceptedCategories ?? [],
+            aisle_categories: zone.aisleCategories ?? {},
             aisle_specializations: zone.aisleSpecializations ?? {},
             site_id: zone.siteId,
             type: zone.type || 'Dry',
@@ -131,7 +139,7 @@ export const warehouseZonesService = {
             .from('warehouse_zones')
             .insert(dbZone);
 
-        if (error && (zone.specialization !== undefined || zone.aisleSpecializations !== undefined)) throw error;
+        if (error && (zone.specialization !== undefined || zone.aisleSpecializations !== undefined || zone.acceptedCategories !== undefined || zone.aisleCategories !== undefined)) throw error;
         if (error) {
             // PostgREST column missing error - fallback to core schema
             const isColumnError = error.message?.toLowerCase().includes('column') ||

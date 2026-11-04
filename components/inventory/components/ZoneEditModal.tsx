@@ -1,3 +1,4 @@
+import { ZoneCategoryAssignments } from './ZoneCategoryAssignments';
 import { ZoneSpecializationFields } from './ZoneSpecializationFields';
 import React, { useState, useEffect } from 'react';
 import { Settings2, X, Lock } from 'lucide-react';
@@ -14,6 +15,8 @@ interface ZoneEditModalProps {
     zone: ZoneWithProducts | null;
     onSubmit: (id: string, data: {
         name: string;
+        acceptedCategories: string[];
+        aisleCategories: Record<string, string[]>;
         specialization: string;
         aisleSpecializations: Record<string, string>;
         type: 'Dry' | 'Cold' | 'Secure';
@@ -37,6 +40,8 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
     onSubmit,
     isLoading
 }) => {
+    const [acceptedCategories, setAcceptedCategories] = useState<string[]>([]);
+    const [aisleCategories, setAisleCategories] = useState<Record<string, string[]>>({});
     const [specialization, setSpecialization] = useState('');
     const [aisleSpecializations, setAisleSpecializations] = useState<Record<string, string>>({});
     const [zoneName, setZoneName] = useState('');
@@ -54,6 +59,8 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
         if (zone) {
             setZoneName(zone.name);
             setSpecialization(zone.specialization || '');
+            setAcceptedCategories(zone.acceptedCategories || []);
+            setAisleCategories(zone.aisleCategories || {});
             setAisleSpecializations(zone.aisleSpecializations || {});
             setZoneType(zone.type as any || 'Dry');
             setZoneSubtype(zone.zoneType || 'STANDARD');
@@ -73,6 +80,8 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
         e.preventDefault();
         await onSubmit(zone.id, {
             name: zoneName,
+            acceptedCategories,
+            aisleCategories,
             specialization,
             aisleSpecializations,
             type: zoneType,
@@ -101,6 +110,7 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
                 </div>
 
                 <div className="space-y-4 text-left">
+                    <ZoneCategoryAssignments accepted={acceptedCategories} aisles={aisleCategories} maxAisles={maxAisles} onChange={(accepted, aisles) => { setAcceptedCategories(accepted); setAisleCategories(aisles); }} />
                     <ZoneSpecializationFields maxAisles={maxAisles} specialization={specialization} aisles={aisleSpecializations} onSpecialization={setSpecialization} onAisles={setAisleSpecializations} />
                     <div className="space-y-1.5">
                         <label htmlFor="edit-zone-name" className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Zone Name</label>

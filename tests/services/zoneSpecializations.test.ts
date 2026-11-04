@@ -26,3 +26,14 @@ it('maps both descriptions back when loading a facility', async () => {
     const zones = await warehouseZonesService.getAll('site');
     expect(zones[0]).toMatchObject({ siteId: 'site', specialization: 'Produce', aisleSpecializations: { '01': 'Greens' } });
 });
+it('saves structured routing categories separately from display descriptions', async () => {
+    await warehouseZonesService.update('z', { acceptedCategories: ['Fruit & Vegetables'],
+        aisleCategories: { '01': ['Fruit & Vegetables'] } });
+    expect(state.calls).toEqual([{ accepted_categories: ['Fruit & Vegetables'],
+        aisle_categories: { '01': ['Fruit & Vegetables'] } }]);
+});
+it('does not fall back to an unrelated partial update when routing columns fail', async () => {
+    state.error = { code: '42703', message: 'column aisle_categories does not exist' };
+    await expect(warehouseZonesService.update('z', { acceptedCategories: ['Baby'], aisleCategories: { '01': ['Baby'] } })).rejects.toEqual(state.error);
+    expect(state.calls).toHaveLength(1);
+});

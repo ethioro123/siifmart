@@ -4,7 +4,12 @@ import type { WarehouseZone } from '../types';
 
 export function useWarehouseZoneMutations(siteId?: string) {
     const client = useQueryClient();
-    const invalidate = () => client.invalidateQueries({ queryKey: ['zones', siteId] });
+    const invalidate = async () => {
+        await Promise.all([
+            client.invalidateQueries({ queryKey: ['zones', siteId] }),
+            client.invalidateQueries({ predicate: query => query.queryKey[0] === 'putawayRouting' && query.queryKey[3] === siteId })
+        ]);
+    };
     const create = useMutation({
         mutationFn: (zone: Omit<WarehouseZone, 'id'>) => warehouseZonesService.create(zone),
         onSuccess: invalidate
