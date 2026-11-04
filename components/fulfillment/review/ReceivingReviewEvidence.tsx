@@ -31,7 +31,7 @@ export function ReceivingReviewEvidence({value:v,t,onOpen}:{value:Evidence;t:(ke
    <h4 className="font-semibold">{t('warehouse.opReceiptPutaway')}</h4>
    {!v.putaway.length&&<p className="text-sm">{t('warehouse.opNoReceiptPutaway')}</p>}
    {v.putaway.map(job=><div key={job.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--theme-border)] pt-3 text-sm">
-    <div><p className="font-medium">{job.reference} · {operationStatusLabel(t,job.status)}</p><p>{job.quantity} {t('warehouse.unitsLabel')} · {job.employee_name}</p></div>
+    <div><p className="font-medium">{t('warehouse.opJobNumber')}: {job.reference} · {operationStatusLabel(t,job.status)}</p><p>{job.quantity} {t('warehouse.unitsLabel')} · {job.employee_name}</p></div>
     <button type="button" className={control} onClick={()=>onOpen({source:'job',id:job.id})}>{t('warehouse.opOpenReceiptPutaway')}</button>
    </div>)}
   </section>

@@ -77,3 +77,7 @@ Live manager reads verified AAAA0033 with 960 ordered, 240 recorded received and
 The old list made the whole text row a button, with no visible action. Every row now has a dedicated, labeled **View details** control with a 44px minimum target. A short instruction explains what it opens, full UUID references use the established job formatter, and selecting a record focuses/scrolls the detail panel into view. Evidence loading and errors remain explicit.
 
 The component regression now clicks **View details: AAAA0033 · Receive** and checks that 960 ordered, 240 recorded received and 720 outstanding appear through the full overview-to-detail path. Additional checks cover visible failure states and short job references. This change adds no database migration or business mutation.
+
+### Putaway job numbers
+
+Saved and applied `migrations/20261104_receiving_review_putaway_job_number.sql` and `migrations/20261104_operations_review_po_job_references.sql` to staging `utykzifrblpyxlvlknsm`. Related putaway, overview rows and opened job details prefer the stored job number, with a site/country-scoped PO number fallback for legacy receiving/putaway. Business reference resolves the parent PO number. Authenticated regional-manager verification for the reported putaway returns AAAA0033 for both title and business reference, and related evidence retains 240 units with the exact job UUID for navigation. Regression covers related/detail consistency alongside existing blind controls and scope checks.

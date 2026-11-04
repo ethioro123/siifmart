@@ -1,5 +1,6 @@
 import { TranslationBlock } from '../types';
 export const operationsReview: TranslationBlock = {
+    opJobNumber: { en: 'Job number', am: 'የሥራ ቁጥር', or: 'Lakkoofsa hojii' },
     opViewDetails: { en: 'View details', am: 'ዝርዝሮችን ይመልከቱ', or: 'Balʼina ilaali' },
     opChooseDetails: { en: 'Choose View details to see recorded counts, submitted evidence and related work.', am: 'የተመዘገቡ ቆጠራዎችን፣ ማስረጃንና ተያያዥ ሥራን ለማየት ዝርዝሮችን ይመልከቱ የሚለውን ይምረጡ።', or: 'Lakkoofsa galmaaʼe, ragaa galfamee fi hojii walqabatu ilaaluuf Balʼina ilaali filadhu.' },
     opMode_partial: {"en": "Partial receipts", "am": "ከፊል ቅበላዎች", "or": "Fudhannaa gariixee"},
