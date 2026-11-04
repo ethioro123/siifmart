@@ -24,6 +24,7 @@ describe('shared operations review',()=>{
   setup();fireEvent.click(screen.getByRole('button',{name:'warehouse.opTitle'}));
   expect(state.calls.mock.calls.at(-1)?.slice(3,6)).toEqual(['ALL','active',0]);
   expect(screen.getByText(/Adama warehouse/)).toBeTruthy();
+  expect(screen.getByRole('option',{name:'warehouse.opMode_partial'})).toBeTruthy();
   const select=screen.getByRole('combobox',{name:'warehouse.opOperation'});
   for(const operation of operations)expect(screen.getByRole('option',{name:`warehouse.opOperation_${operation}`})).toBeTruthy();
   fireEvent.change(select,{target:{value:'PUTAWAY'}});

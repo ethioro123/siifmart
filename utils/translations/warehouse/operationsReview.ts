@@ -1,5 +1,22 @@
 import { TranslationBlock } from '../types';
 export const operationsReview: TranslationBlock = {
+    opMode_partial: {"en": "Partial receipts", "am": "ከፊል ቅበላዎች", "or": "Fudhannaa gariixee"},
+    opEmpty_partial: {"en": "No partially received orders were found in this view.", "am": "በዚህ እይታ በከፊል የተቀበሉ ትዕዛዞች የሉም።", "or": "Ilaalcha kana keessatti ajajni gariin fudhatame hin jiru."},
+    opReceiptEvidence: {"en": "Receiving details", "am": "የቅበላ ዝርዝሮች", "or": "Balʼina fudhannaa"},
+    opPartialReceiptNote: {"en": "This order is partially received. The outstanding quantity remains open; this does not confirm a shortage or require approval to continue normal receiving.", "am": "ይህ ትዕዛዝ በከፊል ተቀብሏል። ቀሪው ብዛት ክፍት ነው፤ ይህ እጥረትን አያረጋግጥም ወይም መደበኛ ቅበላን ለመቀጠል ፈቃድ አይጠይቅም።", "or": "Ajajni kun gariin fudhatameera. Baayʼinni hafe banaa jira; kun hanqina hin mirkaneessu ykn fudhannaa idilee itti fufuuf raggaasisa hin gaafatu."},
+    opReceiptOrdered: {"en": "Ordered units", "am": "የታዘዙ ክፍሎች", "or": "Kutaa ajajame"},
+    opReceiptRecorded: {"en": "Recorded received units", "am": "ተቀብለው የተመዘገቡ ክፍሎች", "or": "Kutaa fudhatamee galmaaʼe"},
+    opReceiptOutstanding: {"en": "Outstanding units", "am": "ቀሪ ክፍሎች", "or": "Kutaa hafe"},
+    opReceiptComparisonHidden: {"en": "Order comparisons are hidden until a count is submitted and viewed by an independent reviewer.", "am": "ቆጠራ እስኪቀርብና ገለልተኛ ገምጋሚ እስኪያየው ድረስ የትዕዛዝ ንጽጽር ተደብቋል።", "or": "Lakkoofsi hanga galfamee qorataan walaba ilaaluutti walbira qabuun ajajaa dhokata."},
+    opReceiptSubmissions: {"en": "Recorded submissions", "am": "የተመዘገቡ ቅበላዎች", "or": "Galmee fudhannaa galfame"},
+    opOpenSubmittedCount: {"en": "Open locked count", "am": "የተቆለፈ ቆጠራ ክፈት", "or": "Lakkoofsa cufame bani"},
+    opLegacyReceiptNote: {"en": "No locked original-count snapshot is available for this submission. Recorded received quantities and related putaway work are shown here.", "am": "ለዚህ ቅበላ የተቆለፈ የመጀመሪያ ቆጠራ መዝገብ አይገኝም። የተመዘገቡ የቅበላ ብዛቶችና የተያያዘ የማስቀመጥ ሥራ እዚህ ይታያሉ።", "or": "Fudhannaa kanaaf galmeen lakkoofsa jalqabaa cufame hin jiru. Baayʼinni fudhatamee galmaaʼe fi hojiin kaawwisaa walqabatu asitti mulʼata."},
+    opReceiptPutaway: {"en": "Related putaway work", "am": "የተያያዘ የማስቀመጥ ሥራ", "or": "Hojii kaawwisaa walqabatu"},
+    opOpenReceiptPutaway: {"en": "Open putaway details", "am": "የማስቀመጥ ዝርዝር ክፈት", "or": "Balʼina kaawwisaa bani"},
+    opNoReceiptItems: {"en": "No receipt items on this page.", "am": "በዚህ ገጽ የቅበላ ዕቃዎች የሉም።", "or": "Fuula kana keessa meeshaleen fudhannaa hin jiran."},
+    opNoSubmissions: {"en": "No submitted receipt transaction is recorded on this page.", "am": "በዚህ ገጽ የተመዘገበ የቅበላ ግቤት የለም።", "or": "Fuula kana keessa fudhannaan galfamee galmaaʼe hin jiru."},
+    opNoReceiptPutaway: {"en": "No related putaway jobs on this page.", "am": "በዚህ ገጽ የተያያዘ የማስቀመጥ ሥራ የለም።", "or": "Fuula kana keessa hojiin kaawwisaa walqabatu hin jiru."},
+
     opOptionalNote: { en: 'Add a review note (optional)', am: 'የግምገማ ማስታወሻ ጨምር (አማራጭ)', or: 'Yaadannoo qorannoo dabali (dirqama miti)' },
     opEmpty_active: { en: 'No active work was found in your authorized sites.', am: 'በተፈቀዱልዎ ቦታዎች ንቁ ሥራ አልተገኘም።', or: 'Bakka hayyamameef keessatti hojiin amma jiru hin argamne.' },
     opEmpty_exceptions: { en: 'No recorded exceptions in this view. Check Active work for ongoing operations.', am: 'በዚህ እይታ የተመዘገበ ልዩነት የለም። ለሚካሄድ ሥራ ንቁ ሥራን ይመልከቱ።', or: 'Ilaalcha kana keessa baqiyyaan galmaaʼe hin jiru. Hojii gaggeeffamaa jiruuf Hojii amma jiru ilaali.' },

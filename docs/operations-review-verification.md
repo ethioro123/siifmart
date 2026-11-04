@@ -54,3 +54,20 @@ Saved before execution and applied to staging `utykzifrblpyxlvlknsm`:
 - `migrations/20261104_operations_overview_site_name_type.sql`
 
 The second file casts the existing varchar site name to the helper's declared text result, as found by the live query check. `tests/sql/operations_overview_active_scope.sql` passed with authenticated identities and rolled back all fixtures: administration-to-warehouse visibility, active receiving after partial submission, actual-facility evidence, bounded pages, facility-only branch visibility, denied anchor manipulation, and country isolation. Eleven focused OperationsReview/BlindReceiptReview component checks passed. TypeScript passed. No active job or stock was changed by these checks.
+
+## Partial receipt evidence follow-up
+
+The live AAAA0033 receipt was saved before the blind-count snapshot trigger existed. Its real receipt transaction links to a putaway job, and its PO item records 240 received units. The canonical packaging helper resolves 20 ordered packs × 48 units to 960 ordered units, leaving 720 outstanding. The original RECEIVE job line still reports zero received and is no longer used as the manager comparison source.
+
+The overview now offers a separate **Partial receipts** view. Partial receipt visibility is informational: it does not change the exception flag, invoke an approval, block receiving or confirm a shortage. Active work also labels partial receiving clearly. The manager detail loads 25 PO items, 25 receipt transactions and 25 related putaway jobs per evidence page. It shows current recorded quantities, submitter/time, locked-original links only where real snapshots exist, and exact related putaway links. Missing original snapshots are identified explicitly; no snapshot or original quantity is invented or backfilled.
+
+Ordered/outstanding comparisons are withheld until a count has been submitted, and remain hidden from an original counter even when that person holds a manager role. Branch/country boundaries remain enforced.
+
+Saved before execution and applied to staging `utykzifrblpyxlvlknsm`:
+
+- `migrations/20261104_receiving_review_saved_evidence.sql`
+- `migrations/20261104_receiving_review_partial_order.sql`
+
+The first draft was rejected by automatic approval review because it categorized all partial receipts as exceptions. The applied version uses a separate partial view and preserves the existing exception and hold behavior. The second migration orders partial active receiving alongside in-progress work.
+
+Live manager reads verified AAAA0033 with 960 ordered, 240 recorded received and 720 outstanding; the partial queue returned `exception=false`. The extended rollback-only scope regression verified submitted line quantities, linked receipts/putaway, the separate partial view, pre-submit redaction and redaction from an original counter with a manager role. Twenty-one focused component tests passed across receiving evidence, shared overview, blind receipt review and receiving steps, including legacy/no-snapshot display and exact related-record links. TypeScript passed. No business counts or stock were changed by the fix or verification.
