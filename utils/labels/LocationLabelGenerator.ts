@@ -1,9 +1,10 @@
+import { specializedLocationLabel, LocationSpecializations } from './specializedLocationLabel';
 import { generateBarcodeSVG } from '../barcodeGenerator';
 import { generateQRCode } from '../qrCodeGenerator';
 import { LabelSize, LabelFormat, SIZE_CSS, normalizeLabelSize } from './types';
 import { escapeHtml } from './escapeHtml';
 
-export interface LocationLabelItem {
+export interface LocationLabelItem extends LocationSpecializations {
     humanLabel: string;   // e.g. "A-01-05"
     barcode: string;      // 15-digit encoded barcode
     zone: string;         // e.g. "A"
@@ -18,6 +19,8 @@ export const generateLocationLabelHTML = async (
     options: {
         size: LabelSize | string;
         format: LabelFormat | string;
+        specializationCaptions?: { zone: string; aisle: string };
+        specializationSizeError?: string;
     }
 ): Promise<string> => {
     const { size, format } = options;
@@ -37,6 +40,10 @@ export const generateLocationLabelHTML = async (
     const isXL = validSize === 'XL';
 
     const labelItemsHTML = await Promise.all(items.map(async (item, idx) => {
+        const hasSpecializations = !!(item.zoneSpecialization?.trim() || item.aisleSpecialization?.trim());
+        if (hasSpecializations && (validSize === 'Tiny' || validSize === 'Small')) {
+            throw new Error(options.specializationSizeError || 'Specialization labels require Medium or larger.');
+        }
         const pageInfo = items.length > 1
             ? `<div style="position:absolute;bottom:4px;right:6px;font-size:7px;color:#999;font-family:monospace;font-weight:700;letter-spacing:1px;">L-${idx + 1}/${items.length}</div>`
             : '';
@@ -227,6 +234,8 @@ export const generateLocationLabelHTML = async (
             `;
         }
 
+        if (hasSpecializations) contentHTML = specializedLocationLabel(item, barcodeObj, qrObj,
+            options.specializationCaptions || { zone: 'Zone', aisle: 'Aisle' });
         return `
             <div class="label" style="width:${css.width};height:${css.height};position:relative;overflow:hidden;background:#fff;">
                 ${contentHTML}
@@ -269,6 +278,7 @@ export const generateLocationLabelHTML = async (
                     height: auto;
                     display: block;
                 }
+                .specialization-code svg, .specialization-code img { max-height: 70px; max-width: 100%; }
                 .qr-container svg { width: 100%; height: 100%; }
                 .barcode-container svg { width: auto; height: auto; max-width: 100%; }
                 .no-print {

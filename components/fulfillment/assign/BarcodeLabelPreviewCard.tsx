@@ -15,6 +15,8 @@ export interface BarcodeLabelPreviewCardProps {
     category?: string;
     siteName?: string;
     siteCode?: string;
+    zoneSpecialization?: string;
+    aisleSpecialization?: string;
     zone?: string;
     aisle?: string;
     bay?: string;
@@ -34,6 +36,8 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
     category,
     siteName,
     siteCode,
+    zoneSpecialization,
+    aisleSpecialization,
     zone,
     aisle,
     bay,
@@ -148,6 +152,8 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                         </div>
                     </div>
 
+                    {zoneSpecialization && <p className="text-xs text-slate-900 break-words"><b>{t('warehouse.zoneSpecialization')}:</b> {zoneSpecialization}</p>}
+                    {aisleSpecialization && <p className="text-xs text-slate-900 break-words"><b>{t('warehouse.aisleSpecialization')}:</b> {aisleSpecialization}</p>}
                     {/* Barcode / QR Graphic */}
                     <div className="py-2.5 px-3 flex justify-center items-center bg-white rounded-xl border border-slate-200 min-h-[72px] shadow-2xs overflow-x-auto">
                         <BarcodeGraphic

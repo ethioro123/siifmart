@@ -11,6 +11,11 @@ export const labels: any = {
         am: 'ቀጥታ',
         or: 'Kallattiin'
     },
+    specializationLabelSizeHelp: {
+        en: 'Labels with zone or aisle specializations require Medium size or larger.',
+        am: 'የዞን ወይም የመተላለፊያ ልዩ አጠቃቀም ያላቸው መለያዎች መካከለኛ ወይም ከዚያ በላይ መጠን ያስፈልጋቸዋል።',
+        or: 'Mallattoon ramaddii addaa zoonii ykn daandii qabu hamma giddugaleessaa ykn isaa ol barbaada.'
+    },
     aisleSpecializationPlaceholder: {
         en: 'Not assigned — enter specialization',
         am: 'አልተመደበም — ልዩ አጠቃቀም ያስገቡ',

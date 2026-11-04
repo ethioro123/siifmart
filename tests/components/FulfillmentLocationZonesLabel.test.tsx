@@ -26,6 +26,8 @@ describe('Fulfillment Zones A through J and Location Label Printing', () => {
 
     const standardZones: WarehouseZone[] = warehouseZonesService.getStandardDefaultZones(mockSite.id).map((z, idx) => ({
         ...z,
+        specialization: idx === 0 ? 'Fresh Produce' : undefined,
+        aisleSpecializations: idx === 0 ? { '01': 'Leafy Greens' } : {},
         id: `zone-${idx + 1}`
     }));
 
@@ -78,6 +80,9 @@ describe('Fulfillment Zones A through J and Location Label Printing', () => {
         // Switch to BAY mode
         const bayModeButtons = screen.getAllByRole('button', { name: /bays/i });
         fireEvent.click(bayModeButtons[0]);
+
+        expect(screen.getByText('Fresh Produce')).toBeTruthy();
+        expect(screen.getByText('Leafy Greens')).toBeTruthy();
 
         // Verify layout banner and active button
         expect(screen.getByText(/Zones A–J Active/i)).toBeTruthy();

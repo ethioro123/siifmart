@@ -1,3 +1,5 @@
+import { locationSpecializations } from '../../../utils/labels/locationSpecializations';
+import { LABEL_SIZES } from './labelSizes';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Printer, Package, Layers, Layout, Info, CheckCircle, Eye } from 'lucide-react';
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
@@ -12,13 +14,7 @@ import { BarcodeLabelPreviewModal } from './BarcodeLabelPreviewModal';
 import { AssignBayLocationSelector } from './AssignBayLocationSelector';
 
 // Label size presets - Refined for WMS
-const LABEL_SIZES = {
-    TINY: { width: '1.25in', height: '0.5in', label: '1.25" x 0.5"' },
-    SMALL: { width: '2in', height: '1in', label: '2" x 1"' },
-    MEDIUM: { width: '3in', height: '2in', label: '3" x 2"' },
-    LARGE: { width: '4in', height: '3in', label: '4" x 3"' },
-    XL: { width: '4in', height: '6in', label: '4" x 6"' },
-};
+
 
 interface AssignLabelHubProps {
     filteredProducts: Product[];
@@ -75,6 +71,9 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     };
 
     const aislePad = bayConfig.aisle.padStart(2, '0');
+    const specialization = locationSpecializations(zones, activeSite?.id, bayConfig.zone, aislePad);
+    const hasSpecialization = !!(specialization.zoneSpecialization || specialization.aisleSpecialization);
+    useEffect(() => { if (labelMode === 'BAY' && hasSpecialization && ['TINY', 'SMALL'].includes(labelSize)) setLabelSize('MEDIUM'); }, [labelMode, hasSpecialization, labelSize]);
     const bayPad = bayConfig.bay.padStart(2, '0');
     const humanLocationLabel = `${bayConfig.zone}-${aislePad}-${bayPad}`;
     const locationBarcode = zoneLetters.includes(bayConfig.zone) ? getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay) : '';
@@ -82,6 +81,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     const buildLocationLabel = useCallback(async () => {
         if (!zoneLetters.includes(bayConfig.zone) || !activeSite?.id || !/^[A-Z]$/.test(bayConfig.zone) || !locationBarcode || !/^\d{15}$/.test(locationBarcode)) throw new Error('Select a valid configured storage bay.');
         const labelHTML = await generateLocationLabelHTML([{
+            ...specialization,
             humanLabel: humanLocationLabel,
             barcode: locationBarcode,
             zone: bayConfig.zone,
@@ -91,11 +91,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             siteCode: activeSite?.code
         }], {
             size: labelSize,
+            specializationCaptions: { zone: t('warehouse.zoneTitle'), aisle: t('warehouse.aisleTitle') },
+            specializationSizeError: t('warehouse.specializationLabelSizeHelp'),
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
 
         return labelHTML;
-    }, [zoneLetters, bayConfig.zone, bayConfig.aisle, bayConfig.bay, activeSite?.id, activeSite?.name, activeSite?.code, labelSize, labelFormat, humanLocationLabel, locationBarcode, aislePad, bayPad]);
+    }, [specialization.zoneSpecialization, specialization.aisleSpecialization, t, zoneLetters, bayConfig.zone, bayConfig.aisle, bayConfig.bay, activeSite?.id, activeSite?.name, activeSite?.code, labelSize, labelFormat, humanLocationLabel, locationBarcode, aislePad, bayPad]);
 
     const buildProductLabel = useCallback(async () => {
         if (!matchedProduct || !activeSite?.id) throw new Error('Select one product at this facility using its SKU or barcode.');
@@ -247,7 +249,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     onChange={(e) => setLabelSize(e.target.value as any)}
                                 >
                                     {Object.entries(LABEL_SIZES).map(([key, val]) => (
-                                        <option key={key} value={key} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{val.label} ({key})</option>
+                                        <option disabled={labelMode === 'BAY' && hasSpecialization && ['TINY', 'SMALL'].includes(key)} key={key} value={key} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{val.label} ({key})</option>
                                     ))}
                                 </select>
                             </div>
@@ -280,6 +282,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         </span>
                                     </div>
                                 )}
+                                {hasSpecialization && <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.specializationLabelSizeHelp')}</p>}
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
                                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -308,6 +311,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         siteCode={activeSite?.code}
                                         zone={bayConfig.zone}
                                         aisle={aislePad}
+                                        {...specialization}
                                         bay={bayPad}
                                     />
                                 </div>
