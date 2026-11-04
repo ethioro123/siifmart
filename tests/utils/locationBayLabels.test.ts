@@ -22,7 +22,7 @@ describe('Location & Bay Label Generator - Scanner Aspect Ratio & Compliance', (
 
         expect(html).toContain('<!DOCTYPE html>');
         expect(html).toContain('LOCATION LABEL');
-        expect(html).toContain('ZONE: A');
+        expect(html).toContain('A-01-05');
         expect(html).toContain('LOC-A0105-001');
         expect(html).toContain('Bole Central Fulfillment Hub');
     });
@@ -36,8 +36,8 @@ describe('Location & Bay Label Generator - Scanner Aspect Ratio & Compliance', (
         // Barcode height is tuned (at least 58-64px) and width is compact (<= 1.25)
         // Check for presence of SVG barcode elements
         expect(html).toContain('<svg');
-        expect(html).toContain('barcode-container');
-        expect(html).toContain('max-width:2.8in');
+        expect(html).toContain('location-print__symbol');
+        expect(html).toContain('LOC-A0105-001');
     });
 
     it('supports Medium with both QR and tall Barcode side-by-side', async () => {
@@ -46,9 +46,9 @@ describe('Location & Bay Label Generator - Scanner Aspect Ratio & Compliance', (
             format: 'Both'
         });
 
-        expect(html).toContain('qr-container');
-        expect(html).toContain('barcode-container');
-        expect(html).toContain('max-width:2.2in');
+        expect(html).toContain('viewBox');
+        expect(html).toContain('location-print__symbol');
+        expect(html.match(/<svg/g)?.length).toBe(2);
     });
 
     it('supports Small, Medium, Large, and XL label sizes', async () => {

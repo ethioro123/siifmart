@@ -1,4 +1,4 @@
-import { specializedLocationLabel, LocationSpecializations } from './specializedLocationLabel';
+import { specializedLocationLabel, LocationSpecializations, SPECIALIZED_LOCATION_CSS } from './specializedLocationLabel';
 import { generateBarcodeSVG } from '../barcodeGenerator';
 import { generateQRCode } from '../qrCodeGenerator';
 import { LabelSize, LabelFormat, SIZE_CSS, normalizeLabelSize } from './types';
@@ -19,7 +19,7 @@ export const generateLocationLabelHTML = async (
     options: {
         size: LabelSize | string;
         format: LabelFormat | string;
-        specializationCaptions?: { zone: string; aisle: string };
+        specializationCaptions?: { zone: string; aisle: string; kind?: string };
         specializationSizeError?: string;
     }
 ): Promise<string> => {
@@ -234,8 +234,8 @@ export const generateLocationLabelHTML = async (
             `;
         }
 
-        if (hasSpecializations) contentHTML = specializedLocationLabel(item, barcodeObj, qrObj,
-            options.specializationCaptions || { zone: 'Zone', aisle: 'Aisle' });
+        if (isMedium || isLarge || isXL) contentHTML = specializedLocationLabel(item, barcodeObj, qrObj,
+            options.specializationCaptions || { zone: 'Zone', aisle: 'Aisle' }, validSize);
         return `
             <div class="label" style="width:${css.width};height:${css.height};position:relative;overflow:hidden;background:#fff;">
                 ${contentHTML}
@@ -248,6 +248,7 @@ export const generateLocationLabelHTML = async (
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
             <title>Location Labels — ${validSize}</title>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -278,7 +279,7 @@ export const generateLocationLabelHTML = async (
                     height: auto;
                     display: block;
                 }
-                .specialization-code svg, .specialization-code img { max-height: 70px; max-width: 100%; }
+                ${SPECIALIZED_LOCATION_CSS}
                 .qr-container svg { width: 100%; height: 100%; }
                 .barcode-container svg { width: auto; height: auto; max-width: 100%; }
                 .no-print {

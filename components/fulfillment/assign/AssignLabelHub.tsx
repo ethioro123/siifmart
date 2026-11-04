@@ -91,7 +91,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             siteCode: activeSite?.code
         }], {
             size: labelSize,
-            specializationCaptions: { zone: t('warehouse.zoneTitle'), aisle: t('warehouse.aisleTitle') },
+            specializationCaptions: { zone: t('warehouse.zoneTitle'), aisle: t('warehouse.aisleTitle'), kind: t('warehouse.locationIdentifierLabel') },
             specializationSizeError: t('warehouse.specializationLabelSizeHelp'),
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
