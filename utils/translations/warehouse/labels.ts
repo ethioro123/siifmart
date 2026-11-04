@@ -11,6 +11,11 @@ export const labels: any = {
         am: 'ቀጥታ',
         or: 'Kallattiin'
     },
+    aisleSpecializationPlaceholder: {
+        en: 'Not assigned — enter specialization',
+        am: 'አልተመደበም — ልዩ አጠቃቀም ያስገቡ',
+        or: 'Hin ramadamne — ramaddii addaa galchi'
+    },
     zoneScopeTitle: {
         en: 'Whole zone', am: 'ሙሉ ዞን', or: 'Zoonii guutuu'
     },
@@ -23,9 +28,9 @@ export const labels: any = {
         en: 'Individual aisles in this zone', am: 'በዚህ ዞን ያሉ ነጠላ መተላለፊያዎች', or: 'Daandii dhuunfaa zoonii kana keessaa'
     },
     aisleScopeHelp: {
-        en: 'Choose an aisle and describe its specialization, for example Leafy Greens. Each aisle is independent. Use the zone save button to save both sections.',
-        am: 'መተላለፊያ ይምረጡና ልዩ አጠቃቀሙን ይግለጹ፣ ለምሳሌ ቅጠላ ቅጠል። እያንዳንዱ መተላለፊያ የተለየ ነው። ሁለቱንም ክፍሎች ለማስቀመጥ የዞኑን ማስቀመጫ ይጠቀሙ።',
-        or: 'Daandii filadhuutii ramaddii addaa isaa ibsi, fakkeenyaaf Kuduraa Baalaa. Daandiin hundi of dandaʼa. Kutaa lamaan kuusuuf qabduu zoonii ittiin kuusan fayyadami.'
+        en: 'Set what each numbered aisle is for, for example Leafy Greens or Fruit. Each aisle is independent. Save the zone to save all descriptions.',
+        am: 'እያንዳንዱ ቁጥር ያለው መተላለፊያ ለምን እንደሚውል ይግለጹ፣ ለምሳሌ ቅጠላ ቅጠል ወይም ፍራፍሬ። እያንዳንዱ መተላለፊያ የተለየ ነው። ሁለቱንም ክፍሎች ለማስቀመጥ የዞኑን ማስቀመጫ ይጠቀሙ።',
+        or: 'Daandiin lakkoofsa qabu hundi maalif akka oolu ibsi, fakkeenyaaf Kuduraa Baalaa ykn Muduraa. Daandiin hundi of dandaʼa. Kutaa lamaan kuusuuf qabduu zoonii ittiin kuusan fayyadami.'
     },
     zoneSpecializations: {
         en: 'Optional specializations', am: 'አማራጭ ልዩ አጠቃቀሞች', or: 'Ramaddii addaa filannoo'
