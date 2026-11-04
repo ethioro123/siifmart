@@ -12,29 +12,28 @@ describe('formatMovementReason', () => {
         expect(formatted).toBe('Putaway job 621F15 line 1 to A-01-01');
     });
 
-    it('resolves job number from context when available', () => {
+    it('resolves putaway job number from context when available', () => {
         const raw = 'Putaway job 621f1556-fd41-480e-af91-bce812a70ae9 line 0 to A-01-01';
         const formatted = formatMovementReason(raw, {
-            jobs: [{ id: '621f1556-fd41-480e-af91-bce812a70ae9', jobNumber: 'AAAA0033' }]
+            jobs: [{ id: '621f1556-fd41-480e-af91-bce812a70ae9', jobNumber: 'PW8K2M' }]
         });
 
-        expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
+        expect(formatted).toBe('Putaway job PW8K2M line 1 to A-01-01');
     });
 
-    it('resolves job number from context when reference is short prefix', () => {
+    it('resolves putaway job number from context when reference is short prefix', () => {
         const raw = 'Putaway job 621F15 line 1 to A-01-01';
         const formatted = formatMovementReason(raw, {
-            jobs: [{ id: '621f1556-fd41-480e-af91-bce812a70ae9', jobNumber: 'AAAA0033' }]
+            jobs: [{ id: '621f1556-fd41-480e-af91-bce812a70ae9', jobNumber: 'PW8K2M' }]
         });
 
-        expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
+        expect(formatted).toBe('Putaway job PW8K2M line 1 to A-01-01');
     });
 
-    it('preserves canonical PO putaway job reference directly', () => {
-        const raw = 'Putaway job AAAA0033 line 1 to A-01-01';
-        const formatted = formatMovementReason(raw);
-
-        expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
+    it('preserves distinct 6-character putaway job references directly', () => {
+        expect(formatMovementReason('Putaway job PW8K2M line 1 to A-01-01')).toBe('Putaway job PW8K2M line 1 to A-01-01');
+        expect(formatMovementReason('Putaway job XTZ8MZ line 1 to A-01-01')).toBe('Putaway job XTZ8MZ line 1 to A-01-01');
+        expect(formatMovementReason('Putaway job RBOBWN line 1 to A-01-02')).toBe('Putaway job RBOBWN line 1 to A-01-02');
     });
 
     it('formats pick job with raw UUID into a clean short reference', () => {

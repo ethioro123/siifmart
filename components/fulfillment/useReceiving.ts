@@ -15,7 +15,8 @@ import { useReceivingSplit } from './useReceivingSplit';
 import { convertToSellableUnits } from '../procurement/utils';
 import { resolveReceivingPolicy } from '../../utils/receivingPolicy';
 import { mergeCustomAttributes, extractProductAttributesFromPOItem } from '../../utils/productAttributes';
-import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receive/receiveQuantityResolver';
+import { receivingFinalizationService } from '../../services/receiving-finalization.service';
+import { useLanguage } from '../../contexts/LanguageContext';
 export { convertToSellableUnits };
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ interface UseReceivingDeps {
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export const useReceiving = (deps: UseReceivingDeps) => {
+    const { t } = useLanguage();
     const {
         orders, allOrders, jobs, products, allProducts,
         activeSite, setJobs, setOrders, setAllOrders, addNotification,
@@ -222,7 +224,6 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     items: 1, // Line items count
                     location: 'Receiving Dock',
                     orderRef: po.id,
-                    jobNumber: po.poNumber || (po as any).po_number,
                     lineItems: [{
                         productId: targetProductId!,
                         name: productName,
@@ -334,56 +335,20 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             const po = orders.find(o => o.id === poId) || allOrders.find(o => o.id === poId);
             if (!po) throw new Error('PO not found');
 
-            const poJobs = jobs.filter(j => (j.orderRef === poId || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
-            const receivedMaps = buildPOJobsReceivedMap(poJobs);
-
-            const updatedLineItems = (po.lineItems || []).map((item: any) => {
-                const progress = resolvePOLineItemProgress(item, receivedMaps, allProducts);
-                return {
-                    ...item,
-                    receivedQty: progress.effectiveReceived,
-                    productId: progress.resolvedProductId || item.productId,
-                    sku: progress.resolvedSku || item.sku
-                };
-            });
-
-            const allReceived = updatedLineItems.length > 0 && updatedLineItems.every((item: any) => {
-                const expectedSellable = convertToSellableUnits(item.quantity, item);
-                return (item.receivedQty || 0) >= expectedSellable;
-            });
-
-            const status = allReceived ? 'Received' : 'Partially Received';
-
-            // 1. Update PO status and lineItems in DB
-            const updated = await purchaseOrdersService.update(poId, { 
-                status: status as any,
-                lineItems: updatedLineItems
-            });
-            setOrders(prev => prev.map(o => o.id === poId ? updated : o));
-            setAllOrders(prev => prev.map(o => o.id === poId ? updated : o));
-
-            // 2. Mark any matching WMS RECEIVE jobs as Completed
-            const receiveJobs = jobs.filter(j => 
-                j.type === 'RECEIVE' && 
-                (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
-            );
-            for (const rj of receiveJobs) {
-                const saved = await wmsJobsService.update(rj.id, {
-                    status: 'Completed',
-                    completedBy: po.receivedBy || 'System',
-                    completedAt: new Date().toISOString()
-                });
-                // Reflect each confirmed save only; a failed job must remain open locally.
-                setJobs(prev => prev.map(j => j.id === saved.id ? saved : j));
-            }
-
-            addNotification('success', `PO #${po.poNumber || po.po_number} finalized as ${status}`);
+            const saved = await receivingFinalizationService.finalize(poId);
+            setOrders(prev => prev.map(o => o.id === poId ? { ...o, status: saved.status } : o));
+            setAllOrders(prev => prev.map(o => o.id === poId ? { ...o, status: saved.status } : o));
+            setJobs(prev => prev.map(job => {
+                const completed = saved.jobs.find(row => row.id === job.id);
+                return completed ? { ...job, status: completed.status, completedBy: completed.completed_by || undefined, completedAt: completed.completed_at } : job;
+            }));
+            addNotification('success', t('warehouse.receivingFinalized'));
         } catch (error) {
             logger.error('useReceiving', 'Finalize PO Error', error as Error);
-            addNotification('alert', 'Failed to finalize PO');
+            addNotification('alert', t('warehouse.receivingFinalizeFailed'));
             throw error;
         }
-    }, [orders, allOrders, jobs, allProducts, setOrders, setAllOrders, setJobs, addNotification]);
+    }, [orders, allOrders, setOrders, setAllOrders, setJobs, addNotification, t]);
 
     return { receivePO, receivePOSplit, finalizePO };
 };

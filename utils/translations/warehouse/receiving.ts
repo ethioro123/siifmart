@@ -1,6 +1,8 @@
 import { TranslationBlock } from '../types';
 
 export const receiving: TranslationBlock = {
+    receivingFinalized: { en: 'Receiving session finalized.', am: 'የቅበላ ክፍለ ጊዜ ተጠናቋል።', or: 'Marsaan fudhannaa xumurameera.' },
+    receivingFinalizeFailed: { en: 'Receiving finalization was not confirmed.', am: 'የቅበላ ማጠናቀቅ አልተረጋገጠም።', or: 'Xumurri fudhannaa hin mirkanoofne.' },
     receivingCheckInstruction: { en: 'Check the product and packaging before counting.', am: 'ከመቁጠርዎ በፊት ዕቃውን እና ማሸጊያውን ያረጋግጡ።', or: 'Osoo hin lakkaaʼin meeshaa fi paakeejii mirkaneessi.' },
     receivingBlindInstruction: { en: 'Count the units physically in front of you.', am: 'በፊትዎ ያሉትን ክፍሎች ይቁጠሩ።', or: 'Kutaa fuula kee dura jiru lakkaaʼi.' },
     receivingHandlingDetails: { en: 'Handling requirements', am: 'የአያያዝ መስፈርቶች', or: 'Ulaagaalee qabannaa' },
