@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Search, X, ArrowLeftRight, RefreshCw } from 'lucide-react';
-import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
+import { formatCompactNumber, formatDateTime, formatMovementReason } from '../../utils/formatting';
 import { stockMovementsService } from '../../services/supabase.service';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
@@ -29,7 +29,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
 
     // Filter State
     const { user } = useStore();
-    const { allProducts, products } = useData();
+    const { allProducts, products, orders } = useData();
     const isSuperAdmin = canViewAllSites(user?.role);
     const isHQView = !activeSite;
 
@@ -281,8 +281,8 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                         <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] whitespace-nowrap">
                                             {move.performedBy || 'System'}
                                         </td>
-                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] max-w-[220px] truncate" title={move.reason || ''}>
-                                            {move.reason || <span className="text-[var(--theme-text-secondary)]/50">—</span>}
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] max-w-[220px] truncate" title={formatMovementReason(move.reason, { orders })}>
+                                            {formatMovementReason(move.reason, { orders }) || <span className="text-[var(--theme-text-secondary)]/50">—</span>}
                                         </td>
                                     </tr>
                                 );

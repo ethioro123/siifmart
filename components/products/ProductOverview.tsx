@@ -9,6 +9,7 @@ import { productSiteName, sellingMargin } from '../../utils/priceManager';
 import { effectivePrice } from '../../utils/pricingGovernance';
 import { getSellUnit } from '../../utils/units';
 import { productOrderUnits, productBarcodes } from '../../utils/productControlLogic';
+import { formatMovementReason } from '../../utils/formatting';
 import { ControlSection, ControlFact } from '../merchandising/product-control/ControlPrimitives';
 import { ProductProfileHeader } from '../inventory/components/ProductProfileHeader';
 import { ProductLocationBreakdown } from '../inventory/components/ProductLocationBreakdown';
@@ -16,7 +17,7 @@ import { ProductHandlingDetails } from '../inventory/components/ProductHandlingD
 import { RecordedAttributes } from '../merchandising/product-control/RecordedAttributes';
 
 export function ProductOverview({ product, currency }: { product: Product; currency: string }) {
-    const { allProducts, sites, effectiveCountry, movements } = useData();
+    const { allProducts, sites, effectiveCountry, movements, orders } = useData();
     const { user } = useStore();
     const showCost = canViewCostPrice(user?.role);
     const margin = sellingMargin(product);
@@ -35,6 +36,6 @@ export function ProductOverview({ product, currency }: { product: Product; curre
         <ProductMasterReference product={product} country={effectiveCountry || ''} />
         <ProductHandlingDetails product={product} currencySymbol={currency} />
         <RecordedAttributes product={product} />
-        <details className="rounded-xl border border-[var(--theme-border)] p-4"><summary className="min-h-[44px] cursor-pointer text-sm font-medium flex items-center">Recent receipts loaded in this session</summary><div className="pt-3">{receives.length === 0 ? <p className="text-sm text-[var(--theme-text-secondary)]">No receipts loaded for this product and location.</p> : <ul className="space-y-3">{receives.map(row => <li key={row.id} className="text-sm">{new Date(row.date).toLocaleString()} · {row.quantity} {getSellUnit(product.unit).shortLabel} · {row.reason || 'Receipt recorded'} · {row.performedBy || row.user || 'Operator not recorded'}</li>)}</ul>}</div></details>
+        <details className="rounded-xl border border-[var(--theme-border)] p-4"><summary className="min-h-[44px] cursor-pointer text-sm font-medium flex items-center">Recent receipts loaded in this session</summary><div className="pt-3">{receives.length === 0 ? <p className="text-sm text-[var(--theme-text-secondary)]">No receipts loaded for this product and location.</p> : <ul className="space-y-3">{receives.map(row => <li key={row.id} className="text-sm">{new Date(row.date).toLocaleString()} · {row.quantity} {getSellUnit(product.unit).shortLabel} · {formatMovementReason(row.reason, { orders })} · {row.performedBy || row.user || 'Operator not recorded'}</li>)}</ul>}</div></details>
     </div>;
 }

@@ -19,6 +19,7 @@ import { authService } from '../../services/auth.service';
 import { useDriverIncident } from '../../hooks/useDriverIncident';
 import { logger } from '../../utils/logger';
 import { canManageDispatch, getDriverMissions } from '../../utils/shipmentWorkflow';
+import { formatOrderRef } from '../../utils/jobIdFormatter';
 
 interface DriverTabProps {
     filteredJobs: WMSJob[];
@@ -105,7 +106,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
 
         const saved = await incident.mutateAsync({
             title: `INCIDENT: ${data.type}`,
-            description: `Driver Report (${user?.name || 'Driver'}): ${data.description}${data.jobId ? ` (Job: ${data.jobId})` : ''}`,
+            description: `Driver Report (${user?.name || 'Driver'}): ${data.description}${data.jobId ? ` (Job: ${formatOrderRef(data.jobId)})` : ''}`,
             assignedTo: targetAssignee,
             status: 'Pending',
             priority: data.priority,

@@ -1,16 +1,17 @@
-import React,{useState} from 'react';
+import React,{useState,useRef} from 'react';
 import type { OperationReport } from '../../../types/operations-review';
 import type { useOperationsReview } from '../../../hooks/useOperationsReview';
 export const reviewControl='min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-2 text-sm text-[var(--theme-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] disabled:opacity-50';
 interface Props{report:OperationReport;job:string;isPick:boolean;api:ReturnType<typeof useOperationsReview>;t:(key:string)=>string;onSaved:()=>void|Promise<void>}
 export function OperationReportReview({report:r,job,isPick,api,t,onSaved}:Props){
  const [reason,setReason]=useState(''),[quantity,setQuantity]=useState(''),[resolution,setResolution]=useState('count_corrected'),[finding,setFinding]=useState<'undetermined'|'stock_issue'|'counting_correction'>('undetermined'),[notice,setNotice]=useState('');
- const busy=api.resolve.isPending||api.audit.isPending;
- const save=async()=>{setNotice('');try{
+ const lock=useRef(false);const [saved,setSaved]=useState(false);
+ const busy=saved||api.resolve.isPending||api.audit.isPending||api.note.isPending||api.credit.isPending;
+ const save=async()=>{if(lock.current||busy||reason.trim().length<3||(!r.can_resolve&&!r.can_review)||(r.can_resolve&&(!quantity.trim()||!Number.isFinite(Number(quantity))||Number(quantity)<0)))return;lock.current=true;setNotice('');try{
   if(r.can_resolve)await api.resolve.mutateAsync({jobId:job,discrepancyId:r.id,resolution:resolution as 'count_corrected'|'goods_recovered'|'excess_segregated'|'short_pick',quantity:Number(quantity),notes:reason});
   else await api.audit.mutateAsync({jobId:job,discrepancyId:r.id,finding,responsibleId:null,notes:reason});
-  setReason('');setNotice(t('warehouse.opSaved'));try{await onSaved();}catch{/* The decision was saved even when refreshing another view fails. */}
- }catch{setNotice(t('warehouse.opSaveFailed'));}};
+  setSaved(true);setReason('');setNotice(t('warehouse.opSaved'));try{await onSaved();}catch{/* The decision was saved even when refreshing another view fails. */}
+ }catch{setNotice(t('warehouse.opSaveFailed'));}finally{lock.current=false;}};
  return <article className="space-y-3 rounded-2xl bg-[var(--theme-bg-subtle)] p-4 text-sm">
   <h4 className="font-semibold">{t('warehouse.opDiscrepancy')} · {r.item_index+1}</h4>
   <p>{t('warehouse.opField_expected')}: {r.expected_qty} · {t('warehouse.opFirstCount')}: {r.first_count} · {t('warehouse.opRecount')}: {r.recount}</p>

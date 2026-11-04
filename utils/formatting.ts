@@ -233,3 +233,6 @@ export const maskPhoneNumber = (phone: string | undefined | null): string => {
     return `${start}••••${end}`;
 };
 
+export { formatMovementReason } from './jobIdFormatter';
+
+

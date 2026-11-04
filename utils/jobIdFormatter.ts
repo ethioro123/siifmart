@@ -232,3 +232,88 @@ export const generateTrackingNumber = (): string => {
     return result;
 };
 
+/**
+ * Formats a stock movement reason for human display.
+ * Eliminates raw UUIDs (e.g. "Putaway job 621f1556-fd41-480e-af91-bce812a70ae9 line 0 to A-01-01")
+ * and converts technical 0-indexed line numbers to human 1-indexed lines.
+ */
+export const formatMovementReason = (
+    reason: string | undefined | null,
+    context?: {
+        orders?: Array<{ id: string; poNumber?: string; po_number?: string }>;
+        jobs?: Array<{ id: string; jobNumber?: string; job_number?: string }>;
+    }
+): string => {
+    if (!reason || !reason.trim()) return 'Receipt recorded';
+
+    let formatted = reason.trim();
+
+    // 1. Putaway job pattern: "Putaway job <uuid> line <idx> to <location>"
+    const putawayMatch = formatted.match(/^Putaway\s+job\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+(?:line\s+(\d+)\s+)?to\s+([A-Z0-9-]+)$/i);
+    if (putawayMatch) {
+        const [, uuid, lineIdx, location] = putawayMatch;
+        let jobLabel = uuid.slice(0, 6).toUpperCase();
+
+        if (context?.jobs) {
+            const j = context.jobs.find(job => job.id.toLowerCase() === uuid.toLowerCase());
+            const jn = j?.jobNumber || j?.job_number;
+            if (jn) jobLabel = jn.toUpperCase();
+        } else if (context?.orders) {
+            const o = context.orders.find(po => po.id.toLowerCase() === uuid.toLowerCase());
+            const pn = o?.poNumber || o?.po_number;
+            if (pn) jobLabel = pn.toUpperCase();
+        }
+
+        const lineNum = lineIdx !== undefined ? Number(lineIdx) + 1 : undefined;
+        const linePart = lineNum !== undefined ? ` line ${lineNum}` : '';
+        return `Putaway job ${jobLabel}${linePart} to ${location}`;
+    }
+
+    // 2. Pick job pattern: "Pick job <uuid> line <idx>"
+    const pickMatch = formatted.match(/^Pick\s+job\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+(?:line\s+(\d+))?$/i);
+    if (pickMatch) {
+        const [, uuid, lineIdx] = pickMatch;
+        let jobLabel = uuid.slice(0, 6).toUpperCase();
+
+        if (context?.jobs) {
+            const j = context.jobs.find(job => job.id.toLowerCase() === uuid.toLowerCase());
+            const jn = j?.jobNumber || j?.job_number;
+            if (jn) jobLabel = jn.toUpperCase();
+        }
+
+        const lineNum = lineIdx !== undefined ? Number(lineIdx) + 1 : undefined;
+        const linePart = lineNum !== undefined ? ` line ${lineNum}` : '';
+        return `Pick job ${jobLabel}${linePart}`;
+    }
+
+    // 3. POS Sale Receipt pattern: "POS Sale — Receipt POS-<uuid>"
+    formatted = formatted.replace(
+        /Receipt\s+(?:POS-)?([0-9a-f]{8})-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+        (_, prefix) => `Receipt POS-${prefix.slice(0, 6).toUpperCase()}`
+    );
+
+    // 4. Any general UUID in the string -> replace with clean 6-character uppercase prefix or context label
+    formatted = formatted.replace(
+        /([0-9a-f]{8})-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+        (fullMatch, prefix) => {
+            if (context?.orders) {
+                const po = context.orders.find(o => o.id.toLowerCase() === fullMatch.toLowerCase());
+                const num = po?.poNumber || po?.po_number;
+                if (num) return num.toUpperCase();
+            }
+            if (context?.jobs) {
+                const j = context.jobs.find(job => job.id.toLowerCase() === fullMatch.toLowerCase());
+                const num = j?.jobNumber || j?.job_number;
+                if (num) return num.toUpperCase();
+            }
+            return prefix.slice(0, 6).toUpperCase();
+        }
+    );
+
+    // 5. Convert technical "line 0" to human "line 1"
+    formatted = formatted.replace(/\bline\s+0\b/gi, 'line 1');
+
+    return formatted;
+};
+
+

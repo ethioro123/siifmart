@@ -2,6 +2,7 @@ import {useData} from '../../../contexts/DataContext';
 import React,{useState} from 'react';
 import {useStore} from '../../../contexts/CentralStore';
 import {useFloorAudit} from '../../../hooks/useFloorAudit';
+import {formatOrderRef} from '../../../utils/jobIdFormatter';
 import type {AuditScope,FloorAuditRow} from '../../../services/floor-audit.service';
 const control='min-h-[44px] rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-2 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]';
 export function FloorAuditTimeline({scope}:{scope:AuditScope}){
@@ -19,7 +20,7 @@ export function FloorAuditTimeline({scope}:{scope:AuditScope}){
    {query.isError&&<p role="alert">History could not be loaded for this scope. <button className={control} onClick={()=>query.refetch()}>Retry</button></p>}
    {query.data?.length===0&&<p>No discrepancy records for this scope.</p>}
    {query.data?.map(d=><article key={d.id} className="space-y-2 border-t border-[var(--theme-border)] pt-3 text-sm">
-    <p className="font-semibold">{d.stage} {d.job_number||d.job_id} · line {d.item_index+1} · {String(d.manifest.sku||'')}</p>
+    <p className="font-semibold">{d.stage} {d.job_number || formatOrderRef(d.job_id)} · line {d.item_index+1} · {String(d.manifest.sku||'')}</p>
     <p>Lot {String(d.manifest.batchNumber||'Not recorded')} · bin {String(d.manifest.location||'Not recorded')} · expiry {String(d.manifest.expiryDate||'Not recorded')}</p>
     <p>Expected {d.expected_qty} · first count {d.first_count} · recount {d.recount} · difference {d.recount-d.expected_qty}</p>
     <p>Reported by {d.reporter_name} · {new Date(d.reported_at).toLocaleString()} · {d.reason}</p>

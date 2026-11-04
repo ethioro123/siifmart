@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';
 import { operationsReviewService as service } from '../services/operations-review.service';
 import { discrepancyService } from '../services/discrepancy.service';
@@ -11,10 +12,11 @@ export function useOperationsReview(scope:ReviewScope,actor:string,role:string,o
  const queue=useQuery({queryKey:[...key,'queue',operation,mode,page],queryFn:()=>service.queue(scope,operation,mode,page),enabled,staleTime:0});
  const detail=useQuery({queryKey:[...key,'detail',selected?.source,selected?.id,evidenceScope.site,evidencePage],queryFn:()=>service.detail(evidenceScope,selected!,evidencePage),enabled:enabled&&!!selected&&selected.source!=='receipt',staleTime:0});
  const refresh=async()=>{await client.invalidateQueries({queryKey:key});};
- const note=useMutation({mutationFn:service.note,onSuccess:refresh});
- const resolve=useMutation({mutationFn:discrepancyService.resolveFloor,onSuccess:refresh});
- const audit=useMutation({mutationFn:floorAuditService.review,onSuccess:refresh});
- const credit=useMutation({mutationFn:(v:{id:string;approve:boolean;reason:string})=>fulfillmentReturnsService.decide(v.id,v.approve,v.reason),onSuccess:refresh});
+ const refreshAfterSave=async()=>{try{await refresh();}catch(error){logger.warn('OperationsReview','Decision saved; refreshing review data failed');}};
+ const note=useMutation({mutationFn:service.note,onSuccess:refreshAfterSave});
+ const resolve=useMutation({mutationFn:discrepancyService.resolveFloor,onSuccess:refreshAfterSave});
+ const audit=useMutation({mutationFn:floorAuditService.review,onSuccess:refreshAfterSave});
+ const credit=useMutation({mutationFn:(v:{id:string;approve:boolean;reason:string})=>fulfillmentReturnsService.decide(v.id,v.approve,v.reason),onSuccess:refreshAfterSave});
  const openJob=useMutation({mutationFn:(id:string)=>service.openJob(evidenceScope,id)});
  return {queue,detail,note,resolve,audit,credit,refresh,openJob};
 }
