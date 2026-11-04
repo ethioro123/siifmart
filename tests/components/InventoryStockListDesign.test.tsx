@@ -31,7 +31,7 @@ describe('modern mobile inventory list',()=>{
  it('shows the product total while keeping adjustment identity and location stock intact',()=>{
   const grouped={...product,stock:10,inventorySummary:{stock:60,locationCount:2}};
   const {adjust}=setup(false,grouped);
-  expect(screen.getByText('2 locations')).toBeTruthy();
+  expect(screen.getByText('2 Locations')).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:'Adjust stock'}));
   expect(adjust).toHaveBeenCalledWith(grouped);
   expect(adjust.mock.calls[0][0].stock).toBe(10);
