@@ -1,3 +1,4 @@
+import { isPrivateNetworkHost } from './privateNetworkHost';
 import { SYSTEM_ROLES } from './roles';
 import { isHqFacilitySite, isRegionalAdminFacilitySite } from './roleSegregation';
 import { STAGING_PROJECT_REF } from '../supabase/functions/staging-quick-login/policy';
@@ -25,7 +26,7 @@ export function checkIsLocalhost(hostname?: string, isDev?: boolean): boolean {
 export function isStagingQuickLoginAvailable(
     hostname?: string, isDev?: boolean, projectUrl = import.meta.env.VITE_SUPABASE_URL
 ): boolean {
-    return checkIsLocalhost(hostname, isDev) && projectUrl === `https://${STAGING_PROJECT_REF}.supabase.co`;
+    return (checkIsLocalhost(hostname, isDev) || ((isDev ?? Boolean(import.meta.env.DEV)) && isPrivateNetworkHost(hostname ?? (typeof window === 'undefined' ? '' : window.location.hostname)))) && projectUrl === `https://${STAGING_PROJECT_REF}.supabase.co`;
 }
 
 export const REGION_NAMES: Record<string, string> = {

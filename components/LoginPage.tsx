@@ -1,3 +1,4 @@
+import { StagingDevicePairing } from './login/StagingDevicePairing';
 import { ThemeSelector } from './ThemeSelector';
 import React, { useState } from 'react';
 import { Lock, Mail, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, Crown } from 'lucide-react';
@@ -247,6 +248,7 @@ export default function LoginPage() {
             </div>
           )}
 
+          {mode === 'login' && <StagingDevicePairing />}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 select-none">

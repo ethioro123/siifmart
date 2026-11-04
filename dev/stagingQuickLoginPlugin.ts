@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { STAGING_PROJECT_REF, isStagingTestEmail } from '../supabase/functions/staging-quick-login/policy';
-import { isLocalQuickLoginRequest } from './stagingQuickLoginPolicy';
+import { createStagingDevicePairing } from './stagingDevicePairing';
 
 interface QuickLoginConfig { url: string; publicKey: string; email?: string; password?: string }
 const respond = (response: ServerResponse, status: number, data: unknown) => {
@@ -23,6 +23,7 @@ export function stagingQuickLoginPlugin(config: QuickLoginConfig): Plugin {
         name: 'local-staging-quick-login', apply: 'serve',
         configureServer(server) {
             if (config.url !== `https://${STAGING_PROJECT_REF}.supabase.co`) return;
+            const pairing = createStagingDevicePairing();
             let administrator: ReturnType<typeof createClient> | undefined;
             let pendingAuthentication: Promise<void> | undefined;
             let expiresAt = 0;
@@ -69,9 +70,10 @@ export function stagingQuickLoginPlugin(config: QuickLoginConfig): Plugin {
             }
 
             server.middlewares.use('/__staging', async (request, response) => {
-                if (!isLocalQuickLoginRequest(request)) return respond(response, 403, { error: 'Local staging access required' });
                 try {
                     const pathname = new URL(request.url || '/', 'http://localhost').pathname;
+                    if (await pairing.handle(request, response, pathname)) return;
+                    if (!pairing.authorized(request)) return respond(response, 403, { error: 'Pair this device from localhost first' });
                     if (pathname === '/accounts' && request.method === 'GET') {
                         if (rosterCache && rosterCache.expires > Date.now()) {
                             return respond(response, 200, { accounts: rosterCache.accounts });

@@ -33,3 +33,12 @@ describe('staging session bridge boundaries', () => {
         expect(isStagingExecutive('country_managing_director')).toBe(false);
     });
 });
+
+it('shows LAN pairing only for the development staging project', async () => {
+    const { isStagingQuickLoginAvailable } = await import('../../utils/stagingQuickLogin');
+    const staging = 'https://utykzifrblpyxlvlknsm.supabase.co';
+    expect(isStagingQuickLoginAvailable('192.168.0.241', true, staging)).toBe(true);
+    expect(isStagingQuickLoginAvailable('192.168.0.241', false, staging)).toBe(false);
+    expect(isStagingQuickLoginAvailable('192.168.0.241', true, 'https://zdgzpxvorwinugjufkvb.supabase.co')).toBe(false);
+    expect(isStagingQuickLoginAvailable('public.example', true, staging)).toBe(false);
+});

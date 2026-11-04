@@ -20,6 +20,20 @@ function requireStaging() {
 }
 
 export const stagingQuickLoginService = {
+    async pairingStatus(): Promise<{ paired: boolean }> {
+        requireStaging();
+        return z.object({ paired: z.boolean() }).parse(await readResponse(await fetch('/__staging/pair-status', { cache: 'no-store' })));
+    },
+    async pairingCode(): Promise<{ code: string }> {
+        requireStaging();
+        return z.object({ code: z.string().regex(/^\d{8}$/) }).parse(await readResponse(await fetch('/__staging/pair-code', { method: 'POST' })));
+    },
+    async pairDevice(code: string): Promise<{ paired: boolean }> {
+        requireStaging();
+        return z.object({ paired: z.boolean() }).parse(await readResponse(await fetch('/__staging/pair-device', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code })
+        })));
+    },
     async getAccounts() {
         requireStaging();
         const result = rosterSchema.parse(await readResponse(await fetch('/__staging/accounts', { cache: 'no-store' })));
