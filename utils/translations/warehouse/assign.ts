@@ -204,14 +204,14 @@ export const assign: any = {
 
     // Available Workers / Team Panel
     teamTitle: {
-        en: 'Team',
-        am: 'ቡድን',
-        or: 'Garee'
+        en: 'Team members',
+        am: 'የቡድን አባላት',
+        or: 'Miseensota garee'
     },
     activeJobsLimitNotice: {
-        en: 'Limit: 100 active jobs per person',
-        am: 'ገደብ፡ ለአንድ ሰው 100 ንቁ ስራዎች',
-        or: 'Daangaa: nama tokkoof hojii socho\'aa 100'
+        en: 'Each person can have up to 100 active jobs.',
+        am: 'እያንዳንዱ ሰው እስከ 100 ንቁ ስራዎች ሊኖሩት ይችላሉ።',
+        or: 'Namni tokko hojii socho\'aa hanga 100 qabaachuu danda\'a.'
     },
     assigningJobNotice: {
         en: 'Assigning {type} {id}. Choose a team member below.',
@@ -219,14 +219,14 @@ export const assign: any = {
         or: '{type} {id} ramadaa jira. Miseensa garee armaan gadii filadhaa.'
     },
     selectJobInQueueNotice: {
-        en: 'Select a job in the queue to see eligible team members.',
-        am: 'ብቁ የቡድን አባላትን ለማየት በወረፋው ውስጥ ስራ ይምረጡ።',
-        or: 'Miseensa heeyyama qabu arguuf tarree irraa hojii filadhaa.'
+        en: 'Select a queued job to see who can be assigned to it.',
+        am: 'ለማን መመደብ እንደሚቻል ለማየት ከወረፋው ውስጥ ስራ ይምረጡ።',
+        or: 'Eenyutti ramaduun akka danda\'amu arguuf hojii tarree keessaa filadhaa.'
     },
     workloadTimezoneNotice: {
-        en: 'Completed today uses {timezone}. Counts refresh every 15 seconds.',
-        am: 'ዛሬ የተጠናቀቀው {timezone} ይጠቀማል። ቆጠራዎች በየ 15 ሰከንድ ይታደሳሉ።',
-        or: 'Kan har\'a xumurame {timezone} fayyadama. Lakkoofsi sekondii 15 hunda haaroma.'
+        en: 'Completed-today counts use {timezone} time. Workload counts update every 15 seconds.',
+        am: 'የዛሬ የተጠናቀቁ ስራዎች ቆጠራ {timezone} ሰዓትን ይጠቀማል። የስራ ጫና ቆጠራዎች በየ15 ሰከንዱ ይዘምናሉ።',
+        or: 'Lakkoofsi hojii har\'a xumurame sa\'aatii {timezone} fayyadama. Lakkoofsi ba\'aa hojii sekondii 15 hunda haaroma.'
     },
     workloadUnavailableNotice: {
         en: 'Workload unavailable or loading. Assignments are disabled until counts are confirmed.',
@@ -244,9 +244,9 @@ export const assign: any = {
         or: 'Gahee Hunda'
     },
     workerWorkloadStatus: {
-        en: '{active} / {max} active · {completed} completed today',
-        am: '{active} / {max} ንቁ · {completed} ዛሬ ተጠናቋል',
-        or: '{active} / {max} socho\'aa · {completed} har\'a xumurame'
+        en: 'Active jobs: {active} of {max} · Completed today: {completed}',
+        am: 'ንቁ ስራዎች፡ {active} ከ {max} · ዛሬ የተጠናቀቁ፡ {completed}',
+        or: 'Hojii socho\'aa: {active} keessaa {max} · Har\'a kan xumurame: {completed}'
     },
     workloadUnavailableText: {
         en: 'Workload unavailable',
