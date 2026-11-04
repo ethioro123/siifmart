@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { counterControlService } from '../services/counter-control.service';
 export function useCounterSummary(id: string | undefined, site: string | undefined, country: string | undefined, user: string | undefined) {
@@ -9,6 +10,6 @@ export function useCounterReview(site: string, country: string, user: string, en
     const query = useQuery({ queryKey, queryFn: () => counterControlService.queue(site, country), enabled: enabled && Boolean(site && country && user), staleTime: 0 });
     const mutation = useMutation({ mutationFn: (input: { id: string; type: 'shift' | 'drop'; notes: string }) => input.type === 'shift'
         ? counterControlService.review(input.id, 'supervisor', 'Flagged', input.notes) : counterControlService.approveDrop(input.id),
-        onSuccess: async () => { await client.invalidateQueries({ queryKey }); await client.invalidateQueries({ queryKey: ['counter-summary', country, site] }); } });
+        onSuccess: async () => { try { await client.invalidateQueries({ queryKey }); await client.invalidateQueries({ queryKey: ['counter-summary', country, site] }); } catch { logger.warn('CounterReview', 'Decision saved; refresh unavailable'); } } });
     return { query, mutation };
 }

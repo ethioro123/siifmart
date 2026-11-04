@@ -23,6 +23,7 @@ export const counterControlService = {
     async review(id: string, stage: 'supervisor' | 'finance', action: 'Reconciled' | 'Flagged', notes: string) {
         const { data, error } = await supabase.rpc('review_counter_shift', { p_shift: id, p_stage: stage, p_action: action, p_notes: notes });
         if (error) throw error;
+        if (data?.id !== id || (stage === 'supervisor' ? !data?.supervisor_signed_at : !data?.finance_sign_off_at)) throw new Error('Counter review was not confirmed');
         return data;
     },
     async queue(site: string, country: string) {
@@ -32,6 +33,6 @@ export const counterControlService = {
     },
     async approveDrop(id: string) {
         const { data, error } = await supabase.rpc('approve_counter_drop', { p_drop: id });
-        if (error) throw error; return data;
+        if (error) throw error; if(data?.id !== id || data?.status !== 'deposited_in_safe') throw new Error('Cash drop approval was not confirmed'); return data;
     },
 };

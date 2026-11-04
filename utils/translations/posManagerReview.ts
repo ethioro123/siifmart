@@ -1,5 +1,7 @@
 import type { TranslationBlock } from './types';
 export const posManagerReview:TranslationBlock={
+ reviewYes:{en:'Yes',am:'አዎ',or:'Eeyyee'},reviewNo:{en:'No',am:'አይ',or:'Lakki'},
+ reviewControlsUnavailable:{en:'Approval controls are unavailable here. A review note does not authorize a financial or stock action.',am:'የማጽደቂያ መቆጣጠሪያዎች እዚህ አይገኙም። የግምገማ ማስታወሻ የገንዘብ ወይም የክምችት እርምጃ አይፈቅድም።',or:'Tooʼannoon raggaasisaa asitti hin jiru. Yaadannoon gamaaggamaa hojii maallaqaa ykn kuusaa hin hayyamu.'},
  reviewField_total:{"en": "Total", "am": "ጠቅላላ", "or": "Idaʼama"},
  reviewField_currency:{"en": "Currency", "am": "ምንዛሬ", "or": "Maallaqa"},
  reviewField_payment:{"en": "Payment method", "am": "የክፍያ ዘዴ", "or": "Mala kaffaltii"},

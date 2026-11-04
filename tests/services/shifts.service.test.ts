@@ -30,7 +30,7 @@ describe('shiftsService', () => {
         expect(supabase.rpc).toHaveBeenCalledWith('submit_counter_count',{p_shift:'shift-123',p_denominations:{100:12},p_reason:'Counted'});
     });
     it('reconciles using the authenticated Finance actor', async () => {
-        vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'shift-123'},error:null} as never);
+        vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'shift-123',finance_sign_off_at:'2026-11-05'},error:null} as never);
         await shiftsService.reconcile('shift-123','Untrusted name','Reconciled','Drawer verified');
         expect(supabase.rpc).toHaveBeenCalledWith('review_counter_shift',{p_shift:'shift-123',p_stage:'finance',p_action:'Reconciled',p_notes:'Drawer verified'});
     });

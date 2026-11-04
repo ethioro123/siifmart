@@ -22,9 +22,20 @@ describe('Trusted counter operations', () => {
   await expect(counterControlService.review('s1','finance','Reconciled','Checked independently')).rejects.toThrow('Denied');
  });
  it('does not submit browser identities for supervisor or Finance review', async () => {
-  vi.mocked(supabase.rpc).mockResolvedValue({ data: { id: 's1' }, error: null } as never);
+  vi.mocked(supabase.rpc).mockResolvedValue({ data: { id: 's1', supervisor_signed_at: '2026-11-05' }, error: null } as never);
   await counterControlService.review('s1','supervisor','Flagged','Checked independently');
   expect(supabase.rpc).toHaveBeenCalledWith('review_counter_shift', { p_shift:'s1', p_stage:'supervisor', p_action:'Flagged', p_notes:'Checked independently' });
+ });
+ it('rejects incomplete or mismatched review confirmations', async () => {
+  vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'s1'},error:null} as never);
+  await expect(counterControlService.review('s1','supervisor','Flagged','Independent review')).rejects.toThrow('confirmed');
+  await expect(counterControlService.review('s1','finance','Reconciled','Independent review')).rejects.toThrow('confirmed');
+  vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'other',status:'deposited_in_safe'},error:null} as never);
+  await expect(counterControlService.approveDrop('d1')).rejects.toThrow('confirmed');
+  vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'d1',status:'pending_supervisor'},error:null} as never);
+  await expect(counterControlService.approveDrop('d1')).rejects.toThrow('confirmed');
+  vi.mocked(supabase.rpc).mockResolvedValue({data:{id:'d1',status:'deposited_in_safe'},error:null} as never);
+  await expect(counterControlService.approveDrop('d1')).resolves.toMatchObject({id:'d1'});
  });
  it('requests a pending drop without supplying an approver', async () => {
   vi.mocked(supabase.rpc).mockResolvedValue({ data: { id: 'd1', status: 'pending_supervisor' }, error: null } as never);
