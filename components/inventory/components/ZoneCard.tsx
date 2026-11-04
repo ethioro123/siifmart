@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { WarehouseZone, Product } from '../../../types';
 
-interface ZoneWithProducts extends WarehouseZone {
+export interface ZoneWithProducts extends WarehouseZone {
     assignedProducts: Product[];
 }
 
@@ -79,6 +79,11 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                         Priority {zone.pickingPriority}
                     </span>
                 )}
+                {zone.allowPicking !== false && zone.allowPutaway !== false && (
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
+                        Picking & Putaway
+                    </span>
+                )}
                 {zone.allowPicking === false && (
                     <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-danger)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                         No Picking
@@ -115,6 +120,34 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 <div className="mt-3 flex items-center gap-1.5 text-[var(--theme-accent)] text-[11px] font-semibold bg-[var(--theme-accent)]/10 px-2.5 py-1.5 rounded-lg border border-[var(--theme-accent)]/20 w-fit relative z-10">
                     <Thermometer size={14} />
                     <span>TARGET TEMP: {zone.temperature}</span>
+                </div>
+            )}
+
+            {/* Assigned Inventory Products */}
+            {zone.assignedProducts.length > 0 && (
+                <div className="mt-3.5 pt-3 border-t border-[var(--theme-border)]/70 relative z-10 text-left">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">
+                        <span>Assigned Inventory</span>
+                        <span className="font-mono text-[10px] text-[var(--theme-accent)]">{zone.assignedProducts.length} items</span>
+                    </div>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                        {zone.assignedProducts.slice(0, 3).map((p: any) => (
+                            <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]/60 text-xs">
+                                <div className="min-w-0 pr-2">
+                                    <p className="font-semibold text-[var(--theme-text-primary)] truncate text-[11px]">{p.name}</p>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">{p.sku} • {p.location || 'Bin Awaiting'}</p>
+                                </div>
+                                <span className="font-mono text-[11px] font-bold text-[var(--theme-text-primary)] shrink-0">
+                                    {Math.round(p.stock || 0)} units
+                                </span>
+                            </div>
+                        ))}
+                        {zone.assignedProducts.length > 3 && (
+                            <p className="text-[10px] text-[var(--theme-text-muted)] text-center pt-1 font-medium">
+                                +{zone.assignedProducts.length - 3} additional products in this zone
+                            </p>
+                        )}
+                    </div>
                 </div>
             )}
 

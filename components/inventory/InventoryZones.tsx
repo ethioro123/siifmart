@@ -39,19 +39,25 @@ export const InventoryZones: React.FC = () => {
         try {
             const dbZones = await warehouseZonesService.getAll(activeSite.id);
 
-            // Map products to zones
+            // Map products to zones with robust dual-matching (zone_id or location prefix)
             const enriched = dbZones.map((z: WarehouseZone) => {
-                const assigned = allProducts.filter(p =>
-                    (p.zoneId === z.id || p.zone_id === z.id) &&
-                    (p.siteId === activeSite.id || p.site_id === activeSite.id)
-                );
+                const zoneLetterMatch = z.name.trim().toUpperCase().match(/^(?:ZONE\s+)?([A-Z])(?:$|[\s-])/)?.[1];
+                const assigned = allProducts.filter(p => {
+                    const matchesSite = (p.siteId === activeSite.id || p.site_id === activeSite.id);
+                    if (!matchesSite) return false;
+                    if (p.zoneId === z.id || p.zone_id === z.id) return true;
+                    if (zoneLetterMatch && p.location && typeof p.location === 'string') {
+                        return p.location.trim().toUpperCase().startsWith(`${zoneLetterMatch}-`);
+                    }
+                    return false;
+                });
 
                 // Calculate actual occupied space if product stock exists
                 const totalStock = assigned.reduce((sum, p) => sum + (p.stock || 0), 0);
 
                 return {
                     ...z,
-                    occupied: totalStock,
+                    occupied: totalStock > 0 ? totalStock : z.occupied || 0,
                     assignedProducts: assigned
                 };
             });

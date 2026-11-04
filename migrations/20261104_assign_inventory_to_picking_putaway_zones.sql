@@ -65,44 +65,52 @@ DECLARE
     cat_lower text := lower(coalesce(p_category, ''));
     name_lower text := lower(coalesce(p_name, ''));
 BEGIN
-    -- 1. Cold / Chilled (Dairy, Eggs, Milk, Yogurt, Cheese) -> Zone E (Chilled 4°C)
-    IF cat_lower LIKE '%dairy%' OR cat_lower LIKE '%fridge%' OR cat_lower LIKE '%chill%' 
-       OR name_lower LIKE '%milk%' OR name_lower LIKE '%yogurt%' OR name_lower LIKE '%cheese%' THEN
+    -- 1. Dry Shelves / Toiletries / Diapers / Kitchenware (Priority check before 'oil' in 'toiletries')
+    IF cat_lower LIKE '%toiletries%' OR cat_lower LIKE '%nappies%' OR cat_lower LIKE '%diaper%' 
+       OR cat_lower LIKE '%dishes%' OR cat_lower LIKE '%plates%' OR cat_lower LIKE '%bowls%' THEN
         SELECT id INTO v_zone_id FROM public.warehouse_zones 
-        WHERE site_id = p_site_id AND name LIKE 'Zone E%' AND allow_picking = true AND allow_putaway = true
+        WHERE site_id = p_site_id AND name LIKE 'Zone D%' AND allow_picking = true AND allow_putaway = true
         LIMIT 1;
         IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
     END IF;
 
-    -- 2. Deep Frozen (Freezer, Frozen, Ice) -> Zone F (Freezer -18°C)
-    IF cat_lower LIKE '%frozen%' OR cat_lower LIKE '%freezer%' OR name_lower LIKE '%frozen%' OR name_lower LIKE '%ice cream%' THEN
-        SELECT id INTO v_zone_id FROM public.warehouse_zones 
-        WHERE site_id = p_site_id AND name LIKE 'Zone F%' AND allow_picking = true AND allow_putaway = true
-        LIMIT 1;
-        IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
-    END IF;
-
-    -- 3. High-Value / Secure (Baby formula, electronics, lanterns, batteries) -> Zone G (Secure Vault)
-    IF cat_lower LIKE '%baby%' OR cat_lower LIKE '%formula%' OR cat_lower LIKE '%electronic%' 
-       OR cat_lower LIKE '%battery%' OR name_lower LIKE '%formula%' OR name_lower LIKE '%lantern%' OR name_lower LIKE '%phone%' THEN
+    -- 2. Baby Food & Formula (Secure Vault)
+    IF cat_lower LIKE '%baby%' OR cat_lower LIKE '%formula%' OR name_lower LIKE '%formula%' OR name_lower LIKE '%infant%' THEN
         SELECT id INTO v_zone_id FROM public.warehouse_zones 
         WHERE site_id = p_site_id AND name LIKE 'Zone G%' AND allow_picking = true AND allow_putaway = true
         LIMIT 1;
         IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
     END IF;
 
-    -- 4. Bulk Dry Goods / Oils / Heavy Staples -> Zone B (Bulk Storage)
-    IF cat_lower LIKE '%oil%' OR cat_lower LIKE '%sauce%' OR cat_lower LIKE '%condiment%' 
+    -- 3. Cold / Chilled (Dairy, Eggs, Fresh Milk, Yogurt, Cheese) -> Zone E (Chilled 4°C)
+    IF cat_lower LIKE '%dairy%' OR cat_lower LIKE '%fridge%' OR cat_lower LIKE '%chill%' 
+       OR name_lower LIKE '%fresh milk%' OR name_lower LIKE '%uht%' OR name_lower LIKE '%yogurt%' OR name_lower LIKE '%cheese%' THEN
+        SELECT id INTO v_zone_id FROM public.warehouse_zones 
+        WHERE site_id = p_site_id AND name LIKE 'Zone E%' AND allow_picking = true AND allow_putaway = true
+        LIMIT 1;
+        IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
+    END IF;
+
+    -- 4. Electronics & High-Value -> Zone G (Secure Vault)
+    IF cat_lower LIKE '%electronic%' OR cat_lower LIKE '%battery%' OR name_lower LIKE '%lantern%' OR name_lower LIKE '%phone%' THEN
+        SELECT id INTO v_zone_id FROM public.warehouse_zones 
+        WHERE site_id = p_site_id AND name LIKE 'Zone G%' AND allow_picking = true AND allow_putaway = true
+        LIMIT 1;
+        IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
+    END IF;
+
+    -- 5. Bulk Dry Goods / Oils / Heavy Staples -> Zone B (Bulk Storage)
+    IF (cat_lower LIKE '%oil%' AND cat_lower NOT LIKE '%toiletries%') OR cat_lower LIKE '%sauce%' OR cat_lower LIKE '%condiment%' 
        OR cat_lower LIKE '%grain%' OR cat_lower LIKE '%flour%' OR cat_lower LIKE '%rice%' 
-       OR name_lower LIKE '%oil%' OR name_lower LIKE '%flour%' OR name_lower LIKE '%sugar%' THEN
+       OR name_lower LIKE '%cooking oil%' OR name_lower LIKE '%flour%' OR name_lower LIKE '%sugar%' THEN
         SELECT id INTO v_zone_id FROM public.warehouse_zones 
         WHERE site_id = p_site_id AND name LIKE 'Zone B%' AND allow_picking = true AND allow_putaway = true
         LIMIT 1;
         IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
     END IF;
 
-    -- 5. Fast Pick Area (Laundry, Detergents, Household Cleaning) -> Zone C (Fast Pick)
-    IF cat_lower LIKE '%laundry%' OR cat_lower LIKE '%dish%' OR cat_lower LIKE '%cleaning%' 
+    -- 6. Fast Pick Area (Laundry, Detergents, Household Cleaning) -> Zone C (Fast Pick)
+    IF cat_lower LIKE '%laundry%' OR cat_lower LIKE '%dishwashing%' OR cat_lower LIKE '%cleaning%' 
        OR cat_lower LIKE '%detergent%' OR name_lower LIKE '%detergent%' OR name_lower LIKE '%soap%' THEN
         SELECT id INTO v_zone_id FROM public.warehouse_zones 
         WHERE site_id = p_site_id AND name LIKE 'Zone C%' AND allow_picking = true AND allow_putaway = true
@@ -110,13 +118,13 @@ BEGIN
         IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
     END IF;
 
-    -- 6. Dry Shelves & General Merchandise (Toiletries, Diapers, Nappies, Dishes, Kitchenware) -> Zone D (Dry Shelves)
+    -- Default fallback: Zone D (Dry Shelves)
     SELECT id INTO v_zone_id FROM public.warehouse_zones 
     WHERE site_id = p_site_id AND name LIKE 'Zone D%' AND allow_picking = true AND allow_putaway = true
     LIMIT 1;
     IF v_zone_id IS NOT NULL THEN RETURN v_zone_id; END IF;
 
-    -- Fallback: Any active zone that supports BOTH picking AND putaway at this facility
+    -- Ultimate fallback: Any active zone with picking and putaway
     SELECT id INTO v_zone_id FROM public.warehouse_zones 
     WHERE site_id = p_site_id AND allow_picking = true AND allow_putaway = true
     ORDER BY picking_priority ASC, name ASC
@@ -133,24 +141,32 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
+DECLARE
+    v_zone_letter text;
 BEGIN
     IF NEW.site_id IS NOT NULL AND (NEW.zone_id IS NULL OR NEW.location IS NULL OR NEW.location LIKE 'A-%' OR NEW.location = 'On Order') THEN
         NEW.zone_id := public.get_recommended_zone_id(NEW.site_id, NEW.category, NEW.name);
         
-        IF NEW.location IS NULL OR NEW.location LIKE 'A-%' OR NEW.location = 'On Order' THEN
+        IF NEW.zone_id IS NOT NULL THEN
             SELECT 
                 CASE 
-                    WHEN wz.name LIKE 'Zone B%' THEN 'B-01-02'
-                    WHEN wz.name LIKE 'Zone C%' THEN 'C-01-02'
-                    WHEN wz.name LIKE 'Zone D%' THEN 'D-01-01'
-                    WHEN wz.name LIKE 'Zone E%' THEN 'E-01-01'
-                    WHEN wz.name LIKE 'Zone F%' THEN 'F-01-01'
-                    WHEN wz.name LIKE 'Zone G%' THEN 'G-01-01'
-                    WHEN wz.name LIKE 'Zone I%' THEN 'I-01-01'
-                    ELSE 'D-01-01'
-                END INTO NEW.location
+                    WHEN wz.name LIKE 'Zone B%' THEN 'B'
+                    WHEN wz.name LIKE 'Zone C%' THEN 'C'
+                    WHEN wz.name LIKE 'Zone D%' THEN 'D'
+                    WHEN wz.name LIKE 'Zone E%' THEN 'E'
+                    WHEN wz.name LIKE 'Zone F%' THEN 'F'
+                    WHEN wz.name LIKE 'Zone G%' THEN 'G'
+                    WHEN wz.name LIKE 'Zone I%' THEN 'I'
+                    ELSE 'D'
+                END INTO v_zone_letter
             FROM public.warehouse_zones wz
             WHERE wz.id = NEW.zone_id;
+
+            IF NEW.location IS NOT NULL AND NEW.location ~ '^[A-Z]-\d{2}-\d{2}$' THEN
+                NEW.location := v_zone_letter || substring(NEW.location from 2);
+            ELSE
+                NEW.location := v_zone_letter || '-01-01';
+            END IF;
         END IF;
     END IF;
     RETURN NEW;
@@ -168,29 +184,36 @@ DO $$
 DECLARE
     r RECORD;
     v_rec_zone_id uuid;
+    v_zone_letter text;
     v_new_loc text;
 BEGIN
-    FOR r IN SELECT id, site_id, category, name FROM public.products WHERE site_id IS NOT NULL LOOP
+    FOR r IN SELECT id, site_id, category, name, location FROM public.products WHERE site_id IS NOT NULL LOOP
         v_rec_zone_id := public.get_recommended_zone_id(r.site_id, r.category, r.name);
         
         IF v_rec_zone_id IS NOT NULL THEN
             SELECT 
                 CASE 
-                    WHEN wz.name LIKE 'Zone B%' THEN 'B-01-02'
-                    WHEN wz.name LIKE 'Zone C%' THEN 'C-01-02'
-                    WHEN wz.name LIKE 'Zone D%' THEN 'D-01-01'
-                    WHEN wz.name LIKE 'Zone E%' THEN 'E-01-01'
-                    WHEN wz.name LIKE 'Zone F%' THEN 'F-01-01'
-                    WHEN wz.name LIKE 'Zone G%' THEN 'G-01-01'
-                    WHEN wz.name LIKE 'Zone I%' THEN 'I-01-01'
-                    ELSE 'D-01-01'
-                END INTO v_new_loc
+                    WHEN wz.name LIKE 'Zone B%' THEN 'B'
+                    WHEN wz.name LIKE 'Zone C%' THEN 'C'
+                    WHEN wz.name LIKE 'Zone D%' THEN 'D'
+                    WHEN wz.name LIKE 'Zone E%' THEN 'E'
+                    WHEN wz.name LIKE 'Zone F%' THEN 'F'
+                    WHEN wz.name LIKE 'Zone G%' THEN 'G'
+                    WHEN wz.name LIKE 'Zone I%' THEN 'I'
+                    ELSE 'D'
+                END INTO v_zone_letter
             FROM public.warehouse_zones wz
             WHERE wz.id = v_rec_zone_id;
 
+            IF r.location IS NOT NULL AND r.location ~ '^[A-Z]-\d{2}-\d{2}$' THEN
+                v_new_loc := v_zone_letter || substring(r.location from 2);
+            ELSE
+                v_new_loc := v_zone_letter || '-01-01';
+            END IF;
+
             UPDATE public.products
             SET zone_id = v_rec_zone_id,
-                location = coalesce(v_new_loc, 'D-01-01')
+                location = v_new_loc
             WHERE id = r.id;
         END IF;
     END LOOP;

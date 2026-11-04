@@ -1,6 +1,6 @@
-import { operationStatusLabel } from '../../../utils/operationsReviewLabels';
-import React,{useState} from 'react';
-import { ClipboardCheck } from 'lucide-react';
+import { operationStatusLabel,operationReference } from '../../../utils/operationsReviewLabels';
+import React,{useState,useEffect,useRef} from 'react';
+import { ClipboardCheck,ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../Modal';
 import { useData } from '../../../contexts/DataContext';
@@ -27,6 +27,8 @@ function Workspace({site,country,actor,role,onClose}:{site:string;country:string
  const api=useOperationsReview({site,country},actor,role,operation,mode,page,selected,evidencePage);
  const [receivingBusy,setReceivingBusy]=useState(false);
  const busy=receivingBusy||api.note.isPending||api.resolve.isPending||api.audit.isPending||api.credit.isPending||api.openJob.isPending;
+ const contentRef=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(selected){contentRef.current?.focus();contentRef.current?.scrollIntoView?.({block:'start'});}},[selected?.id,selected?.source]);
  const choose=(value?:ReviewSelection)=>{setSelected(value);setEvidencePage(0);setNotice('');};
  const saved=async()=>{refreshJobs();};
  const receivingSaved=async()=>{await api.refresh();refreshJobs();await refreshData(['orders']);};
@@ -41,13 +43,13 @@ function Workspace({site,country,actor,role,onClose}:{site:string;country:string
   }else{setActiveTab(tab);onClose();}
  };
  return <Modal isOpen title={t('warehouse.opTitle')} onClose={()=>{if(!busy)onClose();}} size="xl" mobileFullScreen closeOnEscape={!busy} closeOnClickOutside={!busy}>
-  <div className="space-y-4 text-[var(--theme-text-primary)]">
+  <div ref={contentRef} tabIndex={-1} className="space-y-4 text-[var(--theme-text-primary)] outline-none">
    <p className="text-sm leading-relaxed text-[var(--theme-text-secondary)]">{t('warehouse.opIntro')}</p>
    {notice&&<p role="status">{notice}</p>}
    {selected?.source==='receipt'?<ReviewWorkspace site={selected.site_id||site} country={country} actor={actor} role={role} t={t} onSaved={receivingSaved} onClose={()=>choose()} embedded initialReceipt={selected.id} onBusyChange={setReceivingBusy}/>:selected?<>
     {selected.site_name&&<p className="text-sm text-[var(--theme-text-secondary)]">{selected.site_name}</p>}
     <button type="button" className={control} disabled={busy} onClick={()=>choose()}>{t('warehouse.back')}</button>
-    {api.detail.isFetching&&<p role="status">{t('warehouse.opLoading')}</p>}
+    {(api.detail.isFetching||(!api.detail.data&&!api.detail.isError))&&<p role="status">{t('warehouse.opLoading')}</p>}
     {api.detail.isError&&<p role="alert">{t('warehouse.opLoadFailed')} <button type="button" className={control} onClick={()=>void api.detail.refetch()}>{t('warehouse.receiptRefresh')}</button></p>}
     {api.detail.data&&!api.detail.isFetching&&!api.detail.isError&&<>
      <OperationEvidence key={`${selected.source}:${selected.id}:${evidencePage}`} value={api.detail.data} api={api} site={selected.site_id||site} country={country} page={evidencePage} t={t} onSaved={saved} onOpen={()=>void openControls()} onInventory={id=>choose({source:'inventory',id,site_id:selected.site_id||site,site_name:selected.site_name})} onRelated={record=>choose({...record,site_id:selected.site_id||site,site_name:selected.site_name})}/>
@@ -62,11 +64,18 @@ function Workspace({site,country,actor,role,onClose}:{site:string;country:string
     {api.queue.isFetching&&<p role="status">{t('warehouse.opLoading')}</p>}
     {api.queue.isError?<p role="alert">{t('warehouse.opLoadFailed')}</p>:!api.queue.isFetching&&<>
      {api.queue.data?.length===0&&<p>{t(`warehouse.opEmpty_${mode}`)}</p>}
-     <ul className="divide-y divide-[var(--theme-border)]">{api.queue.data?.map(row=><li key={`${row.source}:${row.id}`}><button type="button" className="min-h-[52px] w-full text-left py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]" onClick={()=>choose(row)}>
-      <p className="font-semibold break-words">{row.reference} · {t(`warehouse.opOperation_${row.operation}`)}</p>
-      <p className="text-sm text-[var(--theme-text-secondary)]">{row.site_name && <span>{row.site_name} · </span>}{operationStatusLabel(t,row.status)} · {row.handler} · {new Date(row.occurred_at).toLocaleString()}</p>
-      {row.exception&&<span className="text-sm text-[var(--theme-status-warning-text)]">{t('warehouse.opException')}</span>}
-     </button></li>)}</ul>
+     {!!api.queue.data?.length&&<p className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.opChooseDetails')}</p>}
+     <ul className="divide-y divide-[var(--theme-border)]">{api.queue.data?.map(row=><li key={`${row.source}:${row.id}`} className="flex flex-col sm:flex-row sm:items-center gap-3 py-4">
+      <div className="flex-1 min-w-0">
+       <p className="font-semibold break-words">{operationReference(row)} · {t(`warehouse.opOperation_${row.operation}`)}</p>
+       <p className="text-sm text-[var(--theme-text-secondary)]">{row.site_name && <span>{row.site_name} · </span>}{operationStatusLabel(t,row.status)} · {row.handler} · {new Date(row.occurred_at).toLocaleString()}</p>
+       {row.exception&&<span className="text-sm text-[var(--theme-status-warning-text)]">{t('warehouse.opException')}</span>}
+      </div>
+      <button type="button" className={`${control} inline-flex items-center justify-center gap-2 self-start sm:self-center shrink-0`}
+       aria-label={`${t('warehouse.opViewDetails')}: ${operationReference(row)} · ${t(`warehouse.opOperation_${row.operation}`)}`} onClick={()=>choose(row)}>
+       {t('warehouse.opViewDetails')}<ChevronRight size={16} aria-hidden="true"/>
+      </button>
+     </li>)}</ul>
     </>}
     <nav aria-label={t('warehouse.opQueuePages')} className="flex items-center gap-3"><button type="button" className={control} disabled={api.queue.isFetching||page===0} onClick={()=>setPage(p=>p-1)}>{t('warehouse.opPrevious')}</button><span>{page+1}</span><button type="button" className={control} disabled={api.queue.isFetching||api.queue.isError||api.queue.data?.length!==25} onClick={()=>setPage(p=>p+1)}>{t('warehouse.opNext')}</button></nav>
    </>}

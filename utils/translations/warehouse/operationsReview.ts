@@ -1,5 +1,7 @@
 import { TranslationBlock } from '../types';
 export const operationsReview: TranslationBlock = {
+    opViewDetails: { en: 'View details', am: 'ዝርዝሮችን ይመልከቱ', or: 'Balʼina ilaali' },
+    opChooseDetails: { en: 'Choose View details to see recorded counts, submitted evidence and related work.', am: 'የተመዘገቡ ቆጠራዎችን፣ ማስረጃንና ተያያዥ ሥራን ለማየት ዝርዝሮችን ይመልከቱ የሚለውን ይምረጡ።', or: 'Lakkoofsa galmaaʼe, ragaa galfamee fi hojii walqabatu ilaaluuf Balʼina ilaali filadhu.' },
     opMode_partial: {"en": "Partial receipts", "am": "ከፊል ቅበላዎች", "or": "Fudhannaa gariixee"},
     opEmpty_partial: {"en": "No partially received orders were found in this view.", "am": "በዚህ እይታ በከፊል የተቀበሉ ትዕዛዞች የሉም።", "or": "Ilaalcha kana keessatti ajajni gariin fudhatame hin jiru."},
     opReceiptEvidence: {"en": "Receiving details", "am": "የቅበላ ዝርዝሮች", "or": "Balʼina fudhannaa"},

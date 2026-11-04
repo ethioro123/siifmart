@@ -1,3 +1,5 @@
+import { formatJobId } from './jobIdFormatter';
+import type { OperationRow } from '../types/operations-review';
 const statuses=new Set(['pending','inprogress','completed','cancelled','deleted','received','recorded','pendingreview','approved','rejected','active','requested','shipped','intransit','delivered','partiallydelivered','partiallyreceived','assigned','paused','draft']);
 export function operationStatusLabel(t:(key:string)=>string,status:string){
  const key=status.toLowerCase().replace(/[\s-]/g,'');
@@ -13,4 +15,10 @@ export function operationValueLabel(t:(key:string)=>string,key:string,value:stri
   if(conditions[text])return t(`warehouse.${conditions[text]}`);
  }
  return text;
+}
+
+export function operationReference(row: Pick<OperationRow,'id'|'reference'|'operation'>): string {
+ const reference=row.reference||'';
+ const isUuid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(reference);
+ return formatJobId({id:row.id,type:row.operation,orderRef:reference,jobNumber:reference&&!isUuid?reference:undefined});
 }

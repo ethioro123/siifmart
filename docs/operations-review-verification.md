@@ -71,3 +71,9 @@ Saved before execution and applied to staging `utykzifrblpyxlvlknsm`:
 The first draft was rejected by automatic approval review because it categorized all partial receipts as exceptions. The applied version uses a separate partial view and preserves the existing exception and hold behavior. The second migration orders partial active receiving alongside in-progress work.
 
 Live manager reads verified AAAA0033 with 960 ordered, 240 recorded received and 720 outstanding; the partial queue returned `exception=false`. The extended rollback-only scope regression verified submitted line quantities, linked receipts/putaway, the separate partial view, pre-submit redaction and redaction from an original counter with a manager role. Twenty-one focused component tests passed across receiving evidence, shared overview, blind receipt review and receiving steps, including legacy/no-snapshot display and exact related-record links. TypeScript passed. No business counts or stock were changed by the fix or verification.
+
+## Detail-entry discoverability
+
+The old list made the whole text row a button, with no visible action. Every row now has a dedicated, labeled **View details** control with a 44px minimum target. A short instruction explains what it opens, full UUID references use the established job formatter, and selecting a record focuses/scrolls the detail panel into view. Evidence loading and errors remain explicit.
+
+The component regression now clicks **View details: AAAA0033 · Receive** and checks that 960 ordered, 240 recorded received and 720 outstanding appear through the full overview-to-detail path. Additional checks cover visible failure states and short job references. This change adds no database migration or business mutation.
