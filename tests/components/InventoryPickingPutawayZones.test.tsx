@@ -24,7 +24,7 @@ describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         letters.forEach((letter) => {
             const found = defaults.find(z => z.name.startsWith(`Zone ${letter}`));
-            expect(found).toBeDefined();
+            expect(found?.name).toBe(`Zone ${letter}`);
         });
     });
 

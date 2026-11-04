@@ -23,3 +23,5 @@
 - Brand startup screen (4 November): centered SIIFMART identity, soft theme-aware ambient light, transform/opacity reveal and indeterminate loading motion from first HTML paint through authentication startup. Removed timer-generated progress percentages; retained error/retry behavior with translated copy and reduced-motion/forced-color fallbacks. No minimum display delay or new animation dependency.
 
 - Startup restoration (4 November): restored the previous logo and loading screen at the user’s request; removed the animated brand startup implementation.
+
+- Neutral zone names (4 November): standard zone names now use Zone A–J rather than fixed receiving, fast-pick, packing or outbound purposes. Existing storage classes, temperatures, zone types, stock, IDs and configurable picking/putaway flags are preserved. Migration `migrations/20261104_neutral_warehouse_zone_names.sql` applied to staging (utykzifrblpyxlvlknsm; 300 matching defaults) and production (zdgzpxvorwinugjufkvb; five matching defaults); custom names preserved. Live verification found no disabled picking/putaway flags in either environment.

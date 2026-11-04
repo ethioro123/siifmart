@@ -36,7 +36,7 @@ describe('Fulfillment Zones A through J and Location Label Printing', () => {
         expect(defaults[9].name).toContain('Zone J');
     });
 
-    it('renders Zones A through J in AssignBayLocationSelector with descriptive names', () => {
+    it('renders Zones A through J in AssignBayLocationSelector with neutral names', () => {
         const zoneLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const setBayConfig = vi.fn();
 
@@ -54,9 +54,9 @@ describe('Fulfillment Zones A through J and Location Label Printing', () => {
         const zoneSelect = screen.getByTitle(/zone/i) as HTMLSelectElement;
         expect(zoneSelect.options).toHaveLength(10);
         expect(zoneSelect.options[0].value).toBe('A');
-        expect(zoneSelect.options[0].text).toContain('Receiving Dock');
+        expect(zoneSelect.options[0].text).toContain('Zone A');
         expect(zoneSelect.options[9].value).toBe('J');
-        expect(zoneSelect.options[9].text).toContain('Outbound Dock');
+        expect(zoneSelect.options[9].text).toContain('Zone J');
 
         fireEvent.change(zoneSelect, { target: { value: 'B' } });
         expect(setBayConfig).toHaveBeenCalledWith(expect.objectContaining({ zone: 'B' }));
