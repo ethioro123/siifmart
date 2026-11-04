@@ -223,10 +223,25 @@ export const assign: any = {
         am: 'ለማን መመደብ እንደሚቻል ለማየት ከወረፋው ውስጥ ስራ ይምረጡ።',
         or: 'Eenyutti ramaduun akka danda\'amu arguuf hojii tarree keessaa filadhaa.'
     },
+    workloadEthiopiaTime: {
+        en: 'Ethiopia local time (UTC+3)',
+        am: 'የኢትዮጵያ አካባቢ ሰዓት (UTC+3)',
+        or: 'saʼaatii naannoo Itoophiyaa (UTC+3)'
+    },
+    workloadKenyaTime: {
+        en: 'Kenya local time (UTC+3)',
+        am: 'የኬንያ አካባቢ ሰዓት (UTC+3)',
+        or: 'saʼaatii naannoo Keeniyaa (UTC+3)'
+    },
+    workloadFacilityTime: {
+        en: 'the facility’s local time',
+        am: 'የተቋሙ አካባቢ ሰዓት',
+        or: 'saʼaatii naannoo giddugalichaa'
+    },
     workloadTimezoneNotice: {
-        en: 'Completed-today counts use {timezone} time. Workload counts update every 15 seconds.',
-        am: 'የዛሬ የተጠናቀቁ ስራዎች ቆጠራ {timezone} ሰዓትን ይጠቀማል። የስራ ጫና ቆጠራዎች በየ15 ሰከንዱ ይዘምናሉ።',
-        or: 'Lakkoofsi hojii har\'a xumurame sa\'aatii {timezone} fayyadama. Lakkoofsi ba\'aa hojii sekondii 15 hunda haaroma.'
+        en: 'Jobs completed today are counted from midnight using {timezone}. Workloads refresh every 15 seconds.',
+        am: 'ዛሬ የተጠናቀቁ ስራዎች በ{timezone} ከእኩለ ሌሊት ጀምሮ ይቆጠራሉ። የስራ ጫና በየ15 ሰከንዱ ይዘምናል።',
+        or: 'Hojiiwwan harʼa xumuraman {timezone} fayyadamuun halkan walakkaa irraa eegalee lakkaaʼamu. Baʼaan hojii sekondii 15 hunda haaroma.'
     },
     workloadUnavailableNotice: {
         en: 'Workload unavailable or loading. Assignments are disabled until counts are confirmed.',

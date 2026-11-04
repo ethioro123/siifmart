@@ -38,6 +38,9 @@ interface AssignAvailableWorkersProps {
 export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({ workloads, workloadReady = false, workloadTimezone, refreshWorkloads, filteredEmployees, dispatchEmployeeFilter, setDispatchEmployeeFilter, dispatchEmployeeSearch, setDispatchEmployeeSearch, jobAssignments, selectedJob, setSelectedJob, setIsSubmitting, refreshData, addNotification, assignCurrentPage, setAssignCurrentPage, ASSIGN_ITEMS_PER_PAGE }) => {
     const { t } = useLanguage();
     const { assignJob } = useFulfillment();
+    const timezoneLabel = t(workloadTimezone === 'Africa/Addis_Ababa'
+        ? 'warehouse.workloadEthiopiaTime'
+        : workloadTimezone === 'Africa/Nairobi' ? 'warehouse.workloadKenyaTime' : 'warehouse.workloadFacilityTime');
     const verification = useFloorStageEligibility(selectedJob);
     const [busy, setBusy] = useState<string | null>(null);
     const lock = useRef(false);
@@ -85,7 +88,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({ 
             </p>
             <p className="mt-2 text-xs text-[var(--theme-text-secondary)]">
                 {workloadReady
-                    ? t('warehouse.workloadTimezoneNotice', { timezone: workloadTimezone || 'UTC' })
+                    ? t('warehouse.workloadTimezoneNotice', { timezone: timezoneLabel })
                     : t('warehouse.workloadUnavailableNotice')}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
