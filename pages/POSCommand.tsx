@@ -1,3 +1,4 @@
+import { PosManagerReview } from '../components/pos-command/review/PosManagerReview';
 import { CounterReviewPanel } from '../components/pos-command/layout/CounterReviewPanel';
 import React, { useState } from 'react';
 import { Lock, ReceiptText, ShieldCheck, Users2, LayoutGrid } from 'lucide-react';
@@ -133,6 +134,7 @@ const POSCommandContent: React.FC = () => {
           </div>
         </div>
 
+        <PosManagerReview />
         {/* ===== PANEL CONTENT ===== */}
 
         {/* 1. Register & Sales Panel */}

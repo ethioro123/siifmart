@@ -1,0 +1,11 @@
+import { z } from 'zod';
+export const posReviewRoles=['group_ceo','country_managing_director','country_operations_director','regional_operations_manager','area_operations_manager','store_manager','assistant_store_manager','head_cashier','shift_supervisor','inventory_manager'];
+export const posReviewSources=['all','sale','payment','shift','drop','return','receiving','event'] as const;
+export const posReviewRow=z.object({source:z.enum(['sale','shift','drop','return','receiving','event']),id:z.string().uuid(),reference:z.string(),status:z.string().nullable(),actor_id:z.string().nullable(),actor_name:z.string().nullable(),occurred_at:z.string(),exception:z.boolean()});
+export const posReviewDetail=z.object({summary:posReviewRow,fields:z.record(z.string(),z.union([z.string(),z.number(),z.boolean(),z.null()])),fingerprint:z.string().min(1),can_note:z.boolean(),notes:z.array(z.object({reviewer_name:z.string(),reason:z.string(),created_at:z.string()})).max(25)});
+export type PosReviewRow=z.infer<typeof posReviewRow>;
+export type PosReviewDetail=z.infer<typeof posReviewDetail>;
+export type PosReviewSource=typeof posReviewSources[number];
+export const posReviewScope=z.object({site:z.string().uuid(),country:z.string().regex(/^[A-Z]{2}$/)});
+export type PosReviewScope=z.infer<typeof posReviewScope>;
+export const posReviewNote=posReviewScope.extend({source:posReviewRow.shape.source,id:z.string().uuid(),fingerprint:z.string().min(1),reason:z.string().trim().min(5).max(1200)}).strict();
