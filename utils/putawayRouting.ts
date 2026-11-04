@@ -2,7 +2,7 @@ import { normalizeLocation } from './locationTracking';
 
 export interface RoutingStock {
     id: string; siteId: string; sku: string; category?: string; location?: string; stock: number;
-    batchNumber?: string; expiryDate?: string; zoneId?: string; storageType?: string;
+    batchNumber?: string; expiryDate?: string; receivedOn?: string; status?: string; zoneId?: string; storageType?: string;
 }
 export interface RoutingZone {
     id: string; siteId: string; name: string; type: string; temperature?: string;
@@ -11,11 +11,11 @@ export interface RoutingZone {
 }
 export interface RoutingMapping { siteId: string; category: string; defaultZone: string }
 export interface PutawaySuggestion {
-    location: string; type: 'SUGGESTED'; label: string; labelKey?: string; reason: string; existingUnits: number;
+    location: string; type: 'SUGGESTED'; label: string; labelKey?: string; reason: string; reasonKey?: string; existingUnits: number;
 }
 export interface RoutingInput {
     siteId: string; sku: string; category?: string; quantity: number; batchNumber?: string;
-    expiryDate?: string; storageType?: string; suggestedLocation?: string; condition?: string;
+    expiryDate?: string; receivedOn?: string; storageType?: string; suggestedLocation?: string; condition?: string;
 }
 const key = (v?: string) => (v || '').trim().toLowerCase();
 const code = (v?: string) => normalizeLocation(v || '');
@@ -56,7 +56,9 @@ export function rankPutawayLocations(input: RoutingInput, stock: RoutingStock[],
         return required === 'ambient' && localZones.length === 0;
     };
     const sameSku = (p: RoutingStock) => key(p.sku) === key(input.sku);
-    const compatibleLot = (p: RoutingStock) => key(p.batchNumber) === key(input.batchNumber) && key(p.expiryDate?.slice(0, 10)) === key(input.expiryDate?.slice(0, 10));
+    const exactLot = (p: RoutingStock) => key(p.batchNumber) === key(input.batchNumber) && key(p.expiryDate?.slice(0, 10)) === key(input.expiryDate?.slice(0, 10));
+    const sameDay = (p: RoutingStock) => !!input.receivedOn && /^\d{4}-\d{2}-\d{2}$/.test(input.receivedOn) && p.receivedOn === input.receivedOn;
+    const compatibleLot = (p: RoutingStock) => !['quarantined', 'damaged', 'expired', 'inactive'].includes(key(p.status)) && (exactLot(p) || sameDay(p));
     const categoryStock = local.filter(p => input.category && key(p.category) === key(input.category));
     const categoryAisles = new Map<string, number>();
     categoryStock.forEach(p => { const aisle = code(p.location)!.slice(0, 4); categoryAisles.set(aisle, (categoryAisles.get(aisle) || 0) + 1); });
@@ -73,10 +75,11 @@ export function rankPutawayLocations(input: RoutingInput, stock: RoutingStock[],
         const assigned = zoneFor(loc[0])?.aisleCategories?.[loc.slice(2, 4)]?.some(c => key(c) === key(input.category));
         const assignedZone = zoneFor(loc[0])?.acceptedCategories?.some(c => key(c) === key(input.category));
         const hinted = code(input.suggestedLocation) === loc;
-        const score = (assigned ? 30000 : 0) + (assignedZone ? 15000 : 0) + (consolidation ? 10000 : 0) + (aisleWeight ? 2000 + Math.min(aisleWeight, 100) : 0) + (mappedZone ? 1000 : 0) + (hinted ? 100 : 0);
-        const label = assigned ? 'Assigned category aisle' : assignedZone ? 'Assigned category zone' : consolidation ? 'Consolidate same SKU and lot' : aisleWeight ? 'New bin near this category' : mappedZone ? 'Category storage zone' : 'Compatible storage area';
-        const reason = consolidation ? 'Matching SKU, batch and expiry are already here.' : 'Keep this lot separate from other stock.';
-        candidates.set(loc, { score, suggestion: { location: loc, type: 'SUGGESTED', label, labelKey: assigned ? 'warehouse.putaway.assignedCategoryAisle' : assignedZone ? 'warehouse.putaway.assignedCategoryZone' : undefined, existingUnits: occupants.reduce((s, p) => s + p.stock, 0), reason: `${reason} ${proposed ? 'Proposed bin: verify it exists and has room.' : 'Bin capacity is not configured: verify physical space.'}` } });
+        const score = (assigned ? 30000 : 0) + (assignedZone ? 15000 : 0) + (consolidation ? 100000 : 0) + (aisleWeight ? 2000 + Math.min(aisleWeight, 100) : 0) + (mappedZone ? 1000 : 0) + (hinted ? 100 : 0);
+        const sharedDay = consolidation && occupants.some(p => !exactLot(p));
+        const label = sharedDay ? 'Same product received on the same day' : consolidation ? 'Consolidate same SKU and lot' : assigned ? 'Assigned category aisle' : assignedZone ? 'Assigned category zone' : aisleWeight ? 'New bin near this category' : mappedZone ? 'Category storage zone' : 'Compatible storage area';
+        const reason = sharedDay ? 'Same receiving date; preserve each lot label and verify physical space.' : consolidation ? 'Matching SKU, batch and expiry are already here.' : 'Keep this lot separate from other stock.';
+        candidates.set(loc, { score, suggestion: { location: loc, type: 'SUGGESTED', label, labelKey: sharedDay ? 'warehouse.putaway.sameReceivingDayBin' : consolidation ? 'warehouse.putaway.sameLotBin' : assigned ? 'warehouse.putaway.assignedCategoryAisle' : assignedZone ? 'warehouse.putaway.assignedCategoryZone' : undefined, existingUnits: occupants.reduce((s, p) => s + p.stock, 0), reasonKey: sharedDay ? 'warehouse.putaway.sameReceivingDayReason' : undefined, reason: `${reason} ${proposed ? 'Proposed bin: verify it exists and has room.' : 'Bin capacity is not configured: verify physical space.'}` } });
     };
     grouped.forEach((_, loc) => add(loc));
     if (code(input.suggestedLocation)) add(code(input.suggestedLocation)!, !grouped.has(code(input.suggestedLocation)!));

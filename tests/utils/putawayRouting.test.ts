@@ -57,12 +57,12 @@ describe('explicit zone and aisle category routing', () => {
         aisleCategories: { '01': ['Pantry'], '02': ['Baby'] },
         ...changes
     });
-    it('prefers an explicitly assigned aisle over a legacy zone default or inferred consolidation', () => {
+    it('prefers an eligible existing product bin over an empty category aisle', () => {
         const stock = [product({ location: 'C-01-01' })];
         const result = rankPutawayLocations(input, stock, [assignedZone(), zone({ id: 'c', name: 'C' })],
             [{ siteId: 'et-dc', category: 'Baby', defaultZone: 'C' }]);
-        expect(result[0].location).toBe('B-02-01');
-        expect(result[0].labelKey).toBe('warehouse.putaway.assignedCategoryAisle');
+        expect(result[0].location).toBe('C-01-01');
+        expect(result[0].labelKey).toBe('warehouse.putaway.sameLotBin');
         expect(result.some(r => r.location.startsWith('B-01-'))).toBe(false);
     });
     it('excludes zones assigned to other categories even for matching stock', () => {
@@ -88,4 +88,23 @@ describe('explicit zone and aisle category routing', () => {
     it('withholds placement when no configured category zone accepts the product', () => {
         expect(rankPutawayLocations({ ...input, category: 'Unknown' }, [], [assignedZone()], [])).toEqual([]);
     });
+});
+
+describe('same receiving-day lot routing',()=>{
+ const today={...input,receivedOn:'2026-11-05'};
+ it('prefers the existing bin for different batches received on the same local date',()=>{
+  const result=rankPutawayLocations(today,[product({batchNumber:'OTHER',receivedOn:'2026-11-05'})],[],[]);
+  expect(result[0].location).toBe('B-02-05');expect(result[0].reasonKey).toBe('warehouse.putaway.sameReceivingDayReason');
+ });
+ it('skips a shared-day bin when the worker reports it full',()=>{
+  const result=rankPutawayLocations(today,[product({batchNumber:'OTHER',receivedOn:'2026-11-05'})],[],[],['B-02-05']);
+  expect(result.some(row=>row.location==='B-02-05')).toBe(false);
+ });
+ it.each(['2026-11-04',undefined])('does not infer a shared day from %s',receivedOn=>{
+  expect(rankPutawayLocations(today,[product({batchNumber:'OTHER',receivedOn})],[],[])[0].location).not.toBe('B-02-05');
+ });
+ it('preserves capacity and unavailable-stock restrictions',()=>{
+  expect(rankPutawayLocations(today,[product({batchNumber:'OTHER',receivedOn:'2026-11-05'})],[zone({capacity:50})],[])).toEqual([]);
+  expect(rankPutawayLocations(today,[product({batchNumber:'OTHER',receivedOn:'2026-11-05',status:'quarantined'})],[],[])[0].location).not.toBe('B-02-05');
+ });
 });

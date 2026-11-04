@@ -34,7 +34,14 @@ DO $$ DECLARE result jsonb; BEGIN
 END $$;
 RESET ROLE;
 UPDATE public.wms_jobs SET status='Completed' WHERE id='a098fffd-bad6-442d-9e96-36309317ac35';
-UPDATE public.stock_movements SET reason=reason||' [rollback test]' WHERE reason='Putaway job a611549b-6523-492c-b68b-066e45b09563 line 0 to A-01-02';
+DO $$ BEGIN
+ UPDATE public.stock_movements m SET reason=m.reason||' [rollback test]'
+ FROM public.wms_jobs j WHERE j.id='a611549b-6523-492c-b68b-066e45b09563' AND m.site_id=j.site_id AND m.type='IN'
+ AND m.reason IN('Putaway job '||j.id::text||' line 0 to A-01-02',
+ 'Putaway job '||coalesce(nullif(j.job_number,''),upper(substr(replace(j.id::text,'-',''),1,6)))||' line 1 to A-01-02',
+ 'Putaway job '||coalesce(nullif(j.job_number,''),upper(substr(replace(j.id::text,'-',''),1,6)))||' line 0 to A-01-02');
+ IF NOT FOUND THEN RAISE EXCEPTION 'Regression setup did not alter a real placement audit'; END IF;
+END $$;
 SET LOCAL ROLE authenticated;
 DO $$ DECLARE result jsonb; BEGIN
  result:=public.finalize_po_from_putaway('a611549b-6523-492c-b68b-066e45b09563');

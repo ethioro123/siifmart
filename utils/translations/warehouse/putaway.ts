@@ -1,12 +1,16 @@
 import { TranslationBlock } from '../types';
 
 export const putaway: TranslationBlock = {
+    sameReceivingDayBin: { en: 'Same product received on the same day', am: 'በአንድ ቀን የተቀበለ ተመሳሳይ ምርት', or: 'Oomisha walfakkaatu guyyaa tokko fudhatame' },
+    sameReceivingDayReason: { en: 'These batches were received on the same local date. Keep each lot separately labelled and check physical space before placement.', am: 'እነዚህ ሎቶች በአንድ የአካባቢ ቀን ተቀብለዋል። እያንዳንዱን ሎት በተለየ መለያ ያቆዩ እና ከማስቀመጥዎ በፊት ቦታውን ያረጋግጡ።', or: 'Lootiiwwan kun guyyaa naannoo tokko fudhatamaniiru. Tokkoon tokkoon lootii adda baasuuf mallattoo isaa tursiisi; kaaʼuun dura iddoo qaamaan mirkaneessi.' },
+    sameLotBin: { en: 'Same product and lot', am: 'ተመሳሳይ ምርት እና ሎት', or: 'Oomishaafi lootii walfakkaatu' },
+
     assignedCategoryAisle: { en: 'Assigned category aisle', am: 'ለምድቡ የተመደበ መተላለፊያ', or: 'Daandii ramaddiif ramadame' },
     assignedCategoryZone: { en: 'Assigned category zone', am: 'ለምድቡ የተመደበ ዞን', or: 'Zoonii ramaddiif ramadame' },
     binLotConflict: {
-        en: 'This bin contains the same product with a different batch or expiry. Scan another compatible bin.',
-        am: 'ይህ ቦታ ተመሳሳይ ምርት በተለየ ባች ወይም የማብቂያ ቀን ይዟል። ሌላ ተስማሚ ቦታ ይቃኙ።',
-        or: 'Bakki kun oomisha walfakkaatu lottii ykn guyyaa yeroon itti darbu adda taʼe qaba. Bakka mijatu biraa iskaanii godhi.'
+        en: 'This bin cannot accept this lot. Scan another compatible bin.',
+        am: 'ይህ ቦታ ይህን ሎት መቀበል አይችልም። ሌላ ተስማሚ ቦታ ይቃኙ።',
+        or: 'Bakki kun lootii kana fudhachuu hin dandaʼu. Bakka mijatu biraa iskaanii godhi.'
     },
     placementFailed: { en: 'Stock placement was not confirmed.', am: 'ምርቱን ማስቀመጥ አልተረጋገጠም።', or: 'Kaawwisni meeshaa hin mirkanoofne.' },
     // PUTAWAY Tab UI

@@ -39,3 +39,12 @@ describe('Putaway routing controls', () => {
         expect(screen.queryByRole('button', { name: 'A-01-01' })).toBeNull();
     });
 });
+
+it('uses the server receiving day for a different batch and offers another bin when full',async()=>{
+ vi.mocked(putawayRoutingService.load).mockResolvedValue({receivedOn:'2026-11-05',stock:[{id:'p',siteId:'et-dc',sku:'ET001',stock:20,location:'A-01-01',batchNumber:'OTHER',receivedOn:'2026-11-05'}],zones:[],mappings:[]});
+ const {result}=setup();await waitFor(()=>expect(result.current.suggestions[0]?.location).toBe('A-01-01'));
+ expect(result.current.suggestions[0].labelKey).toBe('warehouse.putaway.sameReceivingDayBin');
+ expect(putawayRoutingService.load).toHaveBeenCalledWith('et-dc','job-1');
+ act(()=>result.current.reportFull('A-01-01'));
+ await waitFor(()=>expect(result.current.suggestions.some(row=>row.location==='A-01-01')).toBe(false));
+});

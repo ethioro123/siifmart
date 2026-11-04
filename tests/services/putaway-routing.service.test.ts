@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { supabase } from '../../lib/supabase';
 import { putawayRoutingService } from '../../services/putaway-routing.service';
-vi.mock('../../lib/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 const rows = (n: number) => Array.from({ length: n }, (_, i) => ({ id: String(i), site_id: 'et-dc', sku: 'ET001', stock: 2, location: 'A-01-01' }));
 function setup(pages: unknown[][], error: unknown = null) {
     const range = vi.fn(); pages.forEach(data => range.mockResolvedValueOnce({ data, error }));
@@ -37,4 +37,10 @@ describe('live site Putaway routing snapshot', () => {
         await expect(putawayRoutingService.load('')).rejects.toThrow('warehouse');
         expect(supabase.from).not.toHaveBeenCalled();
     });
+});
+
+it('loads the trusted receiving day for the current job',async()=>{
+ setup([[]]);vi.mocked(supabase.rpc).mockResolvedValue({data:'2026-11-05',error:null} as never);
+ expect((await putawayRoutingService.load('et-dc','job')).receivedOn).toBe('2026-11-05');
+ expect(supabase.rpc).toHaveBeenCalledWith('putaway_receiving_day',{p_job:'job'});
 });
