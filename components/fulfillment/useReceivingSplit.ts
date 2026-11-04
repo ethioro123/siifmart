@@ -246,6 +246,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                     location: 'Receiving Dock',
                     items: 1,
                     orderRef: po.id,
+                    jobNumber: po.poNumber || (po as any).po_number,
                     createdBy: actionUser?.name || 'System',
                     lineItems: [{
                         productId: targetProductId,

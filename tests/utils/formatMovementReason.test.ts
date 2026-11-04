@@ -21,6 +21,22 @@ describe('formatMovementReason', () => {
         expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
     });
 
+    it('resolves job number from context when reference is short prefix', () => {
+        const raw = 'Putaway job 621F15 line 1 to A-01-01';
+        const formatted = formatMovementReason(raw, {
+            jobs: [{ id: '621f1556-fd41-480e-af91-bce812a70ae9', jobNumber: 'AAAA0033' }]
+        });
+
+        expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
+    });
+
+    it('preserves canonical PO putaway job reference directly', () => {
+        const raw = 'Putaway job AAAA0033 line 1 to A-01-01';
+        const formatted = formatMovementReason(raw);
+
+        expect(formatted).toBe('Putaway job AAAA0033 line 1 to A-01-01');
+    });
+
     it('formats pick job with raw UUID into a clean short reference', () => {
         const raw = 'Pick job e31f246d-5df7-40dc-abc7-1867498a0a5a line 0';
         const formatted = formatMovementReason(raw);

@@ -248,40 +248,64 @@ export const formatMovementReason = (
 
     let formatted = reason.trim();
 
-    // 1. Putaway job pattern: "Putaway job <uuid> line <idx> to <location>"
-    const putawayMatch = formatted.match(/^Putaway\s+job\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+(?:line\s+(\d+)\s+)?to\s+([A-Z0-9-]+)$/i);
+    // 1. Putaway job pattern: "Putaway job <ref> line <idx> to <location>"
+    const putawayMatch = formatted.match(/^Putaway\s+job\s+([0-9a-zA-Z-]+)\s+(?:line\s+(\d+)\s+)?to\s+([A-Z0-9-]+)$/i);
     if (putawayMatch) {
-        const [, uuid, lineIdx, location] = putawayMatch;
-        let jobLabel = uuid.slice(0, 6).toUpperCase();
+        const [, rawRef, lineIdx, location] = putawayMatch;
+        let jobLabel = rawRef;
+        const isFullUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawRef);
 
         if (context?.jobs) {
-            const j = context.jobs.find(job => job.id.toLowerCase() === uuid.toLowerCase());
+            const j = context.jobs.find(job =>
+                job.id.toLowerCase() === rawRef.toLowerCase() ||
+                job.id.toLowerCase().startsWith(rawRef.toLowerCase()) ||
+                (job.jobNumber && job.jobNumber.toLowerCase() === rawRef.toLowerCase()) ||
+                (job.job_number && job.job_number.toLowerCase() === rawRef.toLowerCase())
+            );
             const jn = j?.jobNumber || j?.job_number;
             if (jn) jobLabel = jn.toUpperCase();
+            else if (isFullUuid) jobLabel = rawRef.slice(0, 6).toUpperCase();
         } else if (context?.orders) {
-            const o = context.orders.find(po => po.id.toLowerCase() === uuid.toLowerCase());
+            const o = context.orders.find(po =>
+                po.id.toLowerCase() === rawRef.toLowerCase() ||
+                po.id.toLowerCase().startsWith(rawRef.toLowerCase()) ||
+                (po.poNumber && po.poNumber.toLowerCase() === rawRef.toLowerCase()) ||
+                (po.po_number && po.po_number.toLowerCase() === rawRef.toLowerCase())
+            );
             const pn = o?.poNumber || o?.po_number;
             if (pn) jobLabel = pn.toUpperCase();
+            else if (isFullUuid) jobLabel = rawRef.slice(0, 6).toUpperCase();
+        } else if (isFullUuid) {
+            jobLabel = rawRef.slice(0, 6).toUpperCase();
         }
 
-        const lineNum = lineIdx !== undefined ? Number(lineIdx) + 1 : undefined;
+        const lineNum = lineIdx !== undefined ? (Number(lineIdx) === 0 ? 1 : Number(lineIdx)) : undefined;
         const linePart = lineNum !== undefined ? ` line ${lineNum}` : '';
         return `Putaway job ${jobLabel}${linePart} to ${location}`;
     }
 
-    // 2. Pick job pattern: "Pick job <uuid> line <idx>"
-    const pickMatch = formatted.match(/^Pick\s+job\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+(?:line\s+(\d+))?$/i);
+    // 2. Pick job pattern: "Pick job <ref> line <idx>"
+    const pickMatch = formatted.match(/^Pick\s+job\s+([0-9a-zA-Z-]+)\s+(?:line\s+(\d+))?$/i);
     if (pickMatch) {
-        const [, uuid, lineIdx] = pickMatch;
-        let jobLabel = uuid.slice(0, 6).toUpperCase();
+        const [, rawRef, lineIdx] = pickMatch;
+        let jobLabel = rawRef;
+        const isFullUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawRef);
 
         if (context?.jobs) {
-            const j = context.jobs.find(job => job.id.toLowerCase() === uuid.toLowerCase());
+            const j = context.jobs.find(job =>
+                job.id.toLowerCase() === rawRef.toLowerCase() ||
+                job.id.toLowerCase().startsWith(rawRef.toLowerCase()) ||
+                (job.jobNumber && job.jobNumber.toLowerCase() === rawRef.toLowerCase()) ||
+                (job.job_number && job.job_number.toLowerCase() === rawRef.toLowerCase())
+            );
             const jn = j?.jobNumber || j?.job_number;
             if (jn) jobLabel = jn.toUpperCase();
+            else if (isFullUuid) jobLabel = rawRef.slice(0, 6).toUpperCase();
+        } else if (isFullUuid) {
+            jobLabel = rawRef.slice(0, 6).toUpperCase();
         }
 
-        const lineNum = lineIdx !== undefined ? Number(lineIdx) + 1 : undefined;
+        const lineNum = lineIdx !== undefined ? (Number(lineIdx) === 0 ? 1 : Number(lineIdx)) : undefined;
         const linePart = lineNum !== undefined ? ` line ${lineNum}` : '';
         return `Pick job ${jobLabel}${linePart}`;
     }

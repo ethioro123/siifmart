@@ -222,6 +222,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     items: 1, // Line items count
                     location: 'Receiving Dock',
                     orderRef: po.id,
+                    jobNumber: po.poNumber || (po as any).po_number,
                     lineItems: [{
                         productId: targetProductId!,
                         name: productName,
@@ -367,29 +368,14 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
             );
             for (const rj of receiveJobs) {
-                try {
-                    await wmsJobsService.update(rj.id, {
-                        status: 'Completed',
-                        completedBy: po.receivedBy || 'System',
-                        completedAt: new Date().toISOString()
-                    });
-                } catch (e) {
-                    logger.error('useReceiving', 'finalizePO_updateReceiveJobs', e);
-                }
+                const saved = await wmsJobsService.update(rj.id, {
+                    status: 'Completed',
+                    completedBy: po.receivedBy || 'System',
+                    completedAt: new Date().toISOString()
+                });
+                // Reflect each confirmed save only; a failed job must remain open locally.
+                setJobs(prev => prev.map(j => j.id === saved.id ? saved : j));
             }
-
-            // 3. Update local jobs state so the RECEIVE job is shown as Completed
-            setJobs(prev => prev.map(j => {
-                if (j.type === 'RECEIVE' && (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))) {
-                    return {
-                        ...j,
-                        status: 'Completed' as const,
-                        completedBy: po.receivedBy || 'System',
-                        completedAt: new Date().toISOString()
-                    };
-                }
-                return j;
-            }));
 
             addNotification('success', `PO #${po.poNumber || po.po_number} finalized as ${status}`);
         } catch (error) {
