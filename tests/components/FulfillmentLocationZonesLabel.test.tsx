@@ -27,7 +27,7 @@ describe('Fulfillment Zones A through J and Location Label Printing', () => {
     const standardZones: WarehouseZone[] = warehouseZonesService.getStandardDefaultZones(mockSite.id).map((z, idx) => ({
         ...z,
         specialization: idx === 0 ? 'Fresh Produce' : undefined,
-        aisleSpecializations: idx === 0 ? { '01': 'Leafy Greens' } : {},
+        aisleSpecializations: idx === 0 ? { '01': 'Leafy Greens' } : undefined,
         id: `zone-${idx + 1}`
     }));
 
