@@ -69,6 +69,17 @@ export const systemLogsService = {
             });
         }
 
+        // Verify active session for Zero-Trust remote logging
+        let sessionUserId: string | null = null;
+        try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            sessionUserId = sessionData?.session?.user?.id || null;
+        } catch {
+            sessionUserId = null;
+        }
+
+        const effectiveActorId = sessionUserId || employeeId || null;
+
         const dbLog = {
             user_name: userName,
             action,
@@ -77,13 +88,16 @@ export const systemLogsService = {
             ip_address: log.ip_address || null,
             site_id: siteId,
             country_code: countryCode,
-            employee_id: employeeId,
+            employee_id: employeeId || effectiveActorId,
             device_id: deviceId,
             gps_location: gpsLocation,
             entity_type: log.entity_type || null,
             entity_id: log.entity_id || null,
-            performed_by: log.performed_by || userName,
-            metadata,
+            performed_by: effectiveActorId || log.performed_by || userName,
+            metadata: {
+                ...metadata,
+                performed_by_display: log.performed_by || userName
+            },
         };
 
         try {
@@ -95,6 +109,7 @@ export const systemLogsService = {
                 // Check if error is due to missing columns in schema cache or restrictive module check constraint
                 const isSchemaCacheError = error.message?.includes('schema cache') || error.message?.includes('column');
                 const isModuleCheckError = error.message?.includes('system_logs_module_check') || error.message?.includes('check constraint');
+                const isRlsError = error.code === '42501' || error.message?.includes('row-level security');
 
                 if (isSchemaCacheError || isModuleCheckError) {
                     const fallbackLog = {
@@ -117,9 +132,12 @@ export const systemLogsService = {
                         fallbackError = posFallback.error;
                     }
 
-                    if (fallbackError) {
+                    if (fallbackError && !(isRlsError && !sessionUserId)) {
                         logger.warn('systemLogsService', 'Non-blocking system_logs fallback warning:', { error: fallbackError.message });
                     }
+                } else if (isRlsError && !sessionUserId) {
+                    // Expected when user is not authenticated yet (e.g. login attempt, password reset).
+                    // Suppress warning from cluttering console since local-logs service records it.
                 } else {
                     logger.warn('systemLogsService', 'Non-blocking system_logs insert warning:', { error: error.message });
                 }

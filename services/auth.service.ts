@@ -53,19 +53,37 @@ export const authService = {
         const isEmail = identifier.includes('@');
 
         if (!isEmail) {
-            let { data: employee, error } = await supabase
-                .from('employees')
-                .select('email')
-                .or(`name.ilike.${identifier},code.ilike.${identifier}`)
-                .limit(1)
-                .maybeSingle();
+            let foundEmail: string | null = null;
+            try {
+                const { data: rpcEmail, error: rpcError } = await supabase.rpc('resolve_worker_login_email', {
+                    p_identifier: identifier,
+                });
+                if (!rpcError && rpcEmail) {
+                    foundEmail = rpcEmail;
+                }
+            } catch {
+                // Ignore RPC failure and attempt direct lookup
+            }
 
-            if (error || !employee) {
-                console.error('AuthService: Username or Worker ID lookup failed', error);
+            if (!foundEmail) {
+                let { data: employee, error } = await supabase
+                    .from('employees')
+                    .select('email')
+                    .or(`name.ilike.${identifier},code.ilike.${identifier}`)
+                    .limit(1)
+                    .maybeSingle();
+
+                if (employee?.email) {
+                    foundEmail = employee.email;
+                }
+            }
+
+            if (!foundEmail) {
+                console.error('AuthService: Username or Worker ID lookup failed');
                 throw new Error('Username or Worker ID not found');
             }
 
-            email = employee.email;
+            email = foundEmail;
         }
 
         const { data: firstData, error: firstError } = await supabase.auth.signInWithPassword({ email, password });
@@ -75,19 +93,53 @@ export const authService = {
         // Code-style emails (KE-SIIF0043@siifmart.com or legacy siif-0043@siifmart.com) resolve through the
         // employee's worker code to their real auth email, so old and new formats both keep working.
         if (error && isEmail) {
-            const codeFilter = buildCodeFilterFromLoginEmail(identifier);
-            if (codeFilter) {
-                const { data: emp } = await supabase
-                    .from('employees')
-                    .select('email')
-                    .or(codeFilter)
-                    .limit(1)
-                    .maybeSingle();
-                if (emp?.email && emp.email.toLowerCase() !== email.toLowerCase()) {
-                    const retry = await supabase.auth.signInWithPassword({ email: emp.email, password });
-                    data = retry.data;
-                    error = retry.error;
+            let altEmail: string | null = null;
+            try {
+                const { data: rpcEmail } = await supabase.rpc('resolve_worker_login_email', {
+                    p_identifier: identifier,
+                });
+                if (rpcEmail && rpcEmail.toLowerCase() !== email.toLowerCase()) {
+                    altEmail = rpcEmail;
                 }
+            } catch {
+                // Ignore and fall back
+            }
+
+            if (!altEmail) {
+                const codeFilter = buildCodeFilterFromLoginEmail(identifier);
+                if (codeFilter) {
+                    const { data: emp } = await supabase
+                        .from('employees')
+                        .select('email')
+                        .or(codeFilter)
+                        .limit(1)
+                        .maybeSingle();
+                    if (emp?.email && emp.email.toLowerCase() !== email.toLowerCase()) {
+                        altEmail = emp.email;
+                    }
+                }
+            }
+
+            if (altEmail) {
+                const retry = await supabase.auth.signInWithPassword({ email: altEmail, password });
+                data = retry.data;
+                error = retry.error;
+            }
+        }
+
+        // Case-insensitivity retry for stored upper/lower casing in auth.users
+        if (error && email !== email.toLowerCase()) {
+            const retryLower = await supabase.auth.signInWithPassword({ email: email.toLowerCase(), password });
+            if (!retryLower.error && retryLower.data) {
+                data = retryLower.data;
+                error = null;
+            }
+        }
+        if (error && email !== email.toUpperCase()) {
+            const retryUpper = await supabase.auth.signInWithPassword({ email: email.toUpperCase(), password });
+            if (!retryUpper.error && retryUpper.data) {
+                data = retryUpper.data;
+                error = null;
             }
         }
 
