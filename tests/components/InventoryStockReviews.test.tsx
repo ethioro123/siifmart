@@ -4,9 +4,12 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { InventoryPending } from '../../components/inventory/InventoryPending';
 import type { PendingInventoryChange } from '../../types';
+const linkedState = vi.hoisted(() => ({ data: undefined as PendingInventoryChange | undefined }));
+vi.mock('../../hooks/useInventoryReviewLink', () => ({ useInventoryReviewLink: () => ({ id: linkedState.data?.id || '', query: { data: linkedState.data, isFetching: false, isError: false } }) }));
+vi.mock('../../contexts/LanguageContext', () => ({ useLanguage: () => ({ t: (key: string) => key }) }));
 vi.mock('../../components/inventory/components/InventoryChangeDiff', () => ({ DetailedComparison: () => <div>Request comparison</div> }));
 vi.mock('../../components/inventory/components/InventoryHistoryTable', () => ({ InventoryHistoryTable: () => <div>Preserved review history</div> }));
-afterEach(cleanup);
+afterEach(() => { cleanup(); linkedState.data = undefined; });
 const change = { id: 'real-request', productName: 'Diaper', productSku: 'ET001', changeType: 'stock_adjustment', status: 'pending', adjustmentQty: 2, adjustmentType: 'OUT', requestedBy: 'Worker' } as PendingInventoryChange;
 function setup(canApprove = true) {
     const approve = vi.fn(), reject = vi.fn();
@@ -30,6 +33,13 @@ describe('Inventory Stock Reviews', () => {
         expect(reject).toHaveBeenCalledWith(change, 'Count requires review');
         fireEvent.click(screen.getByRole('button', { name: 'Review history' }));
         expect(screen.getByText('Preserved review history')).toBeTruthy();
+    });
+    it('opens an exact linked stock request outside the loaded list', () => {
+        linkedState.data = { ...change, id: 'linked-request', productName: 'Linked coffee count' };
+        const { approve } = setup();
+        expect(screen.getByText('Linked coffee count')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Approve stock request' }));
+        expect(approve).toHaveBeenCalledWith(linkedState.data);
     });
     it('does not expose decision buttons to read-only staff', () => {
         setup(false); fireEvent.click(screen.getByRole('button', { name: 'Review request' }));

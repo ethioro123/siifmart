@@ -5,7 +5,7 @@ Implemented for new PO receipts saved through `save_receiving_split`. Existing r
 ## Worker and manager flow
 
 - Routine good receipts proceed to putaway automatically, including good partial deliveries. No manager acknowledgment is required for every product.
-- The Receiving tab offers **Receiving review** to managers and **My submitted counts** to workers. Queries run only when opened, use 25-row cursor pages, and fetch lot details for one selected receipt.
+- Managers now open **Operations review** above the WMS operation tabs and select a receiving record; workers retain **My submitted counts** in Receive. Queries run only when opened, use 25-row cursor pages, and fetch lot details for one selected receipt.
 - Manager view defaults to exceptions; workers default to their submitted counts. The exception filter can be cleared to inspect ordinary receipts.
 - Original count, original lot/condition/expiry evidence, counter, and submission time are immutable. Independent managers see ordered units and the count comparison at submission; the original counter's review API response excludes ordered quantities, even when that counter is a manager.
 - Damaged/expired/rejected lots, excess counts within the existing configured intake tolerance, worker-reported delivery issues, and pending corrections appear as exceptions. A partial delivery alone is not reported as a confirmed shortage. Counts above the existing intake tolerance remain rejected by the receipt transaction.

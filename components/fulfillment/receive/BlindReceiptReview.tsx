@@ -20,9 +20,9 @@ export function BlindReceiptReview(props: Props) {
         {open && <ReviewWorkspace key={`${props.site}:${props.country}:${props.actor}:${props.role}`} {...props} onClose={() => setOpen(false)} />}
     </>;
 }
-function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, role }: Props & { onClose: () => void }) {
+export function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, role, embedded = false, initialReceipt, onBusyChange }: Props & { onClose: () => void; embedded?: boolean; initialReceipt?: string; onBusyChange?: (busy: boolean) => void }) {
     const [exceptions, setExceptions] = useState(receiptManagerRoles.includes(role));
-    const [selected, setSelected] = useState<string>();
+    const [selected, setSelected] = useState<string>(initialReceipt || '');
     const [reason, setReason] = useState('');
     const [job, setJob] = useState('');
     const [quantity, setQuantity] = useState('');
@@ -30,6 +30,7 @@ function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, role }: Pr
     const retry = React.useRef<{ signature: string; id: string } | undefined>(undefined);
     const { queue, detail, correction, decision, issue } = useBlindReceiptReview(site, country, actor, true, selected, exceptions);
     const busy = correction.isPending || decision.isPending || issue.isPending;
+    React.useEffect(() => { onBusyChange?.(busy); return () => onBusyChange?.(false); }, [busy, onBusyChange]);
     const value = detail.data;
     const pending = value?.corrections.filter(c => !value.decisions.some(d => d.correction_id === c.id)) || [];
     const submit = async (action: 'review' | 'request' | 'approve' | 'reject' | 'issue', correctionId?: string) => {
@@ -50,12 +51,12 @@ function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, role }: Pr
         } catch { setMessage(t('warehouse.receiptActionFailed')); }
     };
     const choose = (id: string) => { setSelected(id); setReason(''); setQuantity(''); setJob(''); setMessage(''); };
-    return <Modal isOpen title={t('warehouse.receiptReviewTitle')} onClose={() => { if (!busy) onClose(); }} size="xl" closeOnEscape={!busy} closeOnClickOutside={!busy}>
+    const content = (
         <div className="space-y-4 text-[var(--theme-text-primary)]">
             <p className="text-sm leading-relaxed text-[var(--theme-text-secondary)]">{t('warehouse.receiptReviewNote')}</p>
             {message && <p role="status" className="text-sm">{message}</p>}
             {selected ? <>
-                <button type="button" className={control} disabled={busy} onClick={() => choose('')}>{t('warehouse.back')}</button>
+                <button type="button" className={control} disabled={busy} onClick={() => { if (embedded) onClose(); else choose(''); }}>{t('warehouse.back')}</button>
                 {detail.isFetching && <p role="status">{t('warehouse.receiptLoading')}</p>}
                 {detail.isError && <p role="alert">{t('warehouse.receiptLoadFailed')} <button type="button" className={control} onClick={() => void detail.refetch()}>{t('warehouse.receiptRefresh')}</button></p>}
                 {value && !detail.isError && !detail.isFetching && <>
@@ -116,7 +117,8 @@ function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, role }: Pr
                 {queue.hasNextPage && <button type="button" className={control} disabled={queue.isFetchingNextPage} onClick={() => void queue.fetchNextPage()}>{t('warehouse.receiptLoadMore')}</button>}
             </>}
         </div>
-    </Modal>;
+    );
+    return embedded ? content : <Modal isOpen title={t('warehouse.receiptReviewTitle')} onClose={() => { if (!busy) onClose(); }} size="xl" closeOnEscape={!busy} closeOnClickOutside={!busy}>{content}</Modal>;
 }
 export function ReceiptEvidence({ value, t }: { value: ReceiptDetail; t: (key: string) => string }) {
     return <section className="space-y-3">

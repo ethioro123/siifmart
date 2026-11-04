@@ -1,3 +1,4 @@
+import { operationsReview } from './operationsReview';
 import { receiptReview } from './receiptReview';
 import { transferEvidence } from './transferEvidence';
 import {fulfillmentRecovery} from './fulfillmentRecovery';
@@ -23,6 +24,7 @@ import { labels } from './labels';
 import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
+    ...operationsReview,
     ...receiptReview,
     ...transferEvidence,
     ...fulfillmentRecovery,

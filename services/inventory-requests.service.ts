@@ -180,9 +180,10 @@ export const inventoryRequestsService = {
         const result = await this.getMerchandisingRequests(countryCode, { limit, status: 'pending' });
         return result.data;
     },
-    async getAll(siteId?: string, countryCode?: string, limit: number = 25, regionCode?: string, page = 1, pendingOnly = false): Promise<PendingInventoryChange[]> {
+    async getAll(siteId?: string, countryCode?: string, limit: number = 25, regionCode?: string, page = 1, pendingOnly = false, requestId?: string): Promise<PendingInventoryChange[]> {
         // RULE 10: 25-record shelf limit
         let query = supabase.from('inventory_requests').select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_by_employee_id,requested_at,status,proposed_changes,adjustment_type,adjustment_qty,adjustment_reason,approved_by,approved_at,rejected_by,rejected_at,rejection_reason,finance_approved_by_employee_id,product_edit_approvals').limit(limit);
+        if (requestId) query = query.eq('id', requestId);
         if (siteId) query = query.eq('site_id', siteId);
         if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
         if (regionCode) query = query.eq('region_code', regionCode);

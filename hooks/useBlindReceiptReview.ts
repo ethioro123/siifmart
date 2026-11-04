@@ -4,7 +4,7 @@ export function useBlindReceiptReview(site: string, country: string, user: strin
     const client = useQueryClient();
     const scope = ['blind-receipt-review', country, site, user];
     const queue = useInfiniteQuery({
-        queryKey: [...scope, 'queue', exceptions], enabled: enabled && Boolean(site && country && user), staleTime: 0,
+        queryKey: [...scope, 'queue', exceptions], enabled: enabled && !receipt && Boolean(site && country && user), staleTime: 0,
         initialPageParam: undefined as { created_at: string; id: string } | undefined,
         queryFn: ({ pageParam }) => service.list(site, country, pageParam, exceptions),
         getNextPageParam: page => page.length === 25 ? page[page.length - 1] : undefined

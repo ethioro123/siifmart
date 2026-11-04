@@ -1,3 +1,4 @@
+import { operationsReviewRoles } from '../../types/operations-review';
 import { BlindReceiptReview } from './receive/BlindReceiptReview';
 import { useReceivingLabelPrinting } from '../../hooks/useReceivingLabelPrinting';
 import type { ReceivingPrintItem } from '../../utils/receivingLabelData';
@@ -223,7 +224,7 @@ export const ReceiveTab: React.FC = () => {
                 receiveStats={receiveStats}
             />
 
-            {activeSite?.id && effectiveCountry && user?.id && <BlindReceiptReview site={activeSite.id} country={effectiveCountry} actor={user.id} role={user.role} t={t} onSaved={async () => { refreshJobs(); await refreshReceivingData(['orders']); }} />}
+            {activeSite?.id && effectiveCountry && user?.id && !operationsReviewRoles.includes(user.role) && <BlindReceiptReview site={activeSite.id} country={effectiveCountry} actor={user.id} role={user.role} t={t} onSaved={async () => { refreshJobs(); await refreshReceivingData(['orders']); }} />}
             {/* CONTENT AREA */}
             {viewMode === 'Process' ? (
                 <ReceiveList

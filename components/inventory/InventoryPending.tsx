@@ -1,3 +1,5 @@
+import { useInventoryReviewLink } from '../../hooks/useInventoryReviewLink';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useStore } from '../../contexts/CentralStore';
 import { canVoteProductEdit } from '../../utils/productEditApproval';
 import { ProductEditApprovalProgress } from './ProductEditApprovalProgress';
@@ -20,16 +22,21 @@ interface InventoryPendingProps {
 
 export const InventoryPending: React.FC<InventoryPendingProps> = ({ pendingChanges, historyChanges = [], allProducts, canApprove, isSubmitting, currencySymbol = '', onApproveChange, onRejectChange }) => {
     const { user } = useStore();
+    const linked = useInventoryReviewLink();
+    const { t } = useLanguage();
     const [section, setSection] = useState<'pending' | 'history'>('pending');
     const [selected, setSelected] = useState<PendingInventoryChange | null>(null);
     const [reason, setReason] = useState('');
+    useEffect(() => { setSelected(linked.query.data || null); setReason(''); }, [linked.id, linked.query.data]);
     useEffect(() => {
         if (!selected) return;
-        const latest = [...pendingChanges, ...historyChanges].find(change => change.id === selected.id);
+        const latest = [...pendingChanges, ...historyChanges, ...(linked.query.data ? [linked.query.data] : [])].find(change => change.id === selected.id);
         if (!latest) setSelected(null);
         else if (latest !== selected) setSelected(latest);
-    }, [pendingChanges, historyChanges, selected]);
+    }, [pendingChanges, historyChanges, selected, linked.query.data]);
     return <section className="space-y-4" aria-label="Stock reviews">
+        {linked.id && linked.query.isFetching && <p role="status">{t('warehouse.opLoading')}</p>}
+        {linked.id && linked.query.isError && <p role="alert">{t('warehouse.opLoadFailed')}</p>}
         <p className="text-sm text-[var(--theme-text-secondary)]">Product edits need one approval each from regional Operations, Supply Chain and Merchandising. Stock corrections and removal requests keep their existing approval rules.</p>
         <div className="flex flex-wrap gap-2">
             {(['pending', 'history'] as const).map(tab => <button key={tab} type="button" aria-pressed={section === tab} onClick={() => { setSection(tab); setSelected(null); setReason(''); }} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)]">{tab === 'pending' ? `Stock reviews (${pendingChanges.length})` : 'Review history'}</button>)}
