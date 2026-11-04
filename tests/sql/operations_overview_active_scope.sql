@@ -44,7 +44,7 @@ BEGIN
  result:=public.operations_review_detail(facility.id,'ET','job',receive_job,0)->'receiving';
  IF (result->'items'->0->>'ordered')::numeric<>10 OR (result->'items'->0->>'received')::numeric<>2
  OR (result->'items'->0->>'outstanding')::numeric<>8 OR jsonb_array_length(result->'submissions')<>1 OR jsonb_array_length(result->'putaway')<>1 THEN RAISE EXCEPTION 'Submitted receiving details or related work missing'; END IF;
- IF result->'putaway'->0->>'reference' IS DISTINCT FROM (SELECT coalesce(nullif(j.job_number,''),p.po_number) FROM public.wms_jobs j JOIN public.purchase_orders p ON p.id=po WHERE j.id=(result->'putaway'->0->>'id')::uuid) THEN RAISE EXCEPTION 'Related putaway did not use stored or inherited job number'; END IF;
+ IF result->'putaway'->0->>'reference' IS DISTINCT FROM (SELECT coalesce(nullif(j.job_number,''),j.order_ref,j.id::text) FROM public.wms_jobs j JOIN public.purchase_orders p ON p.id=po WHERE j.id=(result->'putaway'->0->>'id')::uuid) THEN RAISE EXCEPTION 'Related putaway did not use WMS job reference'; END IF;
  row:=public.operations_review_detail(facility.id,'ET','job',(result->'putaway'->0->>'id')::uuid,0);
  IF row#>>'{summary,reference}' IS DISTINCT FROM result->'putaway'->0->>'reference'
  OR row#>>'{fields,order}' IS DISTINCT FROM (SELECT po_number FROM public.purchase_orders WHERE id=po) THEN RAISE EXCEPTION 'Putaway detail identifiers do not match related work'; END IF;

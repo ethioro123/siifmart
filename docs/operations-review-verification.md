@@ -81,3 +81,7 @@ The component regression now clicks **View details: AAAA0033 · Receive** and ch
 ### Putaway job numbers
 
 Saved and applied `migrations/20261104_receiving_review_putaway_job_number.sql` and `migrations/20261104_operations_review_po_job_references.sql` to staging `utykzifrblpyxlvlknsm`. Related putaway, overview rows and opened job details prefer the stored job number, with a site/country-scoped PO number fallback for legacy receiving/putaway. Business reference resolves the parent PO number. Authenticated regional-manager verification for the reported putaway returns AAAA0033 for both title and business reference, and related evidence retains 240 units with the exact job UUID for navigation. Regression covers related/detail consistency alongside existing blind controls and scope checks.
+
+### Job and PO reference correction
+
+The preceding PO-as-job fallback was incorrect. `migrations/20261104_review_distinct_job_and_po_numbers.sql` restores the WMS reference (stored job number, otherwise order reference) for rows and related putaway evidence. Both UI entry points use the existing WMS formatter: the reported job displays 9165FB, while its resolved PO business reference remains AAAA0033. Reuses the synchronized en/am/or Job number label. Applied to staging `utykzifrblpyxlvlknsm`; regression checks keep these identifiers separate.

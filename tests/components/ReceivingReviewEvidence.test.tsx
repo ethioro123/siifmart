@@ -8,7 +8,7 @@ const t=(key:string)=>key;
 const evidence:Evidence={po_number:'AAAA0033',supplier_name:'Supplier',partial:true,
  items:[{id:'item',sku:'ETDI001',product_name:'Dishes',ordered:960,received:240,outstanding:720}],
  submissions:[{id:'receipt',item_id:'item',created_at:'2026-11-03T06:20:16Z',employee_name:'Counter',has_snapshot:false,original_quantity:null}],
- putaway:[{id:'putaway',reference:'AAAA0033',status:'In-Progress',quantity:240,employee_name:'Putaway worker'}]};
+ putaway:[{id:'putaway',reference:'62b3caff-b285-4e9b-a431-17e1df9165fb',status:'In-Progress',quantity:240,employee_name:'Putaway worker'}]};
 afterEach(cleanup);
 describe('receiving manager evidence',()=>{
  it('shows recorded partial quantities with the correct unit comparison and historical submission',()=>{
@@ -19,11 +19,15 @@ describe('receiving manager evidence',()=>{
   expect(screen.queryByRole('button',{name:'warehouse.opOpenSubmittedCount'})).toBeNull();
   expect(screen.getByText('warehouse.opPartialReceiptNote')).toBeTruthy();
  });
- it('shows the inherited job number and opens the exact linked putaway record',()=>{
+ it('shows the WMS job number separately from the PO number and opens the exact linked putaway record',()=>{
   const open=vi.fn();render(<ReceivingReviewEvidence value={evidence} t={t} onOpen={open}/>);
-  expect(screen.getByText(/warehouse.opJobNumber: AAAA0033/)).toBeTruthy();
+  expect(screen.getByText(/warehouse.opJobNumber: 9165FB/)).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:'warehouse.opOpenReceiptPutaway'}));
   expect(open).toHaveBeenCalledWith({source:'job',id:'putaway'});
+ });
+ it('preserves an explicit job number instead of replacing it with the PO number',()=>{
+  render(<ReceivingReviewEvidence value={{...evidence,putaway:[{...evidence.putaway[0],reference:'JOB0007'}]}} t={t} onOpen={vi.fn()}/>);
+  expect(screen.getByText(/warehouse.opJobNumber: JOB0007/)).toBeTruthy();
  });
  it('opens a locked original count only when a snapshot exists',()=>{
   const open=vi.fn();render(<ReceivingReviewEvidence value={{...evidence,submissions:[{...evidence.submissions[0],has_snapshot:true,original_quantity:240}]}} t={t} onOpen={open}/>);
