@@ -1,3 +1,4 @@
+import { canProposeProductChanges } from '../utils/productProposalAccess';
 import { useData } from '../contexts/DataContext';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,7 +24,7 @@ export function useProductControlProposals(product: Product | null, country: str
     const [batchFailures, setBatchFailures] = useState<PriceBatchResult['failures']>([]);
     useEffect(() => { setPriceBatch(null); setBatchFailures([]); }, [product?.id, country, activeRegionCode]);
     const savePatch = async (patch: Partial<Product>, reason: string) => {
-        if (!product || isSaving) return false;
+        if (!product || isSaving || !canProposeProductChanges(user?.role)) return false;
         if (!Object.keys(patch).some(key => patch[key as keyof Product] !== undefined)) { showToast('No changes to submit.', 'info'); return false; }
         setIsSaving(true);
         try {
@@ -59,7 +60,7 @@ export function useProductControlProposals(product: Product | null, country: str
         } catch (error) { showToast((error as Error).message, 'error'); return false; }
     };
     const preparePricing = async (cfg: PricingConfig) => {
-        if (!product || isSaving) return;
+        if (!product || isSaving || !canProposeProductChanges(user?.role)) return;
         setIsSaving(true);
         try {
             // Cost is taken from each target's recorded data, never copied from another location.
@@ -74,7 +75,7 @@ export function useProductControlProposals(product: Product | null, country: str
         finally { setIsSaving(false); }
     };
     const confirmPricing = async () => {
-        if (!priceBatch || isSaving) return;
+        if (!priceBatch || isSaving || !canProposeProductChanges(user?.role)) return;
         setIsSaving(true);
         try {
             const result = await submit(priceBatch.changes, priceBatch.source);

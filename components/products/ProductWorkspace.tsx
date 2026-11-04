@@ -3,7 +3,7 @@ import { useProductWorkspaceRecord } from '../../hooks/useProductWorkspaceRecord
 import { ProductOverview } from './ProductOverview';
 import { ProductChangesTab } from './ProductChangesTab';
 import { useProductChanges } from '../../hooks/useProductChanges';
-import { getRoleHierarchy } from '../../utils/roles';
+import { canProposeProductChanges } from '../../utils/productProposalAccess';
 import { useProductControlProposals } from '../../hooks/useProductControlProposals';
 import { PriceBatchPreview } from '../merchandising/components/PriceBatchPreview';
 import { initialUnitConfig } from '../../utils/productControlLogic';
@@ -60,7 +60,7 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
     const [activeTab, setActiveTab] = useState<ModalTab>(initialTab);
 
     const [historyPage, setHistoryPage] = useState(1);
-    const canEdit = !readOnly && getRoleHierarchy(user?.role || '') >= 70;
+    const canEdit = !readOnly && canProposeProductChanges(user?.role);
     const changes = useProductChanges(isOpen ? product : null, activeCountry, historyPage, activeTab === 'history' && isOpen,setHistoryPage);
     const [unitCfg, setUnitCfg] = useState<UnitConfig>({
         sellMode: 'count', sellUnit: 'UNIT', physicalQty: '', physicalUnit: 'g', packOf: '', caseOf: '', label: '', scope: 'single', selectedSiteIds: []
@@ -96,11 +96,12 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
     if (!isOpen || !product) return null;
 
     const markSubmitted = async (tab: ModalTab, signature: string, save: () => Promise<boolean | undefined>) => {
+        if (!canEdit) return;
         if (await save()) setSubmitted(previous => ({ ...previous, [tab]: signature }));
     };
     const handleSaveProfile = () => markSubmitted('profile', JSON.stringify(profileCfg), () => proposals.saveProfile(profileCfg));
     const handleSaveUnit = () => markSubmitted('unit', JSON.stringify(unitCfg), () => proposals.saveUnit(unitCfg));
-    const handleSavePricing = () => proposals.preparePricing(pricingCfg);
+    const handleSavePricing = () => canEdit ? proposals.preparePricing(pricingCfg) : Promise.resolve();
     const handleSaveStock = () => markSubmitted('stock', JSON.stringify(stockCfg), () => proposals.saveStock(stockCfg));
     const handleConfirmPrice = () => markSubmitted('pricing', JSON.stringify(pricingCfg), proposals.confirmPricing);
 
@@ -217,7 +218,7 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
                         />
                     )}
 
-                    {activeTab === 'pricing' && (
+                    {activeTab === 'pricing' && canEdit && (
                         <PricingTab
                             product={product}
                             pricingCfg={pricingCfg}
@@ -233,7 +234,7 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
                         />
                     )}
 
-                    {activeTab === 'stock' && (
+                    {activeTab === 'stock' && canEdit && (
                         <StockTab
                             product={product}
                             stockCfg={stockCfg}

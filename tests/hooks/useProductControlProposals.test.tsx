@@ -4,14 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useProductControlProposals } from '../../hooks/useProductControlProposals';
 import { initialUnitConfig } from '../../utils/productControlLogic';
 import type { Product } from '../../types';
-const mocks = vi.hoisted(() => ({ create: vi.fn(), toast: vi.fn(), invalidate: vi.fn() }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), toast: vi.fn(), invalidate: vi.fn(), role: 'regional_merchandising_manager' }));
 vi.mock('../../contexts/DataContext', () => ({ useData: () => ({ activeRegionCode: 'ET-ADD', sites: [] }) }));
-vi.mock('../../contexts/CentralStore', () => ({ useStore: () => ({ user: { name: 'Requester' }, showToast: mocks.toast }) }));
+vi.mock('../../contexts/CentralStore', () => ({ useStore: () => ({ user: { name: 'Requester', role: mocks.role }, showToast: mocks.toast }) }));
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: mocks.invalidate }) }));
 vi.mock('../../hooks/useInventoryRequestMutations', () => ({ useCreateInventoryRequestMutation: () => ({ mutateAsync: mocks.create }) }));
 vi.mock('../../hooks/useSubmitPriceChanges', () => ({ useSubmitPriceChanges: () => ({ submit: vi.fn() }) }));
 const product = { id: 'milk', siteId: 'store', name: 'Milk', sku: 'ETDY001', price: 125, stock: 23, unit: 'UNIT', size: '1L', minStock: 10, maxStock: 50, customAttributes: { physical: { storage: 'Chilled' } } } as Product;
-beforeEach(() => { vi.clearAllMocks(); mocks.create.mockResolvedValue({ id: 'request' }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.role = 'regional_merchandising_manager'; mocks.create.mockResolvedValue({ id: 'request' }); });
 describe('Product control proposal saves', () => {
     it('submits narrow profile edits as pending and shows completion only after server save', async () => {
         let resolveSave: (value: unknown) => void = () => {};
@@ -44,4 +44,11 @@ describe('Product control proposal saves', () => {
         await act(async () => { await result.current.saveStock({ minStock: '60', maxStock: '50' }); });
         expect(mocks.create).not.toHaveBeenCalled();
     });
+});
+
+it('blocks proposal submission for unrelated departments even if the hook is called directly', async () => {
+    mocks.role = 'regional_finance_manager';
+    const { result } = renderHook(() => useProductControlProposals(product, 'ET'));
+    await act(async () => { await result.current.saveProfile({ name: 'Changed', brand: '', description: '' }); });
+    expect(mocks.create).not.toHaveBeenCalled();
 });
