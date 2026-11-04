@@ -5,16 +5,13 @@ import { useCallback, useRef } from 'react';
 import { PurchaseOrder, WMSJob, Product, SystemConfig } from '../../types';
 import {
     productsService,
-    wmsJobsService,
-    purchaseOrdersService,
-    systemLogsService
+    purchaseOrdersService
 } from '../../services/supabase.service';
 import { logger } from '../../utils/logger';
 import { convertToSellableUnits } from './useReceiving';
 import { resolveReceivingPolicy, maxReceivable, buildOverReceiveMessage } from '../../utils/receivingPolicy';
 import { findMatchingProduct, resolveSmartPutawayLocation, cleanSku } from './receivingSplitHelpers';
 import { mergeCustomAttributes, extractProductAttributesFromPOItem } from '../../utils/productAttributes';
-import { syncProductAliases } from '../../services/products/product-master.service';
 
 interface UseReceivingSplitDeps {
     orders: PurchaseOrder[];
@@ -141,7 +138,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         throw err;
                     }
                 }
-                // 2. Handle Existing Product - Update Barcodes and Attributes if needed
+                // 2. Resolve the existing product without mutating its catalog record
                 else if (variant.productId || itemId) {
                     const prodId = variant.productId || item.productId;
                     const prodSku = variant.sku || item.sku;
@@ -165,84 +162,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         targetProductId = localProduct.id;
                         productSku = localProduct.sku;
 
-                        const updates: any = {};
-                        
-                        // Sync PO line item details if they are missing or updated
-                        if (!localProduct.size && poAttrs.size) updates.size = poAttrs.size;
-                        if (!localProduct.brand && poAttrs.brand) updates.brand = poAttrs.brand;
-                        if (!localProduct.unit && poAttrs.unit) updates.unit = poAttrs.unit;
-                        if (!localProduct.category && poAttrs.category) updates.category = poAttrs.category;
-                        if (!localProduct.image && poAttrs.image) updates.image = poAttrs.image;
-                        if ((!localProduct.packQuantity || localProduct.packQuantity === 1) && poAttrs.packQuantity > 1) updates.packQuantity = poAttrs.packQuantity;
-                        if (!localProduct.packageType && poAttrs.packageType) updates.packageType = poAttrs.packageType;
-                        if (!localProduct.caseSize && poAttrs.caseSize) updates.caseSize = poAttrs.caseSize;
-                        if (!localProduct.description && poAttrs.description) updates.description = poAttrs.description;
-                        if (!localProduct.minStock && poAttrs.minStock) updates.minStock = poAttrs.minStock;
-                        if (!localProduct.maxStock && poAttrs.maxStock) updates.maxStock = poAttrs.maxStock;
-                        if (poAttrs.customAttributes) {
-                            const mergedAttrs = mergeCustomAttributes(localProduct.customAttributes, poAttrs.customAttributes);
-                            if (JSON.stringify(mergedAttrs) !== JSON.stringify(localProduct.customAttributes)) updates.customAttributes = mergedAttrs;
-                        }
-                        if (policy.poPriceApplyAt === 'receive' && item.retailPrice && item.retailPrice > 0 && item.retailPrice !== localProduct.price) {
-                            updates.price = item.retailPrice;
-                            updates.priceUpdatedAt = new Date().toISOString();
-                            if (targetSiteId && item.sku) {
-                                productsService.updatePriceBySku(item.sku, targetSiteId, item.retailPrice).catch(e => {
-                                    logger.warn('useReceivingSplit', `Failed to sync price across SKU ${item.sku}`, e);
-                                });
-                            }
-                        }
-                        if ((!localProduct.costPrice || localProduct.costPrice === 0) && item.unitCost) {
-                            const unitsPerOrderUnit = convertToSellableUnits(1, item);
-                            updates.costPrice = unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : item.unitCost;
-                        }
-                        // Receipt lot identity belongs on the new putaway line, never on existing stock.
-
-                        const currentBarcodes = Array.isArray(localProduct.barcodes) 
-                            ? [...localProduct.barcodes] 
-                            : [];
-                        let changed = false;
-
-                        // Check if variant.barcode is new and needs to be registered
-                        if (variant.barcode) {
-                            const cleanBarcode = variant.barcode.trim();
-                            if (!localProduct.barcode) {
-                                updates.barcode = cleanBarcode;
-                                changed = true;
-                            } else if (localProduct.barcode !== cleanBarcode && !currentBarcodes.includes(cleanBarcode)) {
-                                currentBarcodes.push(cleanBarcode);
-                                changed = true;
-                            }
-                        }
-
-                        // Check if variant.barcodes has any new aliases
-                        if (variant.barcodes && variant.barcodes.length > 0) {
-                            const existingBarcode = localProduct.barcode;
-                            variant.barcodes.forEach(b => {
-                                const cleanB = b.trim();
-                                if (cleanB !== existingBarcode && !currentBarcodes.includes(cleanB)) {
-                                    currentBarcodes.push(cleanB);
-                                    changed = true;
-                                }
-                            });
-                        }
-
-                        if (changed || Object.keys(updates).length > 0) {
-                            if (changed) {
-                                updates.barcodes = currentBarcodes;
-                                const rSku = cleanSku(prodSku || variant.sku || item.sku || '');
-                                if (rSku) syncProductAliases(rSku, targetSiteId, currentBarcodes).catch(() => {});
-                            }
-                            try {
-                                const updated = await productsService.update(targetProductId, updates);
-                                if (updated) {
-                                    setProducts?.(prev => prev.map(p => p.id === targetProductId ? updated : p));
-                                    setAllProducts?.(prev => prev.map(p => p.id === targetProductId ? updated : p));
-                                }
-                            } catch (err) {
-                                logger.warn('useReceivingSplit', 'Could not sync product details in DB during receive split', { error: err instanceof Error ? err.message : JSON.stringify(err) });
-                            }
-                        }
+                        // Receiving records incoming identity and PO attributes on the new lot.
+                        // Catalog changes remain in the supervised product/merchandising workflows.
                     } else {
                         // Create product placeholder record in DB
                         const candidateSku = cleanSku(globalProduct?.sku || prodSku || variant.sku || item.sku || '');
@@ -335,6 +256,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         status: 'Pending',
                         // Advanced fields
                         barcode: primaryBarcode,
+                        barcodes: variant.barcodes,
                         expiryDate: variant.expiryDate,
                         batchNumber: variant.batchNumber,
                         condition: (variant.condition || 'Good') as any,

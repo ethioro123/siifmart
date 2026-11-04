@@ -18,6 +18,7 @@ export interface JobItem {
   unit?: string;
   containerId?: string;
   barcode?: string;
+  barcodes?: string[]; // Observed receipt aliases; does not activate catalog mappings.
   startedAt?: string;
   started_at?: string;
   location?: string;
