@@ -60,7 +60,7 @@ export const warehouseZonesService = {
             }));
         } catch (err) {
             logger.error('warehouseZonesService', 'Critical error in getAll', err as Error);
-            return []; // Fail gracefully with empty array
+            throw err; // A failed request is not an empty configured layout.
         }
     },
 

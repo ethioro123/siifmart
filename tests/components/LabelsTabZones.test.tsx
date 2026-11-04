@@ -26,3 +26,13 @@ it('shows the facility prompt while country switching has no active site',()=>{
  state.value={filteredProducts:[],activeSite:null};render(<LabelsTab/>);
  expect(screen.getByText('Select a facility to prepare labels.')).toBeTruthy();
 });
+it('distinguishes a failed zone fetch from an unconfigured facility and offers retry',()=>{
+ const retry=vi.fn();
+ state.value={filteredProducts:[],zones:[],zonesError:true,refreshJobs:retry,activeSite:{id:'wh',code:'ADA-WH-01',country:'ET'}};
+ render(<LabelsTab/>);
+ fireEvent.click(screen.getAllByRole('button',{name:'Bays'})[0]);
+ expect(screen.getByText('The saved facility layout could not be loaded. Retry loading the zones.')).toBeTruthy();
+ expect(screen.queryByText('No configured zones are available at this facility. Configure the warehouse layout before printing bay labels.')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Retry'}));
+ expect(retry).toHaveBeenCalledOnce();
+});

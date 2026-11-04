@@ -3,6 +3,8 @@ import { TranslationBlock } from '../types';
 
 export const labels: any = {
     ...categoryRouting,
+    zoneLayoutLoading: { en: 'Loading the saved facility layout…', am: 'የተቀመጠውን የቦታ አቀማመጥ በመጫን ላይ…', or: 'Teessuma kuufame feʼaa jira…' },
+    zoneLayoutLoadFailed: { en: 'The saved facility layout could not be loaded. Retry loading the zones.', am: 'የተቀመጠውን የቦታ አቀማመጥ መጫን አልተቻለም። ዞኖቹን እንደገና ይጫኑ።', or: 'Teessumni kuufame feʼamuu hin dandeenye. Zoonii feʼuuf irra deebiʼii yaali.' },
     // Leaf translation for the key "labels" itself (e.g. t('warehouse.labels'))
     en: 'Labels',
     am: 'መለያዎች',

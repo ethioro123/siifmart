@@ -1,3 +1,4 @@
+import { useFacilityZones } from '../../hooks/useFacilityZones';
 import {getFulfillmentTransferPage} from '../../services/fulfillment-transfer-queue.service';
 import {useFulfillmentQueuePaging,fulfillmentQueueWorker} from '../../hooks/useFulfillmentQueuePaging';
 import { useScopedJobHistory } from '../../hooks/useScopedJobHistory';
@@ -12,7 +13,6 @@ import {
     wmsJobsService,
     transfersService,
     jobAssignmentsService,
-    warehouseZonesService,
     barcodeApprovalsService,
     productsService,
     purchaseOrdersService,
@@ -48,6 +48,8 @@ interface FulfillmentDataContextType {
     transfers: TransferRecord[];
     jobAssignments: JobAssignment[];
     zones: WarehouseZone[];
+    zonesLoading: boolean;
+    zonesError: boolean;
     barcodeApprovals: BarcodeApproval[];
     assignJob: (jobId: string, employeeIdOrName: string) => Promise<void>;
     unassignJob: (jobId: string) => Promise<void>;
@@ -108,9 +110,10 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     const {historicalJobs,loadHistoricalJobs,historyError,historyLoading,historyHasMore,loadMoreHistory}=history;
     const [transfers, setTransfers] = useState<TransferRecord[]>([]);
     const [jobAssignments, setJobAssignments] = useState<JobAssignment[]>([]);
-    const [zones, setZones] = useState<WarehouseZone[]>([]);
     const [barcodeApprovals, setBarcodeApprovals] = useState<BarcodeApproval[]>([]);
     const [refreshCounter, setRefreshCounter] = useState(0);
+    const zoneQuery = useFacilityZones(activeSiteId, effectiveCountry || settings?.country || '', user?.id, refreshCounter);
+    const zones = zoneQuery.data || [];
     const queueWorker=fulfillmentQueueWorker(user,employees);
     const {initialize,failInitial,loadMoreJobs,queueHasMore,queueLoading,queueError}=useFulfillmentQueuePaging(activeSiteId,effectiveCountry||settings?.country||'',queueWorker,user?.id,setJobs,setJobAssignments,setTransfers);
     const siteFilteredEmployees = useMemo(() => {
@@ -132,7 +135,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             setJobs([]);
             setTransfers([]);
             setJobAssignments([]);
-            setZones([]);
             setBarcodeApprovals([]);
             return;
         }
@@ -147,12 +149,10 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 const [
                     loadedJobs,
                     loadedTransfers,
-                    loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
                     wmsJobsService.getActivePage(activeSiteId, employeeId, activeCountryCode),
                     getFulfillmentTransferPage(activeSiteId,activeCountryCode),
-                    warehouseZonesService.getAll(activeSiteId),
                     barcodeApprovalsService.getAuditLog(targetSiteId, activeCountryCode)
                 ]);
                 if(cancelled)return;
@@ -168,7 +168,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     logger.error('FulfillmentDataProvider', 'Failed to load active job assignments', assignmentError);
                     addNotification('alert', 'Job assignments could not be loaded.');
                 }
-                setZones(loadedZones);
                 setBarcodeApprovals(loadedApprovals);
             } catch (error) {
                 if(cancelled)return;failInitial();
@@ -369,7 +368,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             loadMoreJobs,queueHasMore,queueLoading,queueError,
             transfers,
             jobAssignments,
-            zones,
+            zones, zonesLoading: zoneQuery.isLoading, zonesError: zoneQuery.isError,
             barcodeApprovals,
             assignJob,
             unassignJob,

@@ -50,6 +50,8 @@ export interface FulfillmentContextType {
     relocateProductMutation: any;
     putawayStock: (params: { jobId?: string, itemIndex?: number, sku: string, location: string, quantity: number, siteId: string, type: 'IN' | 'TRANSFER', expiryDate?: string, batchNumber?: string, sourceProductId?: string, timestamp?: string, size?: string, brand?: string, unit?: string, packQuantity?: number, category?: string, retailPrice?: number, customAttributes?: any, description?: string, minStock?: number, maxStock?: number }) => Promise<void>;
     zones: WarehouseZone[];
+    zonesLoading?: boolean;
+    zonesError?: boolean;
 
     // --- Filtered/Computed Data ---
     filteredJobs: WMSJob[];

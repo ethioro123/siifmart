@@ -21,6 +21,7 @@ interface AssignLabelHubProps {
     addNotification: (type: string, message: string) => void;
     t?: (key: string, params?: Record<string, any>) => string;
     zones: WarehouseZone[];
+    zoneLoadState?: 'loading' | 'error' | 'ready';
     onZoneUpdate: () => void;
     user: any;
     activeSite: Site;
@@ -30,6 +31,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     filteredProducts,
     addNotification,
     zones = [],
+    zoneLoadState = 'ready',
     activeSite
 }) => {
     const { t } = useLanguage();
@@ -268,7 +270,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 />
 
                                 {!zoneLetters.length ? (
-                                    <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>
+                                    <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t(zoneLoadState === 'error' ? 'warehouse.zoneLayoutLoadFailed' : zoneLoadState === 'loading' ? 'warehouse.zoneLayoutLoading' : 'warehouse.noConfiguredZonesAvailable')}</p>
                                 ) : (
                                     <div className="flex items-center justify-between p-2.5 px-3 rounded-xl bg-[var(--theme-accent)]/5 border border-[var(--theme-accent)]/20 text-xs">
                                         <div className="flex items-center gap-2">

@@ -27,8 +27,10 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!selectedSiteId) return;
-        warehouseZonesService.getAll(selectedSiteId).then(setSiteZones);
+        let active = true;
+        setSiteZones([]);
+        if (selectedSiteId) void warehouseZonesService.getAll(selectedSiteId).then(zones => { if (active) setSiteZones(zones); }).catch(error => logger.error('WMSSettings', 'Zone layout request failed', error));
+        return () => { active = false; };
     }, [selectedSiteId]);
 
     const handleStrategyChange = async (siteId: string, strategy: FulfillmentStrategy) => {
