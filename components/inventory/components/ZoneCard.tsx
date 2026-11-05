@@ -31,7 +31,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
     return (
         <div
-            className={`p-5 sm:p-6 relative overflow-hidden group border transition-all duration-200 rounded-2xl shadow-xs ${
+            className={`p-3.5 sm:p-6 relative overflow-hidden group border transition-all duration-200 rounded-2xl shadow-xs ${
                 isLockedState
                     ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger)]/5 hover:border-[var(--theme-status-danger-border)]'
                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 hover:shadow-sm'
@@ -172,17 +172,19 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 'assistant_store_manager', 'shift_supervisor', 'inventory_manager',
                 'inventory_controller', 'inventory_specialist', 'dispatch_supervisor'
             ].includes(userRole || '') && (
-                <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex items-center justify-between relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+                <div className="mt-4 sm:mt-5 pt-3.5 sm:pt-4 border-t border-[var(--theme-border)] flex items-center justify-between gap-2 relative z-10 opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity">
                     <button
+                        type="button"
                         onClick={() => onConfigure(zone)}
-                        className="px-3 py-1.5 text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl border border-[var(--theme-border)] transition-all flex items-center gap-1.5 text-[11px] font-semibold uppercase cursor-pointer active:scale-[0.98]"
+                        className="min-h-11 px-3.5 py-2 text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl border border-[var(--theme-border)] transition-all flex items-center gap-1.5 text-xs font-semibold uppercase cursor-pointer active:scale-[0.98] touch-manipulation"
                     >
                         <Settings2 size={14} /> Configure
                     </button>
                     <button
+                        type="button"
                         onClick={() => onDelete(zone)}
                         disabled={zone.assignedProducts.length > 0}
-                        className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-[11px] font-semibold uppercase cursor-pointer active:scale-[0.98] ${
+                        className={`min-h-11 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold uppercase cursor-pointer active:scale-[0.98] touch-manipulation ${
                             zone.assignedProducts.length > 0
                                 ? 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-not-allowed opacity-40'
                                 : 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger)]/10 hover:bg-[var(--theme-status-danger)]/20 border border-[var(--theme-status-danger-border)]'

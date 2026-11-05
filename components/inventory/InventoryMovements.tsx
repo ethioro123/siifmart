@@ -97,21 +97,21 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
     return (
         <div className="space-y-4 animate-in fade-in">
             {/* Controls Toolbar */}
-            <div className="p-3.5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex flex-wrap items-center gap-3">
-                <div className="flex-1 min-w-[280px] relative group">
+            <div className="p-3 sm:p-3.5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <div className="w-full sm:flex-1 sm:min-w-[240px] relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-accent)] transition-colors pointer-events-none" size={15} />
                     <input
                         type="text"
                         value={movementsSearch}
                         onChange={(e) => setMovementsSearch(e.target.value)}
                         placeholder="Search product or ref ID..."
-                        className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-10 pr-9 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all shadow-xs"
+                        className="w-full h-11 sm:h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-10 pr-9 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all shadow-xs"
                     />
                     {movementsSearch && (
                         <button
                             type="button"
                             onClick={() => setMovementsSearch('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] p-0.5 rounded-full transition-colors"
+                            className="min-h-11 min-w-11 absolute right-0 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                             aria-label="Clear search"
                         >
                             <X size={14} />
@@ -119,14 +119,14 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                     )}
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                     {/* Site Filter (HQ/SuperAdmin Only) */}
                     {(isHQView && isSuperAdmin) ? (
                         <select
                             aria-label="Filter Movement Site"
                             value={movementsSiteFilter}
                             onChange={(e) => setMovementsSiteFilter(e.target.value)}
-                            className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
+                            className="min-h-11 sm:h-10 flex-1 sm:flex-initial bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                         >
                             <option value="All">All Sites</option>
                             {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
@@ -135,7 +135,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         </select>
                     ) : (
                         !isHQView && (
-                            <div className="h-10 px-3.5 bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] rounded-xl text-[13px] text-[var(--theme-text-secondary)] font-medium flex items-center shadow-xs">
+                            <div className="min-h-11 sm:h-10 px-3.5 bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] rounded-xl text-[13px] text-[var(--theme-text-secondary)] font-medium flex items-center shadow-xs">
                                 {activeSite?.name || 'Current Site'}
                             </div>
                         )
@@ -146,7 +146,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         aria-label="Filter Movement Type"
                         value={movementsTypeFilter}
                         onChange={(e) => setMovementsTypeFilter(e.target.value)}
-                        className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
+                        className="min-h-11 sm:h-10 flex-1 sm:flex-initial bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                     >
                         <option value="All">All Types</option>
                         <option value="IN">Inbound (Stock In)</option>
@@ -163,7 +163,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             const [key, direction] = e.target.value.split('-');
                             setMovementsSort({ key, direction: direction as 'asc' | 'desc' });
                         }}
-                        className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
+                        className="min-h-11 sm:h-10 flex-1 sm:flex-initial bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -179,7 +179,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                 setMovementsTypeFilter('All');
                                 if (isHQView) setMovementsSiteFilter('All');
                             }}
-                            className="h-10 px-3 text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-xl transition-colors shrink-0 flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer active:scale-[0.98]"
+                            className="min-h-11 sm:h-10 px-3 text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-xl transition-colors shrink-0 flex items-center justify-center gap-1.5 text-[12px] font-semibold cursor-pointer active:scale-[0.98] touch-manipulation"
                             title="Clear All Filters"
                         >
                             <X size={14} />
@@ -191,9 +191,9 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
 
             {/* Table Container */}
             <div className="bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs isolate overflow-hidden">
-                <div className="px-5 py-4 border-b border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-3">
+                <div className="px-4 py-3.5 sm:px-5 sm:py-4 border-b border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
                             <ArrowLeftRight size={15} />
                         </div>
                         <div>
@@ -208,7 +208,72 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                     </div>
                 </div>
 
-                <div className="overflow-x-auto relative min-h-[360px]">
+                {/* Mobile Cards View */}
+                <div className="md:hidden divide-y divide-[var(--theme-border)]">
+                    {movementsLoading && (
+                        <div className="p-8 text-center">
+                            <RefreshCw className="animate-spin mx-auto text-[var(--theme-accent)]" size={24} />
+                        </div>
+                    )}
+                    {!movementsLoading && localMovements.length === 0 && (
+                        <div className="p-8 text-center text-[var(--theme-text-secondary)]">
+                            <ArrowLeftRight size={24} className="mx-auto mb-2 opacity-40" />
+                            <p className="text-sm font-semibold text-[var(--theme-text-primary)]">No stock movements found</p>
+                            <p className="text-xs mt-1">Adjust search or filters</p>
+                        </div>
+                    )}
+                    {!movementsLoading && localMovements.map((move) => {
+                        const prod = allProducts.find(p => p.id === move.productId) || products.find(p => p.id === move.productId);
+                        const unitCode = prod?.unit;
+                        const unitDef = unitCode ? getSellUnit(unitCode) : null;
+                        let displayQty = Math.abs(move.quantity);
+                        const prefix = move.type === 'IN' ? '+' : move.type === 'OUT' ? '-' : '';
+                        const unitLabel = unitDef ? unitDef.shortLabel : 'units';
+
+                        return (
+                            <article key={move.id} className="p-3.5 space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="font-mono text-xs font-semibold text-[var(--theme-text-secondary)]">
+                                        {move.id?.slice(0, 8).toUpperCase()}
+                                    </span>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                                        move.type === 'IN'
+                                            ? 'text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/20 bg-[var(--theme-status-success-bg)]/10'
+                                            : move.type === 'OUT'
+                                            ? 'text-[var(--theme-accent)] border-[var(--theme-border-focus)]/20 bg-[var(--theme-accent)]/10'
+                                            : move.type === 'TRANSFER'
+                                            ? 'text-[var(--theme-chart-4)] border-[var(--theme-chart-4)]/20 bg-[var(--theme-chart-4)]/10'
+                                            : 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/20 bg-[var(--theme-status-warning-bg)]/10'
+                                    }`}>
+                                        {move.type}
+                                    </span>
+                                </div>
+                                <div className="flex items-start justify-between gap-2">
+                                    <h4 className="font-semibold text-sm text-[var(--theme-text-primary)] break-words flex-1">
+                                        {move.productName}
+                                    </h4>
+                                    <span className={`font-mono text-sm font-bold tabular-nums shrink-0 ${
+                                        move.type === 'IN' ? 'text-[var(--theme-status-success-text)]' : move.type === 'OUT' ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'
+                                    }`}>
+                                        {prefix}{displayQty.toLocaleString()} {unitLabel}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] pt-1">
+                                    <span>{move.performedBy || 'System'}</span>
+                                    <span className="font-mono">{formatDateTime(move.date, { showTime: true })}</span>
+                                </div>
+                                {move.reason && (
+                                    <p className="text-xs text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] p-2 rounded-lg">
+                                        {formatMovementReason(move.reason, { orders })}
+                                    </p>
+                                )}
+                            </article>
+                        );
+                    })}
+                </div>
+
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto relative min-h-[360px]">
                     {movementsLoading && (
                         <div className="absolute inset-0 bg-[var(--theme-bg-card)]/60 backdrop-blur-xs flex items-center justify-center z-10 transition-all">
                             <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
@@ -307,7 +372,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="flex flex-wrap gap-3 justify-between items-center px-5 py-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-hover)]/30">
+                <div className="flex flex-col sm:flex-row gap-3 justify-between items-center px-4 py-3.5 sm:px-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-hover)]/30">
                     <div className="text-[12px] font-medium text-[var(--theme-text-secondary)]">
                         Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{localMovements.length}</span> of <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(totalMovementsCount)}</span> records
                     </div>
@@ -316,7 +381,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             type="button"
                             onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
                             disabled={currentMovementsPage === 1 || movementsLoading}
-                            className="h-8 px-3 rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer"
+                            className="min-h-11 sm:h-8 px-3.5 sm:px-3 rounded-xl sm:rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer touch-manipulation"
                         >
                             Previous
                         </button>
@@ -327,7 +392,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             type="button"
                             onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
                             disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
-                            className="h-8 px-3 rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer"
+                            className="min-h-11 sm:h-8 px-3.5 sm:px-3 rounded-xl sm:rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer touch-manipulation"
                         >
                             Next
                         </button>

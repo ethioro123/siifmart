@@ -44,7 +44,7 @@ const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: Metric
     const isSky = color === 'sky';
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs transition-colors group">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-xs transition-colors group">
             <div className="flex justify-between items-start mb-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
                     isRed
@@ -60,7 +60,7 @@ const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: Metric
             </div>
             <div>
                 <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{title}</p>
-                <h3 className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5 tracking-tight">{value}</h3>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5 tracking-tight">{value}</h3>
                 <p className="text-[11px] text-[var(--theme-text-muted)] font-medium mt-0.5">{sub}</p>
             </div>
         </div>
@@ -84,9 +84,9 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
     const hasInventory = categoryData.length > 0 || abcData.some(d => (d.value || 0) > 0);
 
     return (
-        <div className="space-y-6 animate-in fade-in">
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in">
             {/* KPI Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <MetricCard
                     title="Potential Revenue"
                     value={formatCompactNumber(totalInventoryValueRetail, { currency: activeCurrency })}
@@ -118,9 +118,9 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Value by Category */}
-                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
+                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 shadow-xs">
                     <div className="flex items-center gap-2 mb-5">
                         <BarChart3 size={16} className="text-[var(--theme-accent)]" />
                         <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
@@ -169,7 +169,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                 </div>
 
                 {/* ABC Analysis */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <PieIcon size={16} className="text-[var(--theme-accent)]" />

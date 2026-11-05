@@ -149,10 +149,10 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
     return (
         <div className="space-y-0">
             {/* Main Toolbar */}
-            <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] space-y-4 bg-[var(--theme-bg-subtle)]">
+            <div className="p-3.5 sm:p-5 border-b border-[var(--theme-border)] space-y-3 sm:space-y-4 bg-[var(--theme-bg-subtle)]">
                 {/* Top Search & Records Count Row */}
                 <div className="flex items-center gap-3">
-                    <div className="min-h-[48px] min-w-0 flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 flex-1 focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 transition-all shadow-xs group">
+                    <div className="min-h-[44px] sm:min-h-[48px] min-w-0 flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 flex-1 focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 transition-all shadow-xs group">
                         <Search className="w-4 h-4 text-[var(--theme-text-muted)] group-focus-within:text-[var(--theme-accent)] transition-colors shrink-0" />
                         <input
                             type="text"
@@ -180,16 +180,16 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                 </div>
 
                 {/* Quick-Access Filter Presets & Controls */}
-                <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
                     {/* Left: Quick Filter Chips */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide flex-wrap">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar flex-nowrap sm:flex-wrap w-full md:w-auto touch-manipulation">
                         {quickPresets.map(preset => (
                             <button
                                 key={preset.id}
                                 type="button"
                                 aria-pressed={preset.isActive}
                                 onClick={preset.onClick}
-                                className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
+                                className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 active:scale-[0.98] touch-manipulation ${
                                     preset.isActive
                                         ? 'bg-[var(--theme-accent)] text-[var(--theme-btn-primary-text)]'
                                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
@@ -201,10 +201,10 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                     </div>
 
                     {/* Right: Dropdowns & Advanced Toggle */}
-                    <div className="flex items-center gap-2.5 flex-wrap ml-auto">
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap w-full md:w-auto md:ml-auto">
                         {/* Site Filter (If HQ / Read-Only) */}
                         {(!activeSite || isReadOnly) && (
-                            <div className="relative group">
+                            <div className="relative group flex-1 sm:flex-initial min-w-[130px]">
                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <Map size={14} className="text-[var(--theme-accent)] opacity-70 group-hover:opacity-100 transition-opacity" />
                                 </div>
@@ -212,7 +212,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                     value={filters.siteId || 'All'}
                                     aria-label="Filter by Site"
                                     onChange={(e) => setFilters((prev: any) => ({ ...prev, siteId: e.target.value }))}
-                                    className="min-h-[44px] max-w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all max-w-[150px]"
+                                    className="min-h-[44px] w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all sm:max-w-[150px]"
                                 >
                                     <option value="All">All Sites</option>
                                     {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration' && s.type !== 'Administrative').map(s => (
@@ -224,7 +224,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         )}
 
                         {/* Category Dropdown */}
-                        <div className="relative group">
+                        <div className="relative group flex-1 sm:flex-initial min-w-[140px]">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <Package size={14} className="text-[var(--theme-status-success-text)] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
@@ -232,7 +232,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                 value={filters.category || 'All'}
                                 aria-label="Filter by Category"
                                 onChange={(e) => setFilters((prev: any) => ({ ...prev, category: e.target.value }))}
-                                className="min-h-[44px] max-w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all max-w-[160px]"
+                                className="min-h-[44px] w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all sm:max-w-[160px]"
                             >
                                 <option value="All">All Categories</option>
                                 {allCategories.map(cat => (
@@ -243,7 +243,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         </div>
 
                         {/* Sort Selector Dropdown */}
-                        <div className="relative group">
+                        <div className="relative group flex-1 sm:flex-initial min-w-[140px]">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <ArrowUpDown size={14} className="text-[var(--theme-status-warning-text)] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
@@ -254,7 +254,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                     const selected = SORT_OPTIONS.find(opt => opt.value === e.target.value);
                                     if (selected) handleSort(selected.key, selected.direction);
                                 }}
-                                className="min-h-[44px] max-w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all"
+                                className="min-h-[44px] w-full appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all"
                             >
                                 {SORT_OPTIONS.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -267,7 +267,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 border cursor-pointer active:scale-[0.98] ${
+                            className={`min-h-[44px] flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 border cursor-pointer active:scale-[0.98] touch-manipulation flex-1 sm:flex-initial ${
                                 isAdvancedOpen || activeFiltersCount > 0
                                     ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'

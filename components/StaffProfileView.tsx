@@ -106,9 +106,9 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             />
 
             {employee.status === 'Pending Approval' && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <AlertCircle size={18} />
                         </div>
                         <div>
@@ -122,7 +122,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         <button
                             type="button"
                             onClick={handleApprove}
-                            className="h-10 px-4 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="min-h-11 px-4 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <CheckCircle size={15} />
                             <span>Approve Talent</span>

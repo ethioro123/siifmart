@@ -66,11 +66,11 @@ export default function StaffProfileHeader({
                         title={isOnline ? 'Online now' : 'Offline'}
                         className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full border-2 border-[var(--theme-bg-card)] text-[11px] font-semibold flex items-center gap-1 shadow-xs ${
                             isOnline
-                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
-                                : 'bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                         }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[var(--theme-bg-card)] animate-pulse' : 'bg-[var(--theme-bg-card-hover)]'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[var(--theme-status-success)] animate-pulse' : 'bg-[var(--theme-text-muted)]'}`} />
                         <span>{isOnline ? 'Online' : 'Offline'}</span>
                     </div>
 
@@ -103,13 +103,13 @@ export default function StaffProfileHeader({
                         <div className="self-center lg:self-start shrink-0">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
                                 isActive
-                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                     : isPending
-                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
-                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                             }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                    isActive ? 'bg-[var(--theme-status-success-bg)]' : isPending ? 'bg-[var(--theme-status-warning-bg)] animate-pulse' : 'bg-[var(--theme-status-danger-bg)]'
+                                    isActive ? 'bg-[var(--theme-status-success)]' : isPending ? 'bg-[var(--theme-status-warning)] animate-pulse' : 'bg-[var(--theme-status-danger)]'
                                 }`} />
                                 {employee.status}
                             </span>
@@ -121,7 +121,7 @@ export default function StaffProfileHeader({
                         <button
                             type="button"
                             onClick={onIdCard}
-                            className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                            className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                         >
                             <CreditCard size={14} className="text-[var(--theme-text-secondary)]" />
                             <span>ID Card</span>
@@ -143,7 +143,7 @@ export default function StaffProfileHeader({
                                 <button
                                     type="button"
                                     onClick={onMessage}
-                                    className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                    className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                 >
                                     <MessageSquare size={14} className="text-[var(--theme-text-secondary)]" />
                                     <span>Message</span>
@@ -153,7 +153,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onResetPassword}
-                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] hover:bg-[var(--theme-status-warning)]/20 border border-[var(--theme-status-warning-border)] text-xs font-semibold text-[var(--theme-status-warning-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Key size={14} />
                                         <span>Reset</span>
@@ -164,7 +164,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onTerminate}
-                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger)]/20 border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <AlertTriangle size={14} />
                                         <span>Terminate</span>
@@ -175,7 +175,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onDelete}
-                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger)]/20 border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Trash2 size={14} />
                                         <span>Delete</span>

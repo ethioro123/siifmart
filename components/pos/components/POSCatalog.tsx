@@ -215,7 +215,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(prev => Math.max(prev - 1, 1));
                                         native.haptic();
                                     }}
-                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
@@ -231,6 +231,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }
 
                                     for (let p = startPage; p <= endPage; p++) {
+                                        const isAdjacentOrCurrent = Math.abs(p - currentPage) <= 1;
                                         pages.push(
                                             <button
                                                 type="button"
@@ -241,7 +242,9 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     setCurrentPage(p);
                                                     native.haptic();
                                                 }}
-                                                className={`min-w-11 min-h-11 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${currentPage === p
+                                                className={`min-w-11 min-h-11 rounded-xl items-center justify-center font-bold text-xs sm:text-sm border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] touch-manipulation ${
+                                                    isAdjacentOrCurrent ? 'flex' : 'hidden sm:flex'
+                                                } ${currentPage === p
                                                     ? 'bg-[var(--theme-primary)] border-transparent text-[var(--theme-primary-text)] shadow-xs'
                                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                                 }`}

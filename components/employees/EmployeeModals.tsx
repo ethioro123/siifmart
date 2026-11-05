@@ -67,11 +67,11 @@ export default function EmployeeModals({
 
          {/* Image Processing Overlay */}
          {isProcessingImage && (
-            <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] z-[10001] flex items-center justify-center">
-               <div className="bg-cyber-gray border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-8 max-w-sm text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyber-primary border-t-transparent mx-auto mb-4"></div>
+            <div className="fixed inset-0 bg-[var(--theme-overlay)] z-[10001] flex items-center justify-center p-4">
+               <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-8 max-w-sm text-center shadow-[var(--shadow-modal)]">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--theme-accent)] border-t-transparent mx-auto mb-4"></div>
                   <p className="text-[var(--theme-text-primary)] font-bold mb-2">Processing Image</p>
-                  <p className="text-[var(--theme-text-muted)] text-sm">{processingStatus || 'Please wait...'}</p>
+                  <p className="text-[var(--theme-text-secondary)] text-sm">{processingStatus || 'Please wait...'}</p>
                </div>
             </div>
          )}
@@ -83,7 +83,13 @@ export default function EmployeeModals({
          <AddEmployeeWizard isOpen={isAddModalOpen} {...wizardProps} user={user} sites={sites} />
 
          {/* Staff Profile Modal */}
-         <Modal isOpen={!!selectedEmployee} onClose={() => setSelectedEmployee(null)} title="Staff Profile" size="2xl">
+         <Modal
+            isOpen={!!selectedEmployee}
+            onClose={() => setSelectedEmployee(null)}
+            title={selectedEmployee ? `${selectedEmployee.name} · Staff Profile` : 'Staff Profile'}
+            size="3xl"
+            mobileFullScreen={true}
+         >
             {selectedEmployee && (
                <StaffProfileView
                   employee={selectedEmployee}
@@ -96,9 +102,7 @@ export default function EmployeeModals({
 
          {/* ID Card Generator */}
          {idCardEmployee && (
-            <Modal isOpen={!!idCardEmployee} onClose={() => setIdCardEmployee(null)} title="Identity Verification Card" size="xl">
-               <EmployeeIDCard employee={idCardEmployee} onClose={() => setIdCardEmployee(null)} />
-            </Modal>
+            <EmployeeIDCard employee={idCardEmployee} onClose={() => setIdCardEmployee(null)} />
          )}
 
          {/* Termination Confirmation */}

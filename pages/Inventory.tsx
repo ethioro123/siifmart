@@ -316,7 +316,7 @@ export default function Inventory() {
             />
 
             {/* --- CONTENT --- */}
-            <div className="flex-1 px-4 sm:px-6 md:px-8 pb-8 flex flex-col">
+            <div className="flex-1 px-3.5 sm:px-6 md:px-8 pb-24 sm:pb-32 flex flex-col">
                 {activeTab === 'overview' && (
                     <InventoryOverview
                         serverMetrics={serverMetrics || null}

@@ -79,7 +79,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
                         <div
-                            className="bg-[var(--theme-status-success-bg)] h-full rounded-full transition-all duration-500"
+                            className="bg-[var(--theme-status-success)] h-full rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
                         />
                     </div>
@@ -94,7 +94,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Attendance Rate
                         </span>
-                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent-subtle)] text-[var(--theme-accent)] flex items-center justify-center">
                             <CheckCircle2 size={18} />
                         </div>
                     </div>
@@ -106,7 +106,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
                         <div
-                            className="bg-[var(--theme-primary)] h-full rounded-full transition-all duration-500"
+                            className="bg-[var(--theme-accent)] h-full rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(100, Math.max(0, attendance))}%` }}
                         />
                     </div>
@@ -133,7 +133,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
                         <div
-                            className="bg-[var(--theme-status-info-bg)] h-full rounded-full transition-all duration-500"
+                            className="bg-[var(--theme-status-info)] h-full rounded-full transition-all duration-500"
                             style={{ width: `${taskPercent}%` }}
                         />
                     </div>
@@ -149,7 +149,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                 <div className="bg-[var(--theme-bg-card)] p-4 sm:p-7 rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-[var(--theme-border)]">
                         <h4 className="text-base font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
-                            <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-primary)]">
+                            <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)]">
                                 <User size={16} />
                             </div>
                             <span>Personal Information</span>
@@ -250,7 +250,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                 <Building size={14} className="text-[var(--theme-text-muted)]" />
                                 Assigned Workplace
                             </span>
-                            <span className="text-xs font-bold text-[var(--theme-primary)] px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                            <span className="text-xs font-bold text-[var(--theme-accent)] px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                                 {workplace}
                             </span>
                         </div>
@@ -303,14 +303,14 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                     <div>
                         <h4 className="text-base font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
-                            <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-primary)]">
+                            <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)]">
                                 <TrendingUp size={16} />
                             </div>
                             <span>Weekly Shift & Attendance Schedule</span>
                         </h4>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Planned roster shift hours for this week</p>
                     </div>
-                    <span className="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-primary)] self-start sm:self-auto tabular-nums">
+                    <span className="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-accent)] self-start sm:self-auto tabular-nums">
                         {totalScheduledHours} hrs planned
                     </span>
                 </div>
@@ -326,12 +326,12 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     borderRadius: '12px',
                                     color: 'var(--theme-text-primary)',
                                     fontSize: '12px',
-                                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+                                    boxShadow: 'var(--shadow-modal)'
                                 }}
-                                itemStyle={{ color: 'var(--theme-primary)' }}
+                                itemStyle={{ color: 'var(--theme-accent)' }}
                                 cursor={{ fill: 'var(--theme-bg-subtle)' }}
                             />
-                            <Bar dataKey="hours" fill="var(--theme-primary)" radius={[8, 8, 0, 0]} barSize={36} />
+                            <Bar dataKey="hours" fill="var(--theme-accent)" radius={[8, 8, 0, 0]} barSize={36} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

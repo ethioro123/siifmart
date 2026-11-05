@@ -20,7 +20,7 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
     userRole
 }) => {
     return (
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--theme-bg-card)] p-4 sm:p-5 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 bg-[var(--theme-bg-card)] p-3.5 sm:p-5 rounded-2xl border border-[var(--theme-border)] shadow-xs">
             <div className="space-y-1 text-left">
                 <h2 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-2">
                     <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
@@ -32,12 +32,12 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
                     Configure storage bays, cold chain temperature gauges, picking priorities, and operational capacity for this {activeSite?.type || 'facility'}.
                 </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full md:w-auto">
                 {zonesCount === 0 && !isLoading && (
                     <button
                         type="button"
                         onClick={onInitializeDefaults}
-                        className="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] transition-all"
+                        className="min-h-11 flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
                     >
                         <RefreshCw size={14} />
                         <span>Initialize Default Zones</span>
@@ -47,7 +47,7 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
                     <button
                         type="button"
                         onClick={onCreateOpen}
-                        className="px-4 py-2.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-xs"
+                        className="min-h-11 flex-1 sm:flex-initial justify-center px-4 py-2.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-xs touch-manipulation"
                     >
                         <Plus size={14} />
                         <span>Add New Zone</span>

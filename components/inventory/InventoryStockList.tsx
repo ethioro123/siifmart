@@ -122,9 +122,9 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     return (
         <div className="flex min-w-0 flex-col" aria-busy={isLoading}>
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl isolate overflow-hidden shadow-xs">
-                <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] px-4 py-5 sm:px-6">
-                    <div className="min-w-0"><h2 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">Stock list</h2><p className="mt-1 text-sm text-[var(--theme-text-secondary)] break-words">{activeSite?.name || 'Authorized facilities'} · {t('inventory.inventorySummaryHint')}</p></div>
-                    <div className="rounded-xl bg-[var(--theme-bg-subtle)] px-3 py-2 text-sm tabular-nums text-[var(--theme-text-primary)]" role="status">{isLoading ? 'Updating stock…' : t('inventory.matchingProducts', { count: formatCompactNumber(totalCount) })}</div>
+                <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] px-3.5 py-4 sm:px-6 sm:py-5">
+                    <div className="min-w-0"><h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">Stock list</h2><p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-[var(--theme-text-secondary)] break-words">{activeSite?.name || 'Authorized facilities'} · {t('inventory.inventorySummaryHint')}</p></div>
+                    <div className="rounded-xl bg-[var(--theme-bg-subtle)] px-3 py-2 text-xs sm:text-sm tabular-nums text-[var(--theme-text-primary)]" role="status">{isLoading ? 'Updating stock…' : t('inventory.matchingProducts', { count: formatCompactNumber(totalCount) })}</div>
                 </header>
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
