@@ -30,15 +30,15 @@ export const ScannerNavStep: React.FC<ScannerNavStepProps> = ({
     return (
         <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2 sm:space-y-4">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
-                    <MapIcon size={28} className="text-primary sm:hidden" />
-                    <MapIcon size={36} className="text-primary hidden sm:block" />
+                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-[var(--theme-accent-subtle)] rounded-full flex items-center justify-center mx-auto border border-[var(--theme-accent-subtle-border)]">
+                    <MapIcon size={28} className="text-[var(--theme-accent)] sm:hidden" />
+                    <MapIcon size={36} className="text-[var(--theme-accent)] hidden sm:block" />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">
                     {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorage') : t('warehouse.locateItem')}
                 </h1>
                 <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base">
-                    {t('warehouse.goToLocation')}: <span className="text-primary font-mono tabular-nums font-bold text-lg sm:text-xl">{currentProduct?.location || 'Unknown'}</span>
+                    {t('warehouse.goToLocation')}: <span className="text-[var(--theme-accent)] font-mono tabular-nums font-bold text-lg sm:text-xl">{currentProduct?.location || 'Unknown'}</span>
                 </p>
             </div>
 
@@ -66,12 +66,12 @@ export const ScannerNavStep: React.FC<ScannerNavStepProps> = ({
                         if (e.key === 'Enter') handleLocationScan(locationSearch);
                     }}
                     onPaste={scanOnlyHandlers.onPaste}
-                    className="woody-input py-3 sm:py-4 px-4 sm:px-6 text-xl sm:text-2xl font-mono tabular-nums text-center uppercase min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] w-full scroll-mt-20 scroll-mb-20"
+                    className="py-3 sm:py-4 px-4 sm:px-6 text-xl sm:text-2xl font-mono tabular-nums text-center uppercase min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] w-full scroll-mt-20 scroll-mb-20"
                     autoFocus
                 />
                 <button
                     onClick={() => handleLocationScan(locationSearch)}
-                    className="mt-2 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold w-full py-3 sm:py-3.5 text-base rounded-xl hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
+                    className="mt-2 min-h-[44px] bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold w-full py-3 sm:py-3.5 text-base rounded-xl hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer border border-[var(--theme-accent-subtle-border)]"
                 >
                     {t('warehouse.confirmLocation')}
                 </button>

@@ -118,7 +118,7 @@ export function ReviewWorkspace({ site, country, actor, t, onClose, onSaved, rol
             </>}
         </div>
     );
-    return embedded ? content : <Modal isOpen title={t('warehouse.receiptReviewTitle')} onClose={() => { if (!busy) onClose(); }} size="xl" closeOnEscape={!busy} closeOnClickOutside={!busy}>{content}</Modal>;
+    return embedded ? content : <Modal isOpen title={t('warehouse.receiptReviewTitle')} onClose={() => { if (!busy) onClose(); }} size="xl" mobileFullScreen closeOnEscape={!busy} closeOnClickOutside={!busy}>{content}</Modal>;
 }
 export function ReceiptEvidence({ value, t }: { value: ReceiptDetail; t: (key: string) => string }) {
     return <section className="space-y-3">

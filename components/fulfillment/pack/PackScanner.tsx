@@ -238,7 +238,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         <button
                             onClick={onClose}
-                            className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-xl hover:bg-[var(--theme-bg-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                            className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-xl hover:bg-[var(--theme-bg-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 touch-manipulation cursor-pointer"
                             aria-label={t('warehouse.dismiss')}
                         >
                             <X size={22} />
@@ -269,7 +269,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             }}
                             title={t('warehouse.toggleFullscreen') || 'Toggle Fullscreen'}
                             aria-label={t('warehouse.toggleFullscreen') || 'Toggle Fullscreen'}
-                            className="hidden sm:flex p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] items-center justify-center"
+                            className="hidden sm:flex p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] items-center justify-center touch-manipulation cursor-pointer"
                         >
                             <Maximize2 size={18} />
                         </button>
@@ -447,7 +447,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     type="button"
                                     onClick={handleResetToScan}
                                     disabled={isProcessing || isSubmitting}
-                                    className="px-3.5 py-3.5 min-h-[52px] sm:min-h-[56px] rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shrink-0 transition-transform active:scale-[0.98]"
+                                    className="px-3.5 py-3.5 min-h-[52px] sm:min-h-[56px] rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shrink-0 transition-transform active:scale-[0.98] touch-manipulation cursor-pointer"
                                 >
                                     <ArrowLeft size={16} />
                                     <span className="hidden xs:inline">{t('warehouse.packing.rescan') || 'Rescan'}</span>
@@ -458,16 +458,16 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                 type={isFullyPacked ? 'button' : 'submit'}
                                 onClick={isFullyPacked ? onCompleteJob : undefined}
                                 disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting || showSuccess}
-                                className={`flex-1 py-3.5 px-3 min-h-[52px] sm:min-h-[56px] rounded-2xl flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-xs border relative z-30 font-bold text-sm md:text-base uppercase tracking-wider ${
+                                className={`flex-1 py-3.5 px-3 min-h-[52px] sm:min-h-[56px] rounded-2xl flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-xs border relative z-30 font-bold text-sm md:text-base uppercase tracking-wider touch-manipulation cursor-pointer ${
                                     isProcessing || isSubmitting
                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
                                         : isFullyPacked
                                             ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)]'
                                             : step === 'CONFIRM_QTY'
-                                                ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
+                                                ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]'
                                                 : !inputVal.trim()
                                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
-                                                    : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
+                                                    : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]'
                                 }`}
                             >
                                 {isProcessing || isSubmitting ? (

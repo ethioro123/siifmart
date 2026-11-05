@@ -230,7 +230,7 @@ export function DiscrepancyResolutionModal({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Resolve Discrepancy">
+        <Modal isOpen={isOpen} onClose={onClose} title="Resolve Discrepancy" mobileFullScreen>
             <div className="space-y-6">
                 {/* Header Info */}
                 <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-2xl flex items-center justify-between border border-[var(--theme-border)]">

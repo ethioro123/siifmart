@@ -69,19 +69,20 @@ export const evaluateCandidateHiringRoute = async (params: {
     const role = params.role;
     const proposedSalary = Number(params.offeredSalary) || 0;
 
-    let approvedQuota = 10;
+    let approvedQuota = 0;
     let maxSalary: number | undefined = undefined;
     let currentActive = 0;
     let countryBuffer = 10;
 
     try {
-        const { data: quotaRecord } = await supabase
+        const { data: quotaRecord, error: quotaError } = await supabase
             .from('facility_headcount_quotas')
             .select('approved_quota, max_monthly_salary')
             .eq('site_id', siteId)
             .eq('role', role)
             .maybeSingle();
 
+        if (quotaError) throw quotaError;
         if (quotaRecord) {
             approvedQuota = Number(quotaRecord.approved_quota);
             if (quotaRecord.max_monthly_salary !== null) {
@@ -89,36 +90,39 @@ export const evaluateCandidateHiringRoute = async (params: {
             }
         }
 
-        const { count } = await supabase
+        const { count, error: countError } = await supabase
             .from('employees')
             .select('id', { count: 'exact', head: true })
             .eq('site_id', siteId)
             .eq('role', role)
             .eq('status', 'Active');
 
+        if (countError) throw countError;
         currentActive = count || 0;
 
-        const { data: limitRecord } = await supabase
+        const { data: limitRecord, error: limitError } = await supabase
             .from('country_governance_limits')
             .select('headcount_country_buffer')
             .eq('country_code', country)
             .maybeSingle();
 
-        if (limitRecord?.headcount_country_buffer) {
+        if (limitError) throw limitError;
+        if (limitRecord?.headcount_country_buffer !== undefined && limitRecord?.headcount_country_buffer !== null) {
             countryBuffer = Number(limitRecord.headcount_country_buffer);
         }
     } catch (e) {
-        logger.warn('recruitmentDelegation', 'Failed to evaluate live limits, using defaults', { error: String(e) });
+        logger.warn('recruitmentDelegation', 'Hiring limits could not be loaded', { error: String(e) });
+        throw e;
     }
 
     const isQuotaFull = currentActive >= approvedQuota || maxSalary === undefined;
-    const isSalaryExcess = Boolean(maxSalary && proposedSalary > maxSalary);
+    const isSalaryExcess = maxSalary !== undefined && proposedSalary > maxSalary;
     const isException = isQuotaFull || isSalaryExcess;
     const openSlots = Math.max(0, approvedQuota - currentActive);
     const quotaOverage = isQuotaFull ? (currentActive + 1 - approvedQuota) : 0;
     const exceedsCountryBuffer = quotaOverage > countryBuffer;
 
-    const requiredSteps: CandidateHiringRoute['requiredSteps'] = ['HR_CLEARANCE'];
+    const requiredSteps: CandidateHiringRoute['requiredSteps'] = ['HR_CLEARANCE', 'HIRING_MANAGER_CONFIRM'];
     let reason = 'Routine hiring within pre-approved site headcount quota and standard compensation band.';
 
     if (isException) {
@@ -132,8 +136,6 @@ export const evaluateCandidateHiringRoute = async (params: {
                 ? `Offered salary (${proposedSalary}) exceeds standard band cap (${maxSalary}). Requires Finance clearance and Country MD approval.`
                 : `Facility headcount quota full (${currentActive}/${approvedQuota}). Requires Finance clearance and Country MD approval within national buffer.`;
         }
-    } else {
-        requiredSteps.push('HIRING_MANAGER_CONFIRM');
     }
 
     return {

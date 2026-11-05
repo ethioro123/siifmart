@@ -150,6 +150,7 @@ export const recruitmentService = {
         email: string;
         phone: string;
         resume_url?: string;
+        offered_salary?: number;
     }): Promise<JobCandidate> {
         const country = (data.country_code || 'ET').toUpperCase();
         const now = new Date().toISOString();
@@ -165,8 +166,9 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        const { error } = await supabase.from('job_candidates').insert([newCandidate]);
+        const { data: saved, error } = await supabase.from('job_candidates').insert([newCandidate]).select('id').single();
         if (error) throw new Error(`Failed to save candidate: ${error.message}`);
+        if (saved?.id !== newCandidate.id) throw new Error('Candidate enrollment was not confirmed');
         saveLocalCands([newCandidate]);
         return newCandidate;
     },

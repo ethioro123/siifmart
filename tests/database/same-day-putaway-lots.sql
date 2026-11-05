@@ -17,10 +17,12 @@ BEGIN
  INSERT INTO public.po_items(id,po_id,product_id,product_name,sku,quantity,unit_cost,total_cost,received_qty,pack_quantity,case_size) VALUES(item,po,src,'Same day regression',fixture_sku,100,1,100,20,1,1);
  FOR n IN 1..4 LOOP
   job:=gen_random_uuid();ids:=array_append(ids,job);
+  PERFORM set_config('request.jwt.claim.sub',worker.id::text,true);
   INSERT INTO public.wms_jobs(id,site_id,country_code,type,status,priority,order_ref,assigned_to,items_count,line_items)
   VALUES(job,worker.site_id,'ET','PUTAWAY','In-Progress','Normal',po::text,worker.id::text,1,
   jsonb_build_array(jsonb_build_object('productId',src,'sku',fixture_sku,'name','Same day regression','expectedQty',5,'status','Pending','batchNumber','BATCH-'||n,'expiryDate',CASE WHEN n=2 THEN '2031-01-01' ELSE '2030-01-01' END)));
   INSERT INTO public.job_assignments(job_id,employee_id,employee_name) VALUES(job,worker.id,worker.name);
+  PERFORM set_config('request.jwt.claim.sub',receiver::text,true);
   INSERT INTO private.fulfillment_receipts(id,po_id,item_id,employee_id,fingerprint,job_ids,created_at)
   VALUES(gen_random_uuid(),po,item,receiver,'same-day-'||n,ARRAY[job],CASE WHEN n=1 THEN '2026-11-04 21:05+00'::timestamptz WHEN n=2 THEN '2026-11-05 20:55+00'::timestamptz ELSE '2026-11-05 21:05+00'::timestamptz END);
  END LOOP;

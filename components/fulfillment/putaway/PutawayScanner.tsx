@@ -322,7 +322,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <button
                         onClick={onClose}
-                        className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-xl hover:bg-[var(--theme-bg-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                        className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-xl hover:bg-[var(--theme-bg-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 touch-manipulation cursor-pointer"
                         aria-label={t('warehouse.dismiss')}
                     >
                         <X size={20} />

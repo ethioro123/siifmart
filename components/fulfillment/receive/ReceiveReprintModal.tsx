@@ -129,7 +129,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, copies: Math.max(1, (reprintItem.copies ?? 1) - 1) })}
                                     title={t('warehouse.decreaseQuantity')}
-                                    className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
+                                    className="w-11 h-11 min-h-11 min-w-11 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0 touch-manipulation cursor-pointer"
                                 >
                                     <Minus size={16} />
                                 </button>
@@ -146,7 +146,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, copies: Math.min(500, (reprintItem.copies ?? 1) + 1) })}
                                     title={t('warehouse.increaseQuantity')}
-                                    className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
+                                    className="w-11 h-11 min-h-11 min-w-11 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0 touch-manipulation cursor-pointer"
                                 >
                                     <Plus size={16} />
                                 </button>
@@ -166,7 +166,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     key={size}
                                     disabled={labelType !== 'ITEM' && ['TINY', 'SMALL'].includes(size)}
                                     onClick={() => setReprintSize(size)}
-                                    className={`py-2.5 min-h-[44px] text-xs font-semibold font-mono rounded-xl border transition-all ${reprintSize === size
+                                    className={`py-2.5 min-h-[44px] text-xs font-semibold font-mono rounded-xl border transition-all touch-manipulation cursor-pointer ${reprintSize === size
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-bold'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
@@ -188,7 +188,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 <button
                                     key={format}
                                     onClick={() => setReprintFormat(format)}
-                                    className={`flex-1 py-2.5 min-h-[44px] flex items-center justify-center gap-2 rounded-xl border font-semibold font-mono text-xs uppercase tracking-wide transition-all ${reprintFormat === format
+                                    className={`flex-1 py-2.5 min-h-[44px] flex items-center justify-center gap-2 rounded-xl border font-semibold font-mono text-xs uppercase tracking-wide transition-all touch-manipulation cursor-pointer ${reprintFormat === format
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-bold'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
@@ -213,7 +213,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     key={opt}
                                     disabled={opt === 'showPrice' && printPriceTagAt !== 'receive'}
                                     onClick={() => toggleOption(opt)}
-                                    className={`flex items-center justify-between px-4 py-2.5 min-h-[44px] rounded-xl border transition-all ${reprintOptions[opt]
+                                    className={`flex items-center justify-between px-4 py-2.5 min-h-[44px] rounded-xl border transition-all touch-manipulation cursor-pointer ${reprintOptions[opt]
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-semibold'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
@@ -257,7 +257,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}
-                        className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-[var(--theme-text-primary)] font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+                        className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent-subtle-border)] active:scale-95 text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 touch-manipulation cursor-pointer"
                     >
                         {isSubmitting ? (
                             <RefreshCw className="animate-spin" size={18} />

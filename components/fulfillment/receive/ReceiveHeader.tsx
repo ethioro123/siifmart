@@ -98,17 +98,17 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.searchReceivePlaceholder') || 'Scan barcode / SKU, or search PO, supplier...'}
                             autoComplete="off"
-                            className="w-full h-9 sm:h-12 pl-9 sm:pl-12 pr-8 sm:pr-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-lg sm:rounded-xl text-[var(--theme-text-primary)] font-medium text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60 scroll-mt-20 scroll-mb-20"
+                            className="w-full min-h-11 sm:min-h-12 pl-9 sm:pl-12 pr-10 sm:pr-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl text-[var(--theme-text-primary)] font-medium text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60 scroll-mt-20 scroll-mb-20"
                         />
                         {receiveSearch && (
                             <button
                                 type="button"
                                 onClick={() => setReceiveSearch('')}
-                                className="absolute inset-y-0 right-2 flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer p-1"
+                                className="absolute inset-y-0 right-1 flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer p-1 min-h-[44px] min-w-[44px] touch-manipulation"
                                 title={t('warehouse.clearSearch') || 'Clear search'}
                                 aria-label={t('warehouse.clearSearch') || 'Clear search'}
                             >
-                                <X size={14} />
+                                <X size={16} />
                             </button>
                         )}
                     </div>
@@ -116,7 +116,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !receiveSearch.trim()}
-                        className="h-9 sm:h-12 px-3 sm:px-6 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs tracking-wide rounded-lg sm:rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 shrink-0 touch-manipulation cursor-pointer shadow-xs min-w-[70px] sm:min-w-[90px]"
+                        className="min-h-11 sm:min-h-12 px-3 sm:px-6 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs tracking-wide rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 shrink-0 touch-manipulation cursor-pointer shadow-xs min-w-[70px] sm:min-w-[90px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={14} className="animate-spin" />
@@ -149,8 +149,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         <div className="flex items-center gap-1.5 min-w-0">
                             <Truck size={13} className="text-[var(--theme-accent)] shrink-0 sm:hidden" />
                             <span className="text-xs font-bold text-[var(--theme-text-primary)] md:hidden">{t('warehouse.queueShort') || 'Queue'}</span>
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-text)]" />
                                 {filteredReceiveOrders.length}
                             </span>
                         </div>
@@ -175,7 +175,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         <button
                             type="button"
                             onClick={() => setViewMode('Process')}
-                            className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-[28px] sm:min-h-[32px] flex items-center justify-center ${
+                            className={`px-3 sm:px-3.5 py-1.5 rounded-md sm:rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-11 sm:min-h-8 flex items-center justify-center touch-manipulation ${
                                 viewMode === 'Process'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -186,7 +186,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         <button
                             type="button"
                             onClick={() => setViewMode('History')}
-                            className={`px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-[28px] sm:min-h-[32px] flex items-center justify-center ${
+                            className={`px-3 sm:px-3.5 py-1.5 rounded-md sm:rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-11 sm:min-h-8 flex items-center justify-center touch-manipulation ${
                                 viewMode === 'History'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'

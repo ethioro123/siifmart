@@ -28,6 +28,7 @@ DO $$ DECLARE saved jsonb; product uuid; retry uuid; BEGIN
  saved:=public.apply_inventory_stock_request(current_setting('test.stock.request')::uuid);ASSERT saved->>'saved'='true';PERFORM public.apply_inventory_stock_request(current_setting('test.stock.request')::uuid);
  ASSERT (SELECT stock FROM public.products WHERE id=current_setting('test.stock.product')::uuid)=13,'Approved adjustment retry duplicated stock';
  product:=public.apply_inventory_catalog_request(current_setting('test.stock.catalog')::uuid);retry:=public.apply_inventory_catalog_request(current_setting('test.stock.catalog')::uuid);ASSERT product=retry;
+ ASSERT coalesce(current_setting('siifmart.stock_command',true),'')='' AND coalesce(current_setting('siifmart.inventory_adjustment',true),'')='','Command authority leaked after return';
  ASSERT EXISTS(SELECT 1 FROM public.products WHERE id=product AND stock=0 AND price=500 AND approval_status='approved'),'Reviewed catalog identity or zero physical stock lost';
  ASSERT (SELECT count(*) FROM public.wms_jobs WHERE order_ref='CATALOG-'||current_setting('test.stock.catalog') AND type='PUTAWAY')=1,'Initial stock handoff missing or duplicated';
 END $$;

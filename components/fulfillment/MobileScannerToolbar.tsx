@@ -111,7 +111,7 @@ export default function MobileScannerToolbar({
             <div className="flex items-center justify-between bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl px-3 py-2 shadow-sm overflow-hidden">
                 {/* Left: Icon + Name + Location */}
                 <div className="flex items-center gap-2.5 min-w-0 flex-shrink">
-                    <div className="w-8 h-8 min-w-[32px] rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <div className="w-8 h-8 min-w-[32px] rounded-xl bg-[var(--theme-accent-subtle)] border border-[var(--theme-accent-subtle-border)] flex items-center justify-center text-[var(--theme-accent)]">
                         {tabIcon}
                     </div>
                     <div className="min-w-0">
@@ -144,9 +144,9 @@ export default function MobileScannerToolbar({
                                         key={sv.id}
                                         type="button"
                                         onClick={() => onSubViewChange?.(sv.id)}
-                                        className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 touch-manipulation cursor-pointer ${
+                                        className={`px-3 py-1.5 min-h-11 sm:min-h-9 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 touch-manipulation cursor-pointer ${
                                             isActive
-                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] shadow-sm border border-[var(--theme-accent-subtle-border)]'
                                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
@@ -154,7 +154,7 @@ export default function MobileScannerToolbar({
                                         <span>{sv.label}</span>
                                         {sv.count !== undefined && (
                                             <span className={`px-1.5 py-0.2 rounded-full text-[11px] font-mono tabular-nums ${
-                                                isActive ? 'bg-[var(--theme-primary-text)]/15 text-[var(--theme-primary-text)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
+                                                isActive ? 'bg-[var(--theme-accent-text,var(--theme-text-primary))]/15 text-[var(--theme-accent-text,var(--theme-text-primary))]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
                                             }`}>
                                                 {sv.count}
                                             </span>
@@ -175,14 +175,14 @@ export default function MobileScannerToolbar({
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-xl border flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                                 isMenuOpen || activeFilterCount > 0
-                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
+                                    ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] border-[var(--theme-accent-subtle-border)] shadow-sm'
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                             }`}
                             aria-label="Toggle filters and options"
                         >
                             <SlidersHorizontal size={14} />
                             {activeFilterCount > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-[var(--theme-primary-text)] text-[var(--theme-primary)] text-[11px] font-bold flex items-center justify-center">
+                                <span className="w-4 h-4 rounded-full bg-[var(--theme-accent-text,var(--theme-text-primary))] text-[var(--theme-accent)] text-[11px] font-bold flex items-center justify-center">
                                     {activeFilterCount}
                                 </span>
                             )}
@@ -219,7 +219,7 @@ export default function MobileScannerToolbar({
                         <button
                             type="button"
                             onClick={() => onSearchChange('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] min-h-[38px] min-w-[38px] flex items-center justify-center touch-manipulation"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
                         >
                             <X size={14} />
                         </button>
@@ -274,8 +274,8 @@ export default function MobileScannerToolbar({
                                             key={i}
                                             type="button"
                                             onClick={() => f.onClick()}
-                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${f.isActive
-                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border border-[var(--theme-primary)] shadow-sm'
+                                            className={`px-3.5 py-2 min-h-11 sm:min-h-9 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${f.isActive
+                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] border border-[var(--theme-accent-subtle-border)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >
@@ -296,8 +296,8 @@ export default function MobileScannerToolbar({
                                             key={opt.id}
                                             type="button"
                                             onClick={() => onSortChange?.(opt.id)}
-                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${sortValue === opt.id
-                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border border-[var(--theme-primary)] shadow-sm'
+                                            className={`px-3.5 py-2 min-h-11 sm:min-h-9 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${sortValue === opt.id
+                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] border border-[var(--theme-accent-subtle-border)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >

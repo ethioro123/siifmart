@@ -73,7 +73,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation cursor-pointer"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -177,7 +177,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                 <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row gap-3 justify-end shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors order-2 md:order-1"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors order-2 md:order-1 touch-manipulation cursor-pointer"
                         disabled={isSubmitting}
                     >
                         {t('warehouse.dismiss')}
@@ -185,7 +185,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent-subtle-border)] active:scale-95 text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation cursor-pointer"
                     >
                         {isSubmitting ? (
                             <>

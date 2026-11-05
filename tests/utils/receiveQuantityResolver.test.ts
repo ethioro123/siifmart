@@ -124,3 +124,9 @@ describe('receiveQuantityResolver', () => {
         expect(progress.isComplete).toBe(true);
     });
 });
+
+it('uses saved completion evidence for hidden quantities instead of treating zero as complete', () => {
+ const maps=buildPOJobsReceivedMap([]);
+ expect(resolvePOLineItemProgress({quantity:0,quantityHidden:true,receiptComplete:false},maps,[]).isComplete).toBe(false);
+ expect(resolvePOLineItemProgress({quantity:0,quantityHidden:true,receiptComplete:true},maps,[]).isComplete).toBe(true);
+});

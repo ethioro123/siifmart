@@ -36,7 +36,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {myScannerJobs.length === 0 ? (
                     <div className="text-center text-[var(--theme-text-muted)] mt-20">
-                        <Package size={48} className="mx-auto mb-4 opacity-50 text-primary" />
+                        <Package size={48} className="mx-auto mb-4 opacity-50 text-[var(--theme-accent)]" />
                         <p className="text-sm font-medium">{t('warehouse.noJobsAvailable')}</p>
                     </div>
                 ) : (
@@ -52,7 +52,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
                             <div className="flex justify-between items-start mb-2">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 font-semibold text-[11px] uppercase">
+                                        <span className="px-2 py-0.5 rounded-md bg-[var(--theme-accent-subtle)] text-[var(--theme-accent)] border border-[var(--theme-accent-subtle-border)] font-semibold text-[11px] uppercase">
                                             {job.type}
                                         </span>
                                         <span className="text-[var(--theme-text-primary)] font-mono tabular-nums font-bold text-base">{formatJobId(job)}</span>
@@ -60,7 +60,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
                                     <p className="text-xs text-[var(--theme-text-muted)] mt-1">To: {job.assignedTo || 'Unassigned'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' : 'bg-primary/10 text-primary border-primary/20'} `}>
+                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-accent-subtle)] text-[var(--theme-accent)] border-[var(--theme-accent-subtle-border)]'} `}>
                                         {job.priority}
                                     </span>
                                     <div className="mt-2 text-[var(--theme-text-muted)] text-xs font-mono tabular-nums">
@@ -70,7 +70,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
                             </div>
                             <div className="mt-2 pt-2 border-t border-[var(--theme-border)] flex justify-between items-center">
                                 <span className="text-xs text-[var(--theme-text-secondary)]">{job.sourceSiteId ? `From: ${sites.find(s => s.id === job.sourceSiteId)?.name} ` : ''}</span>
-                                <ChevronRight size={16} className="text-[var(--theme-text-muted)] group-hover:text-primary transition-colors" />
+                                <ChevronRight size={16} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-accent)] transition-colors" />
                             </div>
                         </div>
                     ))

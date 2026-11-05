@@ -118,7 +118,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
             </div>
 
             <div className="flex justify-center gap-3 sm:gap-4">
-                <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-primary/20 text-primary bg-primary/10" />
+                <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-[var(--theme-accent-subtle-border)] text-[var(--theme-accent)] bg-[var(--theme-accent-subtle)]" />
                 <MetricBadge label="Stock" value={currentProduct?.stock || 0} color="border-[var(--theme-border)] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]" />
             </div>
 
@@ -133,8 +133,8 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                         icon={<MapPin size={14} />}
                     />
                     <div className="flex items-center gap-2">
-                        <Scan className="text-primary" size={16} />
-                        <p className="text-xs text-primary uppercase font-semibold">{t('warehouse.scanProductBarcode')}</p>
+                        <Scan className="text-[var(--theme-accent)]" size={16} />
+                        <p className="text-xs text-[var(--theme-accent)] uppercase font-semibold">{t('warehouse.scanProductBarcode')}</p>
                     </div>
                     <input
                         ref={itemInputRef}
@@ -153,13 +153,13 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                             if (e.key === 'Enter') handleInitialBarcodeSubmit();
                         }}
                         onPaste={scanOnlyItemHandlers.onPaste}
-                        className="woody-input font-mono text-base text-center min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] w-full scroll-mt-20 scroll-mb-20"
+                        className="font-mono text-base text-center min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] w-full scroll-mt-20 scroll-mb-20"
                         autoFocus
                     />
                     <button
                         disabled={isProcessingScan || !scannedItem.trim()}
                         onClick={handleInitialBarcodeSubmit}
-                        className="w-full mt-3 sm:mt-4 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3 sm:py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
+                        className="w-full mt-3 sm:mt-4 min-h-[44px] bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold py-3 sm:py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer border border-[var(--theme-accent-subtle-border)]"
                     >
                         {isProcessingScan ? <RefreshCw className="animate-spin" size={18} /> : <CheckCircle size={18} />}
                         {t('warehouse.confirm')}
@@ -178,7 +178,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsVerifyingQty(false)}
-                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 min-h-[38px] touch-manipulation cursor-pointer"
+                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 min-h-11 sm:min-h-9 px-2 touch-manipulation cursor-pointer"
                         >
                             <ArrowLeft size={14} /> Re-scan
                         </button>
@@ -218,20 +218,20 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') handleConfirmQuantity();
                                 }}
-                                className="w-24 h-12 text-center text-xl font-mono tabular-nums font-bold rounded-xl bg-[var(--theme-bg-app)] border border-primary text-[var(--theme-text-primary)] focus:outline-none scroll-mt-20 scroll-mb-20"
+                                className="w-24 h-12 text-center text-xl font-mono tabular-nums font-bold rounded-xl bg-[var(--theme-bg-app)] border border-[var(--theme-accent)] text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] scroll-mt-20 scroll-mb-20"
                                 autoFocus
                             />
                             <button
                                 type="button"
                                 onClick={() => setEnteredQty(prev => Math.min(currentItem.expectedQty, prev + 1))}
-                                className="w-12 h-12 min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] active:scale-95 text-lg font-bold touch-manipulation"
+                                className="w-12 h-12 min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] active:scale-95 text-lg font-bold touch-manipulation cursor-pointer"
                             >
                                 <Plus size={18} />
                             </button>
                         </div>
 
                         {enteredQty < currentItem.expectedQty && (
-                            <div className="mt-3 p-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center justify-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-semibold">
+                            <div className="mt-3 p-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center justify-center gap-2 text-[var(--theme-status-warning-text)] text-xs font-semibold">
                                 <AlertTriangle size={14} />
                                 <span>Short pick: {enteredQty} of {currentItem.expectedQty} units</span>
                             </div>
@@ -245,7 +245,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                     <button
                         disabled={isProcessingScan || enteredQty <= 0}
                         onClick={handleConfirmQuantity}
-                        className="w-full mt-2 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3.5 text-sm uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
+                        className="w-full mt-2 min-h-[44px] bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold py-3.5 text-sm uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer border border-[var(--theme-accent-subtle-border)]"
                     >
                         {isProcessingScan ? <RefreshCw className="animate-spin" size={16} /> : <CheckCircle size={16} />}
                         Confirm Pick of {enteredQty} Units

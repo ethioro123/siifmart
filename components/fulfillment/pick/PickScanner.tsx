@@ -330,7 +330,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         <button
                             onClick={onClose}
-                            className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                            className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 touch-manipulation cursor-pointer"
                             aria-label={t('warehouse.dismiss')}
                         >
                             <X size={20} />
@@ -362,7 +362,15 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 </div>
             </div>
 
-            {onReportDiscrepancy && <button type="button" onClick={onReportDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / reconciliation</button>}
+            {onReportDiscrepancy && (
+                <button
+                    type="button"
+                    onClick={onReportDiscrepancy}
+                    className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors touch-manipulation cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                >
+                    {t('warehouse.picking.physicalDiscrepancyReconciliation') || 'Physical discrepancy / supervisor reconciliation'}
+                </button>
+            )}
             {/* Main View */}
             <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col">
                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center px-2 py-2 sm:p-6 w-full max-w-full">

@@ -232,7 +232,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     }`}>
                                                                         {receivedQty}
                                                                         {(isBlindReceiving || item.quantityHidden) ? (
-                                                                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
+                                                                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
                                                                         ) : (
                                                                             <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                         )}
@@ -247,7 +247,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 }`}>
                                                                     {receivedQty}
                                                                     {(isBlindReceiving || item.quantityHidden) ? (
-                                                                        <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
+                                                                        <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
                                                                     ) : (
                                                                         <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                     )}
@@ -359,7 +359,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             {allItemsReceived && (
                                 <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex flex-col sm:flex-row justify-between items-center gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center shrink-0">
+                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center shrink-0">
                                             <CheckCircle size={18} />
                                         </div>
                                         <div>

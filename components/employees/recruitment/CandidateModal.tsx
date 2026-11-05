@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, UserPlus } from 'lucide-react';
+import { useCandidateEnrollment } from '../../../hooks/useCandidateEnrollment';
 import { recruitmentService } from '../../../services/recruitment.service';
 import type { JobRequisition } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
@@ -23,6 +24,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
     selectedReqId
 }) => {
     const { user, showToast } = useStore();
+    const enrollment = useCandidateEnrollment();
     const { sites, activeSite } = useData();
 
     const allowedRoles = recruitmentService.getAllowedRolesForManager(user?.role || '');
@@ -61,10 +63,12 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
             const finalSiteId = selectedReq ? selectedReq.site_id : (siteId || user?.siteId || 'HQ');
             const finalRole = selectedReq ? selectedReq.role : role;
 
-            await recruitmentService.createCandidate({
+            await enrollment.mutateAsync({
                 country_code: country,
                 requisition_id: reqId || undefined,
                 site_id: finalSiteId,
+                role: finalRole,
+                offered_salary: proposedSalary,
                 name: name.trim(),
                 email: email.trim().toLowerCase(),
                 phone: phone.trim()

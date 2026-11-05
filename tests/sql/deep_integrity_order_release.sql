@@ -27,10 +27,12 @@ DO $$ DECLARE first jsonb; retry jsonb; sale uuid:=current_setting('test.release
  first:=public.release_sale_to_picking(sale,'c1111111-1111-4000-8000-000000000110');
  retry:=public.release_sale_to_picking(sale,'c1111111-1111-4000-8000-000000000110');
  ASSERT first=retry,'Release retry created another handoff';
- ASSERT EXISTS(SELECT 1 FROM public.sales WHERE id=sale AND fulfillment_status='Picking' AND release_status='RELEASED'),'Release falsely marked delivery';
+ ASSERT NOT EXISTS(SELECT 1 FROM public.sales WHERE id=sale),'Source manager unexpectedly read another facility sale';
  ASSERT (SELECT count(*) FROM public.wms_jobs WHERE order_ref=sale::text AND type='PICK')=1,'Missing or duplicate pick';
  ASSERT EXISTS(SELECT 1 FROM public.wms_jobs WHERE id=(first->>'jobId')::uuid AND line_items->0->>'productId'=current_setting('test.release.source') AND line_items->0->>'fefoAllocated'='true'),'Source FEFO lot missing';
  ASSERT NOT EXISTS(SELECT 1 FROM public.wms_jobs WHERE order_ref=sale::text AND type='PACK'),'Unverified picking created premature packing';
 END $$;
+RESET ROLE;
+DO $$ BEGIN ASSERT EXISTS(SELECT 1 FROM public.sales WHERE id=current_setting('test.release.sale')::uuid AND fulfillment_status='Picking' AND release_status='RELEASED'),'Release state was not saved as Picking'; END $$;
 ROLLBACK;
 SELECT 'PASS: order release creates one FEFO PICK, remains Picking and is retry-safe; rolled back' result;

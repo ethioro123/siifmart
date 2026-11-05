@@ -1,5 +1,7 @@
 BEGIN;
 SET LOCAL statement_timeout='8s';
+SELECT set_config('request.jwt.claim.sub','',true);SELECT set_config('request.jwt.claims','{"role":"service_role"}',true);
+INSERT INTO public.facility_headcount_quotas(site_id,role,approved_quota,max_monthly_salary,country_code) VALUES('c1111111-1111-4000-8000-000000000110','picker',100000,10000,'ET') ON CONFLICT(site_id,role) DO UPDATE SET approved_quota=100000,max_monthly_salary=10000;
 SELECT set_config('request.jwt.claim.sub','e1000000-0000-4000-8000-000000000083',true);SELECT set_config('request.jwt.claims','{"sub":"e1000000-0000-4000-8000-000000000083","role":"authenticated"}',true);SET LOCAL ROLE authenticated;
 DO $$ DECLARE e uuid:=gen_random_uuid(); blocked boolean:=false; BEGIN
  INSERT INTO public.employees(id,name,email,role,status,site_id,region_code,scope_level,job_title,join_date,salary)

@@ -19,7 +19,7 @@ vi.mock('../../lib/supabase', () => {
 describe('purchaseOrdersService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(supabase.rpc).mockImplementation((async (_name: string, args: Record<string, unknown>) => ({ data: { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
+        vi.mocked(supabase.rpc).mockImplementation((async (name: string, args: Record<string, unknown>) => ({ data: name === 'purchase_order_items_safe' ? [] : { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
     });
 
     describe('create()', () => {
@@ -273,10 +273,7 @@ describe('purchaseOrdersService', () => {
     describe('Zero-Trust & Chain of Custody: delete() & cancel()', () => {
         it('soft-cancels PO instead of executing hard SQL DELETE', async () => {
             const mockDelete = vi.fn();
-            (supabase.rpc as any).mockResolvedValue({
-                data: { po_id: 'po-to-delete', status: 'Cancelled' },
-                error: null
-            });
+            vi.mocked(supabase.rpc).mockImplementation((async (name: string) => ({ data: name === 'purchase_order_items_safe' ? [] : { po_id: 'po-to-delete', status: 'Cancelled' }, error: null })) as unknown as typeof supabase.rpc);
 
             (supabase.from as any).mockImplementation((table: string) => {
                 if (table === 'purchase_orders') {
@@ -325,7 +322,7 @@ describe('purchaseOrdersService', () => {
 describe('purchase order delivery preflight', () => {
     it('rejects conflicting requirements before creating a header or writing items', async () => {
         vi.clearAllMocks();
-        vi.mocked(supabase.rpc).mockImplementation((async (_name: string, args: Record<string, unknown>) => ({ data: { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
+        vi.mocked(supabase.rpc).mockImplementation((async (name: string, args: Record<string, unknown>) => ({ data: name === 'purchase_order_items_safe' ? [] : { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
         const po = { tempReq: 'Ambient', shelfLife: '7' } as Parameters<typeof purchaseOrdersService.create>[0];
         await expect(purchaseOrdersService.create(po, [{ customAttributes: { storage: { type: 'Chilled', isPerishable: true, shelfLifeDays: '14' } } }])).rejects.toThrow('Chilled');
         expect(supabase.from).not.toHaveBeenCalled();

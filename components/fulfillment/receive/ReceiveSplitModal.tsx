@@ -375,7 +375,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 type="button"
                                 onClick={handleConfirmReceipt}
                                 disabled={isSubmitting || localSubmitting || !countsValid}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm  flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting || localSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

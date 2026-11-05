@@ -100,7 +100,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 <select
                                     value={selectedUnit}
                                     onChange={(e) => setSelectedUnit(e.target.value)}
-                                    className="min-h-[64px] bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] text-[var(--theme-text-primary)] font-bold rounded-xl px-3 py-3 text-base uppercase focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
+                                    className="min-h-[64px] bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] text-[var(--theme-text-primary)] font-bold rounded-xl px-3 py-3 text-base uppercase focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer touch-manipulation"
                                     aria-label="Select unit"
                                 >
                                     {SELL_UNITS.filter(u => u.code === getSellUnit(currentProduct?.unit || currentItem?.unit).code).map(u => (
@@ -197,7 +197,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                     type="button"
                     disabled={isProcessing}
                     onClick={onRecordEmptyBin}
-                    className="w-full min-h-11 rounded-xl border border-[var(--theme-border)] px-3 py-2 text-[var(--theme-text-primary)]"
+                    className="w-full min-h-11 rounded-xl border border-[var(--theme-border)] px-3 py-2 text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] active:scale-95 transition-all touch-manipulation cursor-pointer"
                 >
                     {t('warehouse.picking.noStockInBay') || 'No stock in this bay'}
                 </button>

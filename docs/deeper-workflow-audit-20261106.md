@@ -2,7 +2,7 @@
 
 ## Result
 
-This pass confirmed **14 additional gaps**: ten live database boundary failures, three application recovery/privacy failures and one recruitment compatibility regression. They are recorded here for repair; this scan does not fix them.
+This pass confirmed **14 additional gaps**: ten live database boundary failures, three application recovery/privacy failures and one recruitment compatibility regression. This report preserves the original audit state. The subsequent [repair and staging verification record](deeper-workflow-fixes-20261106.md) documents the fixes.
 
 The most urgent findings are simulated mobile-payment success, direct manager stock writes, an alternate delivery-status write path and unreviewed catalog creation. The reviewed workflow commands can enforce their own checks while older table policies still permit an alternate path.
 

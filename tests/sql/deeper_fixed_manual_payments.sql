@@ -18,6 +18,7 @@ DO $$ DECLARE sale jsonb; retry jsonb; payload jsonb; items jsonb; blocked boole
  ASSERT sale->>'id'=retry->>'id';ASSERT sale->>'manual_payment_verified_by'=auth.uid()::text;ASSERT sale->>'shift_id' IS NOT NULL;
  blocked:=false;BEGIN PERFORM public.create_pos_sale_atomic(payload||jsonb_build_object('id',gen_random_uuid()),items);EXCEPTION WHEN unique_violation THEN blocked:=true;END;ASSERT blocked,'Payment reference reused';
  blocked:=false;BEGIN UPDATE public.sales SET manual_payment_verified_by=NULL WHERE id=(sale->>'id')::uuid;EXCEPTION WHEN raise_exception THEN blocked:=true;END;ASSERT blocked,'Saved manual attestation edited';
+ ASSERT coalesce(current_setting('siifmart.manual_payment_confirmed',true),'')='','Manual attestation context leaked after return';
  ASSERT (SELECT stock FROM public.products WHERE id=current_setting('test.manual.product')::uuid)=49,'Sale retry duplicated stock posting';
 END $$;
 RESET ROLE;

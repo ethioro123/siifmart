@@ -44,6 +44,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 
     useEffect(() => {
         if (candidate && isOpen) {
+            setRoute(null);
             setFinanceSalary(candidate.offered_salary || (country === 'KE' ? 35000 : 12000));
             recruitmentService.evaluateCandidateRoute({
                 siteId: targetSiteId,
@@ -57,27 +58,23 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     if (!isOpen || !candidate) return null;
 
     const userRole = user?.role || '';
-    const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'group_chro', 'country_managing_director'].includes(userRole);
-    const isHiringManager = [
-        'store_manager', 'warehouse_manager', 'facility_director', 'operations_manager',
-        'regional_operations_manager', 'country_operations_director', 'country_managing_director',
-        'country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'group_chro'
-    ].includes(userRole);
-    const isFinance = ['country_finance_director', 'regional_finance_manager', 'group_ceo', 'group_cfo', 'country_managing_director'].includes(userRole);
+    const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'group_chro'].includes(userRole);
+    const isHiringManager = ['store_manager','warehouse_manager','regional_operations_manager','country_operations_director','country_managing_director','group_ceo'].includes(userRole);
+    const isFinance = ['country_finance_director','regional_finance_manager','group_ceo','group_cfo'].includes(userRole);
     const isCEO = ['group_ceo', 'group_chro'].includes(userRole);
 
-    const isOwnRecord = Boolean(
+    const isOwnRecord = candidate.created_by_id === user?.id || Boolean(
         user?.name && candidate.name.toLowerCase() === user.name.toLowerCase() ||
         user?.email && candidate.email.toLowerCase() === user.email.toLowerCase()
     );
 
-    const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception || route?.isException);
+    const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception || route?.isException !== false);
     const hasHRApproval = Boolean(candidate.hr_approved_by_id);
     const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_by_id);
     const hasFinanceApproval = Boolean(candidate.finance_approved_by_id);
     const hasCMDApproval = Boolean(candidate.cmd_approved_by_id);
 
-    const canActivateHire = isHR && hasHRApproval && hasManagerConfirm && !!candidate.offered_salary && (!isException || (hasFinanceApproval && hasCMDApproval));
+    const canActivateHire = route !== null && (isHR || userRole==='country_managing_director') && hasHRApproval && hasManagerConfirm && !!candidate.offered_salary && (!isException || (hasFinanceApproval && hasCMDApproval));
 
     const handleApproveHR = async () => {
         setIsProcessing(true);

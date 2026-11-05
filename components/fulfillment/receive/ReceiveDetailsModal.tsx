@@ -297,7 +297,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                     <button
                                         onClick={() => handleOpenReprint(item)}
-                                        className="min-h-[44px] min-w-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] active:scale-95 transition-all flex items-center justify-center p-2.5"
+                                        className="min-h-[44px] min-w-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] active:scale-95 transition-all flex items-center justify-center p-2.5 touch-manipulation cursor-pointer"
                                         title={t('warehouse.reprintLabel')}
                                     >
                                         <Printer size={18} />
@@ -312,7 +312,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                 <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors touch-manipulation cursor-pointer"
                     >
                         {t('warehouse.dismiss')}
                     </button>

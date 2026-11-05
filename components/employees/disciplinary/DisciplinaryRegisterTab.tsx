@@ -4,7 +4,7 @@ import {
     CheckCircle2, XCircle, Eye, ShieldAlert, FileText, ArrowRight
 } from 'lucide-react';
 import { useDisciplinaryCommand } from '../../../hooks/useDisciplinaryCommand';
-import { disciplinaryService } from '../../../services/disciplinary.service';
+import { useDisciplinaryRecords } from '../../../hooks/useDisciplinaryRecords';
 import type { DisciplinaryRecord, DisciplinaryType, DisciplinarySeverity } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
@@ -21,8 +21,10 @@ export default function DisciplinaryRegisterTab() {
     const country = effectiveCountry || 'ET';
     const command = useDisciplinaryCommand();
 
-    const [records, setRecords] = useState<DisciplinaryRecord[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    useEffect(() => { setPage(1); }, [country, activeSite?.id, user?.id]);
+    const {data:records=[],isLoading,error,refetch:loadRecords} = useDisciplinaryRecords(user?.id,country,activeSite?.id,page,user?.role);
+    useEffect(()=>{if(error)showToast('Personnel records could not be loaded','error');},[error,showToast]);
 
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,23 +38,8 @@ export default function DisciplinaryRegisterTab() {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<DisciplinaryRecord | null>(null);
 
-    const loadRecords = async () => {
-        setRecords([]);
-        setIsLoading(true);
-        try {
-            const data = await disciplinaryService.fetchDisciplinaryRecords(country, undefined, activeSite?.id);
-            setRecords(data);
-        } catch {
-            setRecords([]);
-            showToast('Personnel records could not be loaded', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadRecords();
-    }, [country, activeSite?.id, user?.id]);
+    const visibleRecord = records.find(record=>record.id===selectedRecord?.id) || null;
+    useEffect(()=>{setSelectedRecord(null);setIsDetailModalOpen(false);setIsAppealModalOpen(false);},[country,activeSite?.id,user?.id]);
 
     const canAdjudicate = useMemo(() => {
         return ADJUDICATION_ROLES.includes(user?.role || '');
@@ -255,7 +242,7 @@ export default function DisciplinaryRegisterTab() {
                 <div className="space-y-3">
                     {filteredRecords.map(rec => {
                         const isIssuer = Boolean(
-                            (user?.id && rec.issued_by === user.id) ||
+                            (user?.id && (rec.issued_by_id === user.id || rec.issued_by === user.id)) ||
                             (user?.name && rec.issued_by === user.name)
                         );
                         const isExpired = rec.expires_at ? new Date(rec.expires_at) < new Date() : false;
@@ -375,7 +362,7 @@ export default function DisciplinaryRegisterTab() {
                                                             onClick={() => handleOpenDetail(rec)}
                                                             className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                                         >
-                                                            Overturn Warning
+                                                            Review appeal
                                                         </button>
                                                         <button
                                                             type="button"
@@ -412,20 +399,25 @@ export default function DisciplinaryRegisterTab() {
                     setSelectedRecord(null);
                 }}
                 onSuccess={loadRecords}
-                record={selectedRecord}
+                record={visibleRecord}
             />
 
+            <nav aria-label="Personnel record pages" className="flex items-center justify-end gap-3 py-3">
+                <button type="button" className="min-h-11 rounded-lg border border-[var(--theme-border)] px-4" disabled={page===1 || isLoading} onClick={()=>setPage(value=>value-1)}>Previous</button>
+                <span aria-live="polite">Page {page}</span>
+                <button type="button" className="min-h-11 rounded-lg border border-[var(--theme-border)] px-4" disabled={records.length<25 || isLoading} onClick={()=>setPage(value=>value+1)}>Next</button>
+            </nav>
             <DisciplinaryDetailModal
                 isOpen={isDetailModalOpen}
                 onClose={() => {
                     setIsDetailModalOpen(false);
                     setSelectedRecord(null);
                 }}
-                record={selectedRecord}
+                record={visibleRecord}
                 onResolveAppeal={handleResolveAppeal}
                 canAdjudicate={canAdjudicate}
                 isIssuer={Boolean(
-                    (user?.id && selectedRecord?.issued_by === user.id) ||
+                    (user?.id && (selectedRecord?.issued_by_id === user.id || selectedRecord?.issued_by === user.id)) ||
                     (user?.name && selectedRecord?.issued_by === user.name)
                 )}
                 onOpenFileAppeal={handleOpenFileAppeal}

@@ -385,9 +385,9 @@ export const ScannerInterface: React.FC = () => {
     if (!currentItem) {
         return (
             <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col items-center justify-center text-[var(--theme-text-primary)] p-6">
-                <CheckCircle size={64} className="text-primary mb-4" />
+                <CheckCircle size={64} className="text-[var(--theme-status-success)] mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{t('warehouse.jobComplete')}</h2>
-                <button onClick={() => setSelectedJob(null)} className="woody-btn-secondary px-6 py-3 mt-6 min-h-[44px] touch-manipulation">
+                <button onClick={() => setSelectedJob(null)} className="px-6 py-3 mt-6 min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-surface)] text-[var(--theme-text-primary)] font-semibold hover:bg-[var(--theme-bg-subtle)] active:scale-95 transition-all touch-manipulation cursor-pointer">
                     {t('warehouse.backToJobs')}
                 </button>
             </div>
@@ -423,11 +423,11 @@ export const ScannerInterface: React.FC = () => {
                 {lastCompletedItem && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] animate-in fade-in duration-300">
                         <div className="text-center animate-in zoom-in-95 duration-300">
-                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center animate-pulse border border-primary/30">
-                                <CheckCircle size={48} className="text-primary" />
+                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-[var(--theme-status-success-bg)] flex items-center justify-center animate-pulse border border-[var(--theme-status-success-border)]">
+                                <CheckCircle size={48} className="text-[var(--theme-status-success)]" />
                             </div>
                             <h3 className="text-2xl font-bold mb-2 text-[var(--theme-text-primary)]">Picked</h3>
-                            <p className="text-primary font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
+                            <p className="text-[var(--theme-status-success)] font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
                         </div>
                     </div>
                 )}
