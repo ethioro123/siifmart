@@ -168,7 +168,7 @@ export default function WMSSettings() {
                             key={tab.id}
                             type="button"
                             onClick={() => setActiveTab(tab.id)}
-                            className={`min-h-[38px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                            className={`min-h-[42px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${active
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
                                 }`}
@@ -207,7 +207,7 @@ export default function WMSSettings() {
                                     onChange={(val) => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                                 />
                                 {inbound.receivingLogic === 'verified' && (
-                                    <div className="flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
+                                    <div className="flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-[11px] text-[var(--theme-status-warning-text)] font-medium">
                                         <AlertTriangle size={14} className="shrink-0" />
                                         <span>Verified Receive exposes expected quantities to staff. Zero-trust blind receiving is recommended.</span>
                                     </div>
@@ -276,7 +276,7 @@ export default function WMSSettings() {
                                         type="button"
                                         onClick={() => handleSaveSection('inbound')}
                                         disabled={isSaving === 'inbound' || !canConfigureWMS}
-                                        className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                        className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                     >
                                         {isSaving === 'inbound' ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={14} />}
                                         Save Inbound
@@ -327,7 +327,7 @@ export default function WMSSettings() {
                                             type="button"
                                             onClick={() => handleSaveSection('health')}
                                             disabled={isSaving === 'health' || !canConfigureWMS}
-                                            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                            className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'health' ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Health
@@ -366,7 +366,7 @@ export default function WMSSettings() {
                                             warning={!isHQAdmin ? 'HQ Executive Admin required to toggle barcode scanning' : undefined}
                                         />
                                         {!outbound.strictScanning && (
-                                            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
+                                            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
                                                 <AlertTriangle size={14} className="shrink-0" />
                                                 <span>Barcode validation disabled — scan fraud risk elevated. HQ audit active.</span>
                                             </div>
@@ -408,7 +408,7 @@ export default function WMSSettings() {
                                             type="button"
                                             onClick={() => handleSaveSection('outbound')}
                                             disabled={isSaving === 'outbound' || !canConfigureWMS}
-                                            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                            className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'outbound' ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Outbound

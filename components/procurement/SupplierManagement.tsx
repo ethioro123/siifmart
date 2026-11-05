@@ -379,32 +379,6 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                     </button>
                 </div>
             </div>
-                <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                    Showing <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{filteredSuppliers.length}</span> of <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount}</span> Partners
-                </p>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1 || loading}
-                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
-                    >
-                        <ChevronLeft size={14} /> Previous
-                    </button>
-                    <div className="flex items-center px-3.5 h-9 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono">
-                        <span className="text-[var(--theme-text-secondary)] mr-1.5">Page</span>
-                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{currentPage}</span>
-                        <span className="text-[var(--theme-text-secondary)] mx-1.5">of</span>
-                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{totalPages}</span>
-                    </div>
-                    <button
-                        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage >= totalPages || loading}
-                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
-                    >
-                        Next <ChevronRight size={14} />
-                    </button>
-                </div>
-            </div>
 
             {/* Modals */}
             <AddSupplierModal
