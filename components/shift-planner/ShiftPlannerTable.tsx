@@ -4,6 +4,7 @@ import { WeekDayInfo } from '../../utils/shiftPlanner';
 import { ShiftCell } from './ShiftCell';
 import { formatRole } from '../../utils/formatting';
 import { User, AlertCircle } from 'lucide-react';
+import { ShiftPlannerMobileView } from './ShiftPlannerMobileView';
 
 interface ShiftPlannerTableProps {
     employees: Employee[];
@@ -54,9 +55,24 @@ export const ShiftPlannerTable: React.FC<ShiftPlannerTableProps> = ({
     }
 
     return (
-        <div className="bg-[color-mix(in_srgb,var(--theme-bg-card)_90%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_90%,transparent)] border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-2xl overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[900px]">
+        <div className="space-y-4">
+            {/* Mobile View: Day Carousel & Staff Shift Cards (Phones / small viewports) */}
+            <div className="block md:hidden">
+                <ShiftPlannerMobileView
+                    employees={employees}
+                    weekDays={weekDays}
+                    scheduleMap={scheduleMap}
+                    canEdit={canEdit}
+                    employeeWeeklyHours={employeeWeeklyHours}
+                    onCycleShift={onCycleShift}
+                    onEditShift={onEditShift}
+                />
+            </div>
+
+            {/* Desktop View: Full 7-Day Matrix Table (Tablet / Desktop viewports) */}
+            <div className="hidden md:block bg-[color-mix(in_srgb,var(--theme-bg-card)_90%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_90%,transparent)] border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-2xl overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[900px]">
                     <thead>
                         <tr className="bg-[var(--theme-bg-app)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border-b border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                             {/* Employee column */}
@@ -179,5 +195,6 @@ export const ShiftPlannerTable: React.FC<ShiftPlannerTableProps> = ({
                 </table>
             </div>
         </div>
+    </div>
     );
 };

@@ -111,7 +111,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         />
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold mt-2.5 flex items-center gap-1">
-                        <span>●</span> Verified shift & roster attendance
+                        <span>●</span> Recorded attendance metric
                     </p>
                 </div>
 

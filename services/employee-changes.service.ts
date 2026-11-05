@@ -120,104 +120,10 @@ export const employeeChangesService = {
         approverRole: string,
         notes?: string
     ): Promise<EmployeeProfileChangeRequest> {
-        // 1. Fetch current record from server
-        const { data: currentData, error: fetchErr } = await supabase
-            .from('employee_change_requests')
-            .select('*')
-            .eq('id', requestId)
-            .single();
-
-        if (fetchErr || !currentData) {
-            logger.error('employeeChangesService', 'Change request not found on server:', fetchErr as Error);
-            throw new Error(`Employee profile change request ${requestId} not found on server.`);
-        }
-
-        const target = mapDBToChangeRequest(currentData);
-        const approvedAt = new Date().toISOString();
-
-        // Zero-Trust Governance Checks
-        const isApproverCEO = isSovereignCEO(approverRole);
-
-        // Fetch current employee to inspect target role
-        const { data: targetEmp } = await supabase
-            .from('employees')
-            .select('role')
-            .eq('id', target.employeeId)
-            .maybeSingle();
-
-        const isTargetCEO = (targetEmp?.role && isSovereignCEO(targetEmp.role)) || 
-            Boolean(target.fullProposedEmployee?.role && isSovereignCEO(target.fullProposedEmployee.role));
-
-        if (isTargetCEO && !isApproverCEO) {
-            throw new Error('Sovereign Authority Violation: Only the Global CEO can approve changes to the Global CEO profile.');
-        }
-
-        // 4-Eyes Principle: Requester cannot approve their own change request
-        if (!isApproverCEO && target.requestedBy && approverName && 
-            target.requestedBy.trim().toLowerCase() === approverName.trim().toLowerCase()) {
-            throw new Error('Zero-Trust 4-Eyes Violation: Requester cannot approve their own change request.');
-        }
-
-        // Hierarchy Rank Guard
-        if (!isApproverCEO && targetEmp?.role) {
-            const approverLevel = getRoleHierarchy(approverRole);
-            const targetLevel = getRoleHierarchy(targetEmp.role);
-            if (approverLevel <= targetLevel) {
-                throw new Error(`Hierarchy Violation: Role "${approverRole}" (Level ${approverLevel}) cannot approve changes for "${targetEmp.role}" (Level ${targetLevel}).`);
-            }
-        }
-
-        // 2. Apply changes to the actual employee record via employeesService
-        try {
-            await employeesService.update(target.employeeId, target.fullProposedEmployee);
-            logger.info('employeeChangesService', `Applied profile updates for employee ${target.employeeName} (${target.employeeId})`);
-        } catch (updateErr) {
-            logger.error('employeeChangesService', 'Failed to update employee in database:', updateErr as Error);
-            throw new Error(`Failed to apply changes to employee: ${(updateErr as Error).message}`);
-        }
-
-        // 3. Persist approval state on server
-        const { error: reqErr } = await supabase
-            .from('employee_change_requests')
-            .update({
-                status: 'approved',
-                approved_by: approverName,
-                approved_by_role: approverRole,
-                approved_at: approvedAt
-            })
-            .eq('id', requestId);
-
-        if (reqErr) {
-            logger.error('employeeChangesService', 'Remote update failed:', reqErr as Error);
-            throw new Error(`Failed to record approval on server: ${reqErr.message}`);
-        }
-
-        const updatedRecord: EmployeeProfileChangeRequest = {
-            ...target,
-            status: 'approved',
-            approvedBy: approverName,
-            approvedByRole: approverRole,
-            approvedAt
-        };
-
-        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRecord : r);
-
-        // 4. Log to system audit trail
-        try {
-            await systemLogsService.create({
-                action: 'APPROVE_EMPLOYEE_PROFILE_CHANGE',
-                details: `Approved cross-departmental changes for ${target.employeeName}. Reason: ${target.reason}. Diff summary: ${target.diffs.map(d => `${d.label}: ${d.oldValue} -> ${d.newValue}`).join('; ')}`,
-                user_name: approverName,
-                performed_by: approverName,
-                module: 'HR',
-                site_id: target.siteId,
-                country_code: target.countryCode
-            });
-        } catch {
-            // Non-blocking log
-        }
-
-        return updatedRecord;
+        const { data, error } = await supabase.rpc('review_employee_change', { p_request: requestId, p_approve: true, p_notes: notes || 'Employee changes reviewed' });
+        if (error) throw error;
+        if (!data?.id || data.id !== requestId) throw new Error('Employee review was not confirmed');
+        return mapDBToChangeRequest(data);
     },
 
     async reject(
@@ -226,59 +132,9 @@ export const employeeChangesService = {
         rejectionReason: string
     ): Promise<EmployeeProfileChangeRequest> {
         // 1. Fetch current record from server
-        const { data: currentData, error: fetchErr } = await supabase
-            .from('employee_change_requests')
-            .select('*')
-            .eq('id', requestId)
-            .single();
-
-        if (fetchErr || !currentData) {
-            logger.error('employeeChangesService', 'Change request not found on server:', fetchErr as Error);
-            throw new Error(`Employee profile change request ${requestId} not found on server.`);
-        }
-
-        const target = mapDBToChangeRequest(currentData);
-        const rejectedAt = new Date().toISOString();
-
-        const { error: reqErr } = await supabase
-            .from('employee_change_requests')
-            .update({
-                status: 'rejected',
-                rejected_by: rejectedByName,
-                rejected_at: rejectedAt,
-                rejection_reason: rejectionReason
-            })
-            .eq('id', requestId);
-
-        if (reqErr) {
-            logger.error('employeeChangesService', 'Remote update failed:', reqErr as Error);
-            throw new Error(`Failed to record rejection on server: ${reqErr.message}`);
-        }
-
-        const updatedRecord: EmployeeProfileChangeRequest = {
-            ...target,
-            status: 'rejected',
-            rejectedBy: rejectedByName,
-            rejectedAt,
-            rejectionReason
-        };
-
-        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRecord : r);
-
-        try {
-            await systemLogsService.create({
-                action: 'REJECT_EMPLOYEE_PROFILE_CHANGE',
-                details: `Rejected change request for ${target.employeeName}. Reason: ${rejectionReason}`,
-                user_name: rejectedByName,
-                performed_by: rejectedByName,
-                module: 'HR',
-                site_id: target.siteId,
-                country_code: target.countryCode
-            });
-        } catch {
-            // Non-blocking
-        }
-
-        return updatedRecord;
+        const { data, error } = await supabase.rpc('review_employee_change', { p_request: requestId, p_approve: false, p_notes: rejectionReason });
+        if (error) throw error;
+        if (data?.id !== requestId || data.status !== 'rejected') throw new Error('Employee review was not confirmed');
+        return mapDBToChangeRequest(data);
     }
 };

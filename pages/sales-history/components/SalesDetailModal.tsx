@@ -284,7 +284,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex gap-3 mt-5 pt-4 border-t border-[var(--theme-border)]">
+                    <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-5 pt-4 border-t border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={handleReprint}

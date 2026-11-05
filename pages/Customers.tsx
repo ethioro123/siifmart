@@ -11,6 +11,7 @@ import { useData } from '../contexts/DataContext';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { logger } from '../utils/logger';
 import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
+import { CustomerDetailContent } from '../components/customers/CustomerDetailContent';
 
 export default function Customers() {
    const { customers, addCustomer, updateCustomer, deleteCustomer, addNotification } = useData();
@@ -197,57 +198,14 @@ export default function Customers() {
                )}
             </div>
 
-            {/* Detail Panel */}
-             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 h-fit lg:sticky lg:top-6 shadow-xs">
+            {/* Desktop Detail Panel (Sticky Sidebar) */}
+            <div className="hidden lg:block bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 h-fit lg:sticky lg:top-6 shadow-xs">
                {selectedCustomer ? (
-                  <div className="space-y-6 animate-in fade-in">
-                     <div className="text-center">
-                        <div className="w-24 h-24 rounded-full bg-[var(--theme-bg-subtle)] mx-auto flex items-center justify-center border border-[var(--theme-border)] mb-4">
-                           <Crown size={40} className={
-                              selectedCustomer.tier === 'Platinum' ? 'text-[var(--theme-accent)]' :
-                                 selectedCustomer.tier === 'Gold' ? 'text-[var(--theme-status-warning-text)]' :
-                                    selectedCustomer.tier === 'Silver' ? 'text-[var(--theme-text-muted)]' : 'text-[var(--theme-status-warning-text)]'
-                           } />
-                        </div>
-                        <h3 className="text-2xl font-bold text-[var(--theme-text-primary)]">{selectedCustomer.name}</h3>
-                        <p className="text-[var(--theme-text-secondary)] text-sm mt-1">{selectedCustomer.email || 'No email address'}</p>
-                        <div className="flex justify-center gap-2 mt-4">
-                           <a href={`tel:${selectedCustomer.phone.replace(/[^\d+]/g, '')}`} className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`Call ${selectedCustomer.name}`}><Phone size={18} /></a>
-                           {selectedCustomer.email && <a href={`mailto:${encodeURIComponent(selectedCustomer.email)}`} className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`Email ${selectedCustomer.name}`}><Mail size={18} /></a>}
-                           <ProtectedButton permission="EDIT_CUSTOMER" onClick={() => handleEditCustomer(selectedCustomer)} className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label="Edit Customer"><Edit2 size={18} /></ProtectedButton>
-                           <ProtectedButton permission="DELETE_CUSTOMER" onClick={() => handleDeleteCustomer(selectedCustomer.id)} className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-status-danger)] hover:bg-[var(--theme-status-danger-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]" aria-label="Delete Customer"><Trash2 size={18} /></ProtectedButton>
-                        </div>
-                     </div>
-
-                     <div className="space-y-4">
-                        <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)] flex justify-between items-center">
-                           <div className="flex items-center gap-3">
-                              <Gift className="text-[var(--theme-accent)]" size={20} aria-hidden="true" />
-                              <div>
-                                 <p className="text-xs text-[var(--theme-text-secondary)]">Loyalty balance</p>
-                                 <p className="font-bold text-[var(--theme-text-primary)]">{selectedCustomer.loyaltyPoints} pts</p>
-                              </div>
-                           </div>
-                        </div>
-
-                        <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)] flex justify-between items-center">
-                           <div className="flex items-center gap-3">
-                              <History className="text-[var(--theme-accent)]" size={20} aria-hidden="true" />
-                              <div>
-                                 <p className="text-xs text-[var(--theme-text-secondary)]">Last visit</p>
-                                 <p className="font-bold text-[var(--theme-text-primary)]">{selectedCustomer.lastVisit}</p>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div>
-                        <h4 className="font-bold text-[var(--theme-text-primary)] mb-3 flex items-center gap-2"><FileText size={16} className="text-[var(--theme-text-secondary)]" /> Notes</h4>
-                        <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-sm text-[var(--theme-text-primary)] min-h-[80px]">
-                           {selectedCustomer.notes || "No notes available."}
-                        </div>
-                     </div>
-                  </div>
+                  <CustomerDetailContent
+                     customer={selectedCustomer}
+                     onEdit={handleEditCustomer}
+                     onDelete={handleDeleteCustomer}
+                  />
                ) : (
                   <div className="h-full flex flex-col items-center justify-center text-[var(--theme-text-secondary)] py-20">
                      <Users size={48} className="mb-4 opacity-20" />
@@ -255,6 +213,28 @@ export default function Customers() {
                   </div>
                )}
             </div>
+         </div>
+
+         {/* Mobile Detail Modal (Opens instantly when tapping any customer on phones/tablets) */}
+         <div className="lg:hidden">
+            <Modal
+               isOpen={Boolean(selectedCustomer)}
+               onClose={() => setSelectedCustomer(null)}
+               title="Customer Profile"
+            >
+               {selectedCustomer && (
+                  <CustomerDetailContent
+                     customer={selectedCustomer}
+                     onEdit={(c) => {
+                        setSelectedCustomer(null);
+                        handleEditCustomer(c);
+                     }}
+                     onDelete={(id) => {
+                        handleDeleteCustomer(id);
+                     }}
+                  />
+               )}
+            </Modal>
          </div>
 
          {/* Add/Edit Modal */}

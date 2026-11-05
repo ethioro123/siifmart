@@ -1,3 +1,5 @@
+import { usePayrollCommands } from '../../hooks/usePayrollCommands';
+import { PayrollSettlementForm } from './payroll/PayrollSettlementForm';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Loader2,
@@ -26,9 +28,9 @@ export const PayrollModal: React.FC = () => {
     effectiveCountry,
     activeSite,
     addNotification,
-    processPayroll
   } = useFinance();
 
+  const command = usePayrollCommands();
   const [activeRun, setActiveRun] = useState<PayrollRun | null>(null);
   const [isLoadingRun, setIsLoadingRun] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -48,7 +50,7 @@ export const PayrollModal: React.FC = () => {
     e => (!activeSite?.id || e.siteId === activeSite.id || e.site_id === activeSite.id) && e.status === 'Active'
   );
 
-  const totalPayout = totalSalaries + totalBonuses;
+  const totalPayout = activeRun?.totalNetPayout ?? totalSalaries + totalBonuses;
 
   // Load latest payroll run for the active country/site
   const loadActiveRun = useCallback(async () => {
@@ -103,7 +105,7 @@ export const PayrollModal: React.FC = () => {
   const handleInitiateRun = async () => {
     setIsActionLoading(true);
     try {
-      const newRun = await payrollRunsService.create({
+      const newRun = await command.mutateAsync({ action: 'create', run: {
         period: currentMonthYear,
         countryCode: effectiveCountry,
         siteId: activeSite?.id,
@@ -116,7 +118,7 @@ export const PayrollModal: React.FC = () => {
         status: 'pending_verification',
         initiatedBy: userName,
         initiatedByRole: userRole
-      });
+      } });
       setActiveRun(newRun);
       addNotification('info', `Payroll run initiated for ${currentMonthYear}. Awaiting dual sign-off.`);
     } catch (err: any) {
@@ -130,12 +132,7 @@ export const PayrollModal: React.FC = () => {
     if (!activeRun) return;
     setIsActionLoading(true);
     try {
-      const updated = await payrollRunsService.signAsHR(
-        activeRun.id,
-        userName,
-        user?.role || 'country_hr_director',
-        hrNotesInput || 'Headcount, attendance, and leave deductions verified.'
-      );
+      const updated = await command.mutateAsync({ action: 'hr', id: activeRun.id, notes: hrNotesInput || 'Roster and attendance evidence reviewed' });
       setActiveRun(updated);
       setHrNotesInput('');
       addNotification('success', 'HR verification certified. Awaiting Finance authorization.');
@@ -150,12 +147,7 @@ export const PayrollModal: React.FC = () => {
     if (!activeRun) return;
     setIsActionLoading(true);
     try {
-      const updated = await payrollRunsService.signAsFinance(
-        activeRun.id,
-        userName,
-        user?.role || 'country_finance_director',
-        financeNotesInput || 'Bank liquidity and statutory tax withholdings verified.'
-      );
+      const updated = await command.mutateAsync({ action: 'finance', id: activeRun.id, notes: financeNotesInput || 'Payroll totals and deductions reviewed' });
       setActiveRun(updated);
       setFinanceNotesInput('');
       addNotification('success', 'Finance authorization completed.');
@@ -170,10 +162,9 @@ export const PayrollModal: React.FC = () => {
     if (!activeRun) return;
     setIsActionLoading(true);
     try {
-      await payrollRunsService.disburse(activeRun.id, userName);
-      await processPayroll(activeSite?.id || 'SITE-0001', userName);
-      addNotification('success', `Payroll disbursed: ${currencySymbol} ${totalPayout.toLocaleString()}`);
-      setIsPayrollModalOpen(false);
+      const prepared = await command.mutateAsync({ action: 'prepare', id: activeRun.id });
+      setActiveRun(prepared);
+      addNotification('success', 'Payroll expense prepared. No completed payment has been recorded.');
     } catch (err: any) {
       addNotification('alert', err.message || 'Disbursement failed');
     } finally {
@@ -188,12 +179,7 @@ export const PayrollModal: React.FC = () => {
     }
     setIsActionLoading(true);
     try {
-      const updated = await payrollRunsService.reject(
-        activeRun.id,
-        userName,
-        userRole,
-        rejectionReason
-      );
+      const updated = await command.mutateAsync({ action: 'reject', id: activeRun.id, notes: rejectionReason });
       setActiveRun(updated);
       setIsRejecting(false);
       setRejectionReason('');
@@ -379,7 +365,7 @@ export const PayrollModal: React.FC = () => {
                 </div>
               </div>
             ) : (
-              !isDisbursed && (
+              !isDisbursed && activeRun.status !== 'prepared' && (
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -394,6 +380,7 @@ export const PayrollModal: React.FC = () => {
           </div>
         )}
 
+        {activeRun?.status === 'prepared' && <PayrollSettlementForm run={activeRun} actorId={user?.id} role={userRole} onSaved={run => { setActiveRun(run); addNotification('success', 'Completed payroll payment recorded.'); }} />}
         {/* Action Footer */}
         <div className="pt-4 border-t border-[var(--theme-border)] flex items-center justify-between gap-3">
           <button
@@ -404,7 +391,7 @@ export const PayrollModal: React.FC = () => {
             Close
           </button>
 
-          {activeRun && !isDisbursed && (
+          {activeRun && !isDisbursed && activeRun.status !== 'prepared' && (
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -422,14 +409,14 @@ export const PayrollModal: React.FC = () => {
                 ) : (
                   <CheckCircle2 size={14} />
                 )}
-                {isDualApproved ? 'Disburse Payout' : 'Awaiting Dual Sign-Off'}
+                {isDualApproved ? 'Prepare payroll expense' : 'Awaiting Dual Sign-Off'}
               </button>
             </div>
           )}
 
           {isDisbursed && (
             <span className="text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1.5">
-              <CheckCircle2 size={16} /> Disbursed &amp; Reconciled
+              <CheckCircle2 size={16} /> Completed payment recorded
             </span>
           )}
         </div>

@@ -21,6 +21,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { ExpenseRecord } from '../../types/expense';
 import { ExpenseVoucherModal } from './ExpenseVoucherModal';
 import { ExpenseMetricRibbon } from './ExpenseMetricRibbon';
+import { ExpensesMobileList } from './ExpensesMobileList';
 
 export const ExpensesTab: React.FC = () => {
     const {
@@ -151,8 +152,24 @@ export const ExpensesTab: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
+                {/* Mobile Cards View (Phones / small viewports) */}
+                <div className="block md:hidden">
+                    <ExpensesMobileList
+                        expenses={displayedExpenses}
+                        expensesLoading={expensesLoading}
+                        currencySymbol={currencySymbol}
+                        user={user}
+                        canApproveRole={canApproveRole}
+                        isSubmitting={isSubmitting}
+                        onInspectExpense={setInspectingExpense}
+                        onApproveExpense={handleApproveExpense}
+                        onRejectExpense={handleRejectExpense}
+                        onTriggerVoidExpense={handleTriggerVoidExpense}
+                    />
+                </div>
+
+                {/* Desktop Table (Tablet / Desktop viewports) */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>

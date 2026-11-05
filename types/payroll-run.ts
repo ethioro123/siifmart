@@ -11,11 +11,16 @@ export type PayrollRunStatus =
   | 'pending_hr'
   | 'pending_finance'
   | 'approved'
+  | 'prepared'
   | 'disbursed'
   | 'rejected';
 
 export interface PayrollRun {
   id: string;
+  initiatedById?: string;
+  hrApprovedById?: string;
+  financeApprovedById?: string;
+  settlementReference?: string;
   period: string; // e.g., "October 2026"
   countryCode: string; // 'ET' | 'KE' (Multi-Country Isolation)
   country_code?: string;

@@ -77,17 +77,8 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                 'Approved via Cross-Department Governance Portal'
             );
 
-            // Update employee through DataContext
-            const targetEmp = employees.find(e => e.id === req.employeeId);
-            if (targetEmp && updateEmployee) {
-                await updateEmployee({
-                    ...targetEmp,
-                    ...req.fullProposedEmployee
-                } as any, user?.name || 'Approver');
-            }
-
             setRequests(prev => prev.map(r => r.id === req.id ? updated : r));
-            addNotification('success', `Approved: Profile changes applied to ${req.employeeName}`);
+            addNotification(updated.status === 'approved' ? 'success' : 'info', updated.status === 'approved' ? `Profile changes applied to ${req.employeeName}` : 'Department decision saved. Remaining independent approvals are required.');
             onRequestsUpdated?.();
         } catch (err: any) {
             addNotification('alert', `Approval failed: ${err.message || 'Unknown error'}`);

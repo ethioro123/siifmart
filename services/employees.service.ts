@@ -103,7 +103,7 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
 export const employeesService = {
     async getAll(siteId?: string | string[], onlyManagers: boolean = false) {
         let query = supabase
-            .from('employees')
+            .from('employee_directory')
             .select('*')
             .order('created_at', { ascending: false });
 
@@ -125,7 +125,7 @@ export const employeesService = {
 
     async getPendingApproval(country?: string, countrySiteIds?: string[], allowUnassigned: boolean = false): Promise<Employee[]> {
         let query = supabase
-            .from('employees')
+            .from('employee_directory')
             .select('*')
             .eq('status', 'Pending Approval')
             .order('created_at', { ascending: false });
@@ -166,7 +166,7 @@ export const employeesService = {
     ) {
         // Step 1: Fetch ALL matching lightweight data (ID, Role, Name) to sort globally
         let query = supabase
-            .from('employees')
+            .from('employee_directory')
             .select('id, role, name, created_at', { count: 'exact' });
 
         // Specific site filter takes precedence (e.g. branch manager lock or dropdown selection)
@@ -225,7 +225,7 @@ export const employeesService = {
 
         // Step 4: Fetch full details for the sliced IDs
         const { data: details, error: detailsError } = await supabase
-            .from('employees')
+            .from('employee_directory')
             .select('*')
             .in('id', pageIds);
 
@@ -243,7 +243,7 @@ export const employeesService = {
 
     async getById(id: string) {
         const { data, error } = await supabase
-            .from('employees')
+            .from('employee_directory')
             .select('*')
             .eq('id', id)
             .single();
@@ -254,7 +254,7 @@ export const employeesService = {
 
     async getByEmail(email: string) {
         const { data, error } = await supabase
-            .from('employees')
+            .from('employee_directory')
             .select('*')
             .ilike('email', email)
             .single();
@@ -337,11 +337,11 @@ export const employeesService = {
             const { data, error } = await supabase
                 .from('employees')
                 .insert(dbEmployee)
-                .select()
+                .select('id')
                 .single();
 
             if (!error) {
-                return mapDbEmployeeToEmployee(data as RawDbEmployee);
+                return this.getById(employee.id);
             }
 
             // If unique constraint violation on code, generate fresh next code and retry
@@ -418,37 +418,10 @@ export const employeesService = {
             dbUpdates.job_title = getJobTitleForRole(updates.role as string);
         }
 
-        try {
-            const { data, error } = await supabase
-                .from('employees')
-                .update(dbUpdates)
-                .eq('id', id)
-                .select()
-                .single();
-
-            if (error) throw error;
-            return mapDbEmployeeToEmployee(data as RawDbEmployee);
-        } catch (err: any) {
-            // Resilient fallback if optional new columns do not exist yet in DB schema
-            if (err?.code === 'PGRST204' || err?.message?.includes('column') || err?.message?.includes('schema')) {
-                delete dbUpdates.age;
-                delete dbUpdates.date_of_birth;
-                delete dbUpdates.national_id_number;
-                delete dbUpdates.emergency_contact;
-                delete dbUpdates.address;
-                delete dbUpdates.scope_level;
-                delete dbUpdates.job_title;
-                const { data, error: retryError } = await supabase
-                    .from('employees')
-                    .update(dbUpdates)
-                    .eq('id', id)
-                    .select()
-                    .single();
-                if (retryError) throw retryError;
-                return mapDbEmployeeToEmployee(data as RawDbEmployee);
-            }
-            throw err;
-        }
+        const { data, error } = await supabase.from('employees').update(dbUpdates).eq('id', id).select('id').single();
+        if (error) throw error;
+        if (data?.id !== id) throw new Error('Employee update was not confirmed');
+        return this.getById(id);
     },
 
     async delete(_id: string): Promise<never> {

@@ -1,3 +1,4 @@
+import { payrollRunsService } from '../../services/payroll-runs.service';
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ExpenseRecord, Employee, Product, Supplier, SystemLog } from '../../types';
@@ -116,35 +117,14 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
         }
     }, [addNotification]);
 
-    const processPayroll = useCallback(async (siteId: string, user: string) => {
-        try {
-            const activeEmployees = employees.filter(e => (e.siteId === siteId || e.site_id === siteId) && e.status === 'Active');
-            const totalSalary = activeEmployees.reduce((sum, e) => sum + (e.salary || 0), 0);
-
-            if (totalSalary === 0) {
-                addNotification('info', 'No active employees with salary to process.');
-                return;
-            }
-
-            const expense: ExpenseRecord = {
-                id: `PAYROLL-${Date.now()}`,
-                siteId,
-                site_id: siteId,
-                date: new Date().toISOString().split('T')[0],
-                category: 'Salaries',
-                description: `Monthly Payroll for ${activeEmployees.length} employees`,
-                amount: totalSalary,
-                status: 'Paid',
-                approvedBy: user
-            };
-
-            await addExpense(expense);
-            // Preparing a local expense does not prove payroll was processed or paid.
-        } catch (error) {
-            logger.error('useFinanceActions', 'Payroll failed:', error);
-            addNotification('alert', 'Failed to process payroll');
-        }
-    }, [employees, addExpense, addNotification, logSystemEvent]);
+    const processPayroll = useCallback(async (siteId: string, _user: string) => {
+        if (!activeSite?.country || siteId !== activeSiteId) throw new Error('Select the payroll workplace');
+        const period = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
+        const run = await payrollRunsService.getLatestRun(siteId, activeSite.country, period);
+        if (!run) throw new Error('No approved payroll run exists for this workplace and month');
+        await payrollRunsService.prepare(run.id);
+        await queryClient.invalidateQueries({ queryKey: ['expenses', siteId] });
+    }, [activeSite?.country, activeSiteId, queryClient]);
 
     return { addSupplier, adjustStock, addExpense, deleteExpense, processPayroll };
 }

@@ -89,7 +89,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
             });
 
             const res = await employeesService.getAll(undefined, true);
-            expect(supabase.from).toHaveBeenCalledWith('employees');
+            expect(supabase.from).toHaveBeenCalledWith('employee_directory');
             expect(orMock).toHaveBeenCalledWith(expect.stringContaining('role.in.'));
             expect(res).toHaveLength(2);
         });
