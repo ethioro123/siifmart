@@ -406,7 +406,7 @@ export const POSCartPanel: React.FC = () => {
                         className="w-full min-h-14 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="flex items-center gap-2.5">
-                            <div className="bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
+                            <div className="bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
                                 {totalItemCount} {totalItemCount === 1 ? t('pos.item') : t('pos.items')}
                             </div>
                             <span className="text-xs font-bold uppercase tracking-wider">{t('pos.viewCart')}</span>

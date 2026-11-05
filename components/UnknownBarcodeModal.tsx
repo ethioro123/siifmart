@@ -387,6 +387,8 @@ export default function UnknownBarcodeModal({
                         onKeyDown={handleSearchKeyDown}
                         onBack={() => setStep('evidence')}
                         onConfirmMap={handleInitiateMap}
+                        siteName={activeSite?.name}
+                        siteCode={activeSite?.code}
                     />
                 )}
 

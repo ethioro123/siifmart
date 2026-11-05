@@ -354,7 +354,7 @@ export function useCountryScoping({
   useEffect(()=>{
     const general=resolveCountryGeneralSettings(settings,effectiveCountry);
     setGlobalTimezone(general.timezone);setGlobalDateFormat(general.dateFormat);
-  },[effectiveCountry,settings.timezone,settings.dateFormat,settings.countryConfigs]);
+  },[effectiveCountry,settings?.timezone,settings?.dateFormat,settings?.countryConfigs]);
 
   // Synchronize category CURRENCY_SYMBOL to the active sovereign country
   useEffect(() => {

@@ -450,35 +450,15 @@
 - Country employee directory uses the same explicit facility filter for ET and KE, excluding unassigned global leadership.
 - Migration: `migrations/20261023_correct_group_ceo_global_assignment.sql`.
 
-### Procurement receiving facility selection (2026-10-23)
-- New orders default only to the signed-in employee’s eligible receiving hub; HQ and regional staff choose their destination explicitly.
-- Saved and existing orders never fall back silently to the first warehouse when their destination is unavailable.
-- Staging quick login includes every warehouse and distribution center so receiving teams can access the selected facility.
+### Procurement & Appearance Refinements (2026-10-23)
+- Facility selection defaults to signed-in employee's receiving hub; assignment boundaries guarded in DB (`20261023_enforce_procurement_assignment_boundaries.sql`).
+- Device appearance follows system theme with labeled Device/Light/Dark controls in user profile and header.
+- Purchase request workspace with stock suggestions, assigned-workspace context, and searchable status-filtered history.
+- Header adapts to measured available width with overflow controls.
 
-### Procurement assignment boundaries (2026-10-23)
-- Order lists, receiving destinations, and catalog fallback use employee-assigned regional/site scope and deny missing assignments.
-- Database procurement guards prevent regional or site staff from accessing orders beyond their assignment; regional supplier access requires the matching region.
-- Policy persisted in `rules/02-country-and-operations.md`; migration `migrations/20261023_enforce_procurement_assignment_boundaries.sql` (staging).
-
-### Receiving hub region heading (2026-10-23)
-- Procurement receiving dropdown identifies the worker’s assigned region rather than the country HQ label. National/global views derive the visible hubs’ regions; missing names use region codes.
-
-### Device appearance following (2026-10-23)
-- Appearance defaults to the device setting and follows live light/dark changes. Login, header and user menu provide explicit device/light/dark choices; legacy theme toggles cleared on first paint.
-
-### Profile appearance control (2026-10-23)
-- User menu appearance uses labeled Device/Light/Dark buttons with a visible selected state, keyboard focus, and consistent theme tokens. Changing appearance keeps the menu open.
-
-### Profile dropdown refinement (2026-10-23)
-- Compact identity summary, expandable activity/achievements, consistent preference groups and pinned sign-out action with responsive sizing. Country controls appear only for authorized executives.
-- Close control is available on desktop and mobile; Escape closes the dropdown and returns focus to its trigger.
-
-### Purchase request workspace (2026-10-23)
-- Separate stock/suggestion views, clearer forms and item quantities, assigned-workspace context, next-step guidance, and searchable status-filtered history.
-- Review notes remain separate per request; receiving options stay within the requester’s assigned region and active facilities.
-
-### Responsive top bar priorities (2026-10-23)
-- Header adapts to measured available width; compact views retain navigation, search, and profile, with workplace/region in overflow. Long profile names yield space before overlap.
+### Mobile Scanner & Location Clearance Normalization (2026-11-06)
+- Standardized all scanners across Fulfillment (`PickScanner`, `PutawayScanner`, `PackScanner`, `DriverScanner`, `ScannerInterface`, `ReceiveHeader`) and POS (`POSHeader`, `POSTerminal`, `UnknownBarcodeModal`, `UnknownBarcodeSearchStep`) so that scanner input fields and active facility/bay locations are pinned together and never hidden by mobile software keyboards or viewport compression.
+- Cleaned duplicate Tailwind utility tokens across mobile scanner and settings components. Safe scroll-into-view behavior active on virtual keyboard focus.
 ### PO attribute consistency and pricing handoff (2026-10-23)
 - Live delivery checks align order temperature and minimum remaining days with item storage and total product shelf life; conflicting temperature groups require separate orders.
 - New product handling requirements require confirmation, packaging counts require entry, and unbranded identity is explicit. Category preview suggestions are labeled and advanced catalog specifications are read only.

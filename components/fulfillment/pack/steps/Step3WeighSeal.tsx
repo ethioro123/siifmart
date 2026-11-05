@@ -76,7 +76,13 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                             placeholder="0.00"
                             value={scaleWeight}
                             onChange={(e) => setScaleWeight(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-2xl py-3 px-4 text-center font-mono font-bold text-2xl md:text-3xl text-[var(--theme-text-primary)] outline-none min-h-[56px] transition-colors"
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
+                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-2xl py-3 px-4 text-center font-mono font-bold text-2xl md:text-3xl text-[var(--theme-text-primary)] outline-none min-h-[56px] transition-colors scroll-mt-20 scroll-mb-20"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-[var(--theme-text-secondary)]">
                             KG
@@ -90,7 +96,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                 {hasWeight && (
                     <div className="animate-in fade-in">
                         {isExceeded ? (
-                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-2.5">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] flex items-center gap-2.5">
                                 <AlertTriangle size={18} className="shrink-0" />
                                 <div>
                                     <p className="font-bold uppercase tracking-tight">
@@ -102,8 +108,8 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-3 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-2.5 font-semibold">
-                                <Check size={18} className="shrink-0 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs text-[var(--theme-status-success-text)] flex items-center gap-2.5 font-semibold">
+                                <Check size={18} className="shrink-0 text-[var(--theme-status-success-text)]" />
                                 <div>
                                     <p className="font-bold uppercase tracking-tight">
                                         Scale weight verified within ±{tol}% tolerance (Variance: ±{diffPct.toFixed(1)}%)
@@ -123,7 +129,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-6 shadow-sm space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center">
                                 <Lock size={18} />
                             </div>
                             <div>
@@ -137,7 +143,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                         </div>
 
                         {requireSeal && (
-                            <span className="px-2.5 py-1 rounded-md bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-bold font-mono text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase">
+                            <span className="px-2.5 py-1 rounded-md bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-bold font-mono text-[var(--theme-status-danger-text)] uppercase">
                                 {t('warehouse.packing.mandatoryPolicy') || 'Mandatory Policy'}
                             </span>
                         )}
@@ -150,9 +156,15 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                             placeholder={t('warehouse.packing.scanSealSerialPrompt') || 'Scan or type seal serial (e.g. SEAL-8921)...'}
                             value={sealSerialNumber}
                             onChange={(e) => setSealSerialNumber(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-border-accent)] rounded-2xl py-3 pl-10 pr-4 font-mono font-bold text-sm md:text-base text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] uppercase outline-none min-h-[50px] transition-colors"
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
+                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-border-accent)] rounded-2xl py-3 pl-10 pr-4 font-mono font-bold text-sm md:text-base text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] uppercase outline-none min-h-[50px] transition-colors scroll-mt-20 scroll-mb-20"
                         />
-                        <Hash size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-accent)] text-[var(--theme-accent)]" />
+                        <Hash size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-accent)]" />
                     </div>
                 </div>
             )}

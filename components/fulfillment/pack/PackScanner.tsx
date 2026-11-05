@@ -329,7 +329,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 {/* Pinned Mobile Thumb-Zone Bottom Dock */}
                 <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
                     <form onSubmit={handleScan} className="mx-auto w-full max-w-2xl relative z-20 space-y-2">
-                        {/* Pinned Pack Station & Location Indicator */}
+                        {/* Pinned Pack Station & Item Location Indicator */}
                         <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs">
                             <div className="flex items-center gap-1.5 min-w-0">
                                 <Box size={14} className="text-[var(--theme-accent)] shrink-0" />
@@ -339,6 +339,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                 <span className="font-mono font-bold text-[var(--theme-text-primary)] truncate text-xs">
                                     {(job as any).station || (job as any).stagingLocation || (job as any).destinationSite || 'Pack Station 1'}
                                 </span>
+                                {(nextUnpackedItem?.location || matchedItem?.location) && (
+                                    <span className="font-mono text-[10px] text-[var(--theme-accent)] bg-[var(--theme-bg-card)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] shrink-0 truncate max-w-[120px]">
+                                        Bay: {nextUnpackedItem?.location || matchedItem?.location}
+                                    </span>
+                                )}
                             </div>
                             <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
                                 {formatJobId(job)}
@@ -457,7 +462,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     isProcessing || isSubmitting
                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
                                         : isFullyPacked
-                                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)]'
+                                            ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)]'
                                             : step === 'CONFIRM_QTY'
                                                 ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                                 : !inputVal.trim()

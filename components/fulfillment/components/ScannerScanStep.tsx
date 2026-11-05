@@ -123,9 +123,16 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
             </div>
 
             {!isVerifyingQty ? (
-                /* Scanner Input */
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs">
-                    <div className="flex items-center gap-2 mb-2">
+                /* Scanner Input Card with Pinned Location */
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs space-y-2.5">
+                    {/* Location Badge Pinned Directly with Input to Prevent Keyboard Occlusion */}
+                    <MobileScannerLocationBadge
+                        label={t('warehouse.pickLocation') || 'Pick Location'}
+                        location={currentProduct?.location || (currentItem as any)?.location || t('warehouse.nA') || 'N/A'}
+                        sku={currentItem.sku}
+                        icon={<MapPin size={14} />}
+                    />
+                    <div className="flex items-center gap-2">
                         <Scan className="text-primary" size={16} />
                         <p className="text-xs text-primary uppercase font-semibold">{t('warehouse.scanProductBarcode')}</p>
                     </div>
@@ -161,15 +168,21 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
             ) : (
                 /* Zero-Trust Physical Quantity Verification */
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 space-y-4 animate-in zoom-in-95 duration-200">
+                    <MobileScannerLocationBadge
+                        label={t('warehouse.pickLocation') || 'Pick Location'}
+                        location={currentProduct?.location || (currentItem as any)?.location || t('warehouse.nA') || 'N/A'}
+                        sku={currentItem.sku}
+                        icon={<MapPin size={14} />}
+                    />
                     <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={() => setIsVerifyingQty(false)}
-                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 min-h-[38px] touch-manipulation"
+                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 min-h-[38px] touch-manipulation cursor-pointer"
                         >
                             <ArrowLeft size={14} /> Re-scan
                         </button>
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-success-border)]">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-success-border)]">
                             Barcode Verified
                         </span>
                     </div>

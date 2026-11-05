@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Search, Loader2, Link as LinkIcon } from 'lucide-react';
+import { Search, Loader2, Link as LinkIcon, MapPin } from 'lucide-react';
 import { Product, User } from '../../types';
 
 interface UnknownBarcodeSearchStepProps {
@@ -15,6 +15,8 @@ interface UnknownBarcodeSearchStepProps {
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onBack: () => void;
     onConfirmMap: () => void;
+    siteName?: string;
+    siteCode?: string;
 }
 
 export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> = ({
@@ -28,17 +30,38 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
     searchInputRef,
     onKeyDown,
     onBack,
-    onConfirmMap
+    onConfirmMap,
+    siteName,
+    siteCode,
 }) => {
     const { t } = useLanguage();
     return (
         <div className="space-y-4">
-            <p className="text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] text-sm">
+            {siteName && (
+                <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <MapPin size={13} className="text-[var(--theme-accent)] shrink-0" />
+                        <span className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] tracking-wider shrink-0">
+                            {t('pos.storeLocation') || 'Location'}:
+                        </span>
+                        <span className="font-bold text-[var(--theme-text-primary)] truncate font-mono text-xs">
+                            {siteName}
+                        </span>
+                    </div>
+                    {siteCode && (
+                        <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+                            {siteCode}
+                        </span>
+                    )}
+                </div>
+            )}
+
+            <p className="text-[var(--theme-text-secondary)] text-sm">
                 {t('pos.barcodeSearchHelp')}
             </p>
 
             <div className="relative">
-                <Search className="absolute left-3 top-3 text-[#4D6E56] text-[var(--theme-text-secondary)]" size={18} />
+                <Search className="absolute left-3 top-3 text-[var(--theme-text-secondary)]" size={18} />
                 <input
                     ref={searchInputRef}
                     type="text"
@@ -50,7 +73,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                             target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
                         }, 150);
                     }}
-                    className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] focus:outline-none transition-colors scroll-mt-20 scroll-mb-20 min-h-[44px]"
+                    className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:outline-none transition-colors scroll-mt-20 scroll-mb-20 min-h-[44px]"
                     value={searchTerm || ''}
                     onChange={e => setSearchTerm(e.target.value)}
                     onKeyDown={onKeyDown}
@@ -67,18 +90,18 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                             type="button"
                             onClick={() => setSelectedProduct(product)}
                             className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${selectedProduct?.id === product.id
-                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] dark:border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'
-                                : 'bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_25%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-card)] dark:hover:bg-[var(--theme-bg-panel)]/40 hover:border-[var(--theme-border)]/30'
+                                ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
+                                : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                 }`}
                         >
-                            <div className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{product.name}</div>
-                            <div className="text-xs text-[#4D6E56] text-[var(--theme-text-muted)] flex justify-between items-center mt-1">
+                            <div className="font-bold text-[var(--theme-text-primary)]">{product.name}</div>
+                            <div className="text-xs text-[var(--theme-text-secondary)] flex justify-between items-center mt-1">
                                 <span className="font-mono">{product.sku}</span>
                                 <div className="flex items-center gap-2">
                                     {isLocalStock ? (
-                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
                                     ) : (
-                                        <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
                                     )}
                                 </div>
                             </div>
@@ -86,13 +109,13 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     );
                 })}
                 {searchTerm && filteredProducts.length === 0 && (
-                    <div className="text-center text-[#4D6E56] text-[var(--theme-text-muted)] font-medium py-4">{t('pos.barcodeNoProducts')}</div>
+                    <div className="text-center text-[var(--theme-text-muted)] font-medium py-4">{t('pos.barcodeNoProducts')}</div>
                 )}
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
+            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)]">
                 {selectedProduct ? (
-                    <div className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-semibold truncate max-w-[200px]">
+                    <div className="text-xs text-[var(--theme-accent)] font-semibold truncate max-w-[200px]">
                         {t('pos.barcodeSelected')} <b>{selectedProduct.name}</b>
                     </div>
                 ) : <div />}
@@ -101,7 +124,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     <button
                         type="button"
                         onClick={onBack}
-                        className="px-4 py-2 text-[var(--theme-text-primary)] hover:text-[var(--theme-primary)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] font-bold text-sm transition-colors cursor-pointer"
+                        className="px-4 py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-sm transition-colors cursor-pointer min-h-[44px]"
                     >
                         {t('pos.barcodeBack')}
                     </button>
@@ -109,7 +132,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                         type="button"
                         onClick={onConfirmMap}
                         disabled={!selectedProduct || isUploading}
-                        className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:opacity-90 font-bold rounded-xl disabled:bg-[var(--theme-bg-subtle)] disabled:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] disabled:text-[var(--theme-text-muted)] disabled:text-[var(--theme-text-secondary)] border border-transparent disabled:border-[var(--theme-border)] disabled:border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none cursor-pointer text-xs uppercase tracking-wider"
+                        className="px-6 py-2.5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-bold rounded-xl disabled:bg-[var(--theme-bg-subtle)] disabled:text-[var(--theme-text-secondary)]/50 border border-transparent disabled:border-[var(--theme-border)] disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none cursor-pointer text-xs uppercase tracking-wider min-h-[44px]"
                     >
                         {isUploading ? <Loader2 className="animate-spin" size={16} /> : <LinkIcon size={16} />}
                         {t('pos.barcodeSubmit')}

@@ -55,12 +55,18 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                         type="text"
                         value={scanInput}
                         onChange={e => setScanInput(e.target.value)}
+                        onFocus={(e) => {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                            }, 150);
+                        }}
                         onKeyDown={scanOnlyHandlers.onKeyDown}
                         onPaste={scanOnlyHandlers.onPaste}
                         disabled={isScanning}
                         aria-label={t('warehouse.scanProductBarcode') || 'Scan Product Barcode'}
                         title={t('warehouse.scanProductBarcode') || 'Scan Product Barcode'}
-                        className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-xs sm:text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50"
+                        className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-xs sm:text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50 scroll-mt-16 scroll-mb-16"
                         placeholder={t('warehouse.scanOrderOrJobPrompt') || 'Scan Order, Job #, or SKU...'}
                         autoComplete="off"
                     />

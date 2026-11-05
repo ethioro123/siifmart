@@ -57,11 +57,11 @@ interface MobileScannerToolbarProps {
 const statColorMap: Record<string, string> = {
     cyan: 'text-primary',
     blue: 'text-primary',
-    green: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
-    yellow: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
-    red: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+    green: 'text-[var(--theme-status-success-text)]',
+    yellow: 'text-[var(--theme-status-warning-text)]',
+    red: 'text-[var(--theme-status-danger-text)]',
     purple: 'text-[var(--theme-text-secondary)]',
-    orange: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+    orange: 'text-[var(--theme-status-warning-text)]',
 };
 
 export default function MobileScannerToolbar({
