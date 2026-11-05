@@ -54,6 +54,7 @@ export interface DataContextType {
   setAllSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
 
   // Actions
+  applyConfirmedSettings:(settings:SystemConfig)=>void;
   updateSettings: (settings: Partial<SystemConfig>, user: string) => Promise<void>;
   setActiveSite: (id: string) => void;
   addSite: (site: Site, user: string) => Promise<void>;

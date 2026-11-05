@@ -22,7 +22,7 @@ export const systemConfigService = {
         return this._mapSettings(data);
     },
 
-    async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<SystemConfig> {
+    async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<Partial<SystemConfig>> {
         // Enforce explicit column allowlist: only send columns confirmed to exist in system_config
         const finalUpdates: Record<string, unknown> = {
             id: '00000000-0000-0000-0000-000000000001',
@@ -51,7 +51,7 @@ export const systemConfigService = {
                 throw error;
             }
             if (!data) throw new Error('System settings could not be updated for this account.');
-            return this._mapSettings(finalUpdates, updates);
+            return { ...updates };
         } catch (err) {
             console.error('Failed to update system_config:', err);
             throw err;

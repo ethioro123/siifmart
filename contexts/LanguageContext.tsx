@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo,useRef } from 'react';
 import { TRANSLATIONS, Language } from '../utils/translations';
 import { useData } from './DataContext';
 import { logger } from '../utils/logger';
@@ -70,6 +70,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         setCurrencySymbol(currencySymbol);
     }, [currencySymbol]);
 
+    const explicitLanguage=useRef((()=>{try{return !!localStorage.getItem('siifmart_language');}catch{return false;}})());
     // Initialize language from localStorage or settings, sanitized by country
     const [language, setLocalLanguage] = useState<Language>(() => {
         try {
@@ -95,16 +96,19 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         });
     }, [country]);
 
+    useEffect(()=>{if(!explicitLanguage.current)setLocalLanguage(sanitizeLanguageForCountry(settings?.language,country));},[settings?.language,country]);
+
     // Persist to localStorage whenever language changes
     useEffect(() => {
         try {
-            localStorage.setItem('siifmart_language', language);
+            if(explicitLanguage.current)localStorage.setItem('siifmart_language', language);
         } catch {
             logger.warn('LanguageContext', 'LocalStorage write failed for language settings');
         }
     }, [language]);
 
     const setLanguage = (lang: Language) => {
+        explicitLanguage.current=true;
         const sanitized = sanitizeLanguageForCountry(lang, country);
         setLocalLanguage(sanitized);
     };

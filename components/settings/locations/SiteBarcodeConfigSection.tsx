@@ -101,14 +101,16 @@ export function SiteBarcodeConfigSection({
         <div className="flex-1">
           <button
             type="button"
+            disabled={isGenerating || !newSite.id}
             onClick={() => generateBarcodes({ ...newSite, barcodePrefix: currentPrefix })}
             className="w-full h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
             {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
-            Download Location Labels (CSV)
+            Export Saved Location Labels (CSV)
           </button>
         </div>
       </div>
+      <p className="mt-2 text-xs text-[var(--theme-text-secondary)]">Exports saved, non-archived stock locations only. Unused bays are not generated.</p>
       <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] p-2.5 rounded-xl border-[var(--theme-border)]">
         <span className="uppercase font-semibold">Preview:</span>
         {newSite.code || newSite.barcodePrefix ? (

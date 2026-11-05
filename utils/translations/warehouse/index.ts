@@ -1,3 +1,4 @@
+import {datePreferences} from './datePreferences';
 import {fefo} from './fefo';
 import { operationsReview } from './operationsReview';
 import { receiptReview } from './receiptReview';
@@ -25,6 +26,7 @@ import { labels } from './labels';
 import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
+    datePreferences,
     ...fefo,
     ...operationsReview,
     ...receiptReview,

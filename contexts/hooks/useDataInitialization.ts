@@ -352,13 +352,6 @@ export function useDataInitialization({
     };
   }, [user, loadGlobalData, products.length, sites.length, isDataInitialLoading, setLoadError, setIsDataInitialLoading]);
 
-  // --- SYNC TIMEZONE ---
-  useEffect(() => {
-    if (settings.timezone) {
-      setGlobalTimezone(settings.timezone);
-    }
-  }, [settings.timezone]);
-
   const queriesRef = React.useRef(queries);
   queriesRef.current = queries;
 

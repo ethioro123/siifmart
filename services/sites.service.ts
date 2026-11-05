@@ -12,29 +12,14 @@ async function fetchReplenishmentSourceIds(siteIds: string[]): Promise<Record<st
         .from('site_replenishment_sources')
         .select('site_id, source_site_id')
         .in('site_id', siteIds);
-    if (error || !data) return {};
+    if (error) throw error;
+    if (!data) return {};
     const map: Record<string, string[]> = {};
     for (const row of data) {
         if (!map[row.site_id]) map[row.site_id] = [];
         map[row.site_id].push(row.source_site_id);
     }
     return map;
-}
-
-// Helper: replace all replenishment source associations for a site
-async function upsertReplenishmentSources(siteId: string, sourceIds: string[]): Promise<void> {
-    // Delete existing
-    await supabase
-        .from('site_replenishment_sources')
-        .delete()
-        .eq('site_id', siteId);
-
-    if (!sourceIds.length) return;
-
-    // Insert new
-    const rows = sourceIds.map(id => ({ site_id: siteId, source_site_id: id }));
-    const { error } = await supabase.from('site_replenishment_sources').insert(rows);
-    if (error) throw error;
 }
 
 function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
@@ -103,37 +88,6 @@ export const sitesService = {
 
         if (error) throw error;
 
-        // Auto-provision Administration HQ for active supported countries if missing
-        const supportedCountries: Country[] = ['ET', 'KE', 'UG', 'RW', 'TZ'];
-        for (const c of supportedCountries) {
-            const hasAdmin = data.some((s: any) =>
-                (s.country || 'ET').toUpperCase() === c &&
-                ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(s.type || '')
-            );
-            if (!hasAdmin) {
-                try {
-                    const defaults = getCountryAdminDefaults(c);
-                    const newAdmin = await this.create({
-                        name: defaults.name,
-                        code: defaults.code,
-                        type: defaults.type,
-                        address: defaults.address,
-                        status: defaults.status,
-                        manager: defaults.manager,
-                        country: defaults.country,
-                        currency: defaults.currency,
-                        region: defaults.region,
-                        isFulfillmentNode: false
-                    });
-                    if (newAdmin) {
-                        data.unshift(newAdmin);
-                    }
-                } catch {
-                    // Non-blocking in case of offline or RLS restrictions
-                }
-            }
-        }
-
         const siteIds = data.map((s: any) => s.id);
         const sourcesMap = await fetchReplenishmentSourceIds(siteIds);
 
@@ -168,7 +122,7 @@ export const sitesService = {
             .from('sites')
             .select('code, site_number, country');
 
-        if (!(site.region_code || site.regionCode)) {
+        if (site.type !== 'Administration' && !(site.region_code || site.regionCode)) {
             throw new Error('Operational region is mandatory. Every location must belong to a region.');
         }
 
@@ -211,42 +165,18 @@ export const sitesService = {
             warehouse_bonus_enabled: site.warehouseBonusEnabled,
             fulfillment_strategy: site.fulfillmentStrategy || 'NEAREST',
             is_fulfillment_node: site.isFulfillmentNode !== undefined ? site.isFulfillmentNode : true,
-            barcode_prefix: (site.type === 'Warehouse' || site.type === 'Distribution Center')
-                ? resolvedCode.replace(/^[A-Z]+-/, '').padStart(4, '0')
-                : null,
             // Keep legacy field in sync with first source
             replenishment_source_id: sourceIds[0] ?? null,
             logistics_zone_id: site.logisticsZoneId ?? null,
             region_code: site.region_code || site.regionCode || null,
-            site_number: nextSiteNum,
             country: siteCountry,
             currency: siteCurrency
         };
 
-        let insertResult = await supabase
-            .from('sites')
-            .insert(dbSite)
-            .select()
-            .single();
-
-        if (insertResult.error && (insertResult.error.message?.includes('column "country"') || insertResult.error.message?.includes('column "currency"'))) {
-            delete dbSite.country;
-            delete dbSite.currency;
-            insertResult = await supabase
-                .from('sites')
-                .insert(dbSite)
-                .select()
-                .single();
-        }
-
-        if (insertResult.error) throw insertResult.error;
-        const data = insertResult.data;
-
-        // Write join table associations
-        if (sourceIds.length > 0) {
-            await upsertReplenishmentSources(data.id, sourceIds);
-        }
-
+        const { data, error } = await supabase.rpc('save_site_configuration', {
+            p_site_id: null, p_changes: dbSite, p_source_ids: sourceIds
+        });
+        if (error) throw error;
         return mapSiteRow(data, sourceIds);
     },
 
@@ -261,7 +191,7 @@ export const sitesService = {
         // Fields with identical names in TypeScript and the DB:
         const directFields: (keyof Site)[] = [
             'name', 'type', 'address', 'contact', 'status',
-            'manager', 'capacity', 'language', 'latitude', 'longitude', 'region',
+            'manager', 'capacity', 'region',
             'country', 'currency'
         ];
         for (const field of directFields) {
@@ -280,12 +210,9 @@ export const sitesService = {
             ['isFulfillmentNode', 'is_fulfillment_node'],
             ['logisticsZoneId', 'logistics_zone_id'],
             ['regionCode', 'region_code'],
-            ['zoneCount', 'zone_count'],
-            ['aisleCount', 'aisle_count'],
-            ['binCount', 'bin_count'],
         ];
         for (const [tsKey, dbKey] of fieldMap) {
-            if (updates[tsKey] !== undefined) dbUpdates[dbKey] = updates[tsKey];
+            if (updates[tsKey] !== undefined) dbUpdates[dbKey] = tsKey === 'logisticsZoneId' && updates[tsKey] === '' ? null : updates[tsKey];
         }
 
         // Compute new source IDs from multi-source array (falling back to single-source)
@@ -303,32 +230,10 @@ export const sitesService = {
             dbUpdates.replenishment_source_id = sourceIds.length > 0 ? sourceIds[0] : null;
         }
 
-        let updateResult = await supabase
-            .from('sites')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (updateResult.error && (updateResult.error.message?.includes('column "country"') || updateResult.error.message?.includes('column "currency"'))) {
-            delete dbUpdates.country;
-            delete dbUpdates.currency;
-            updateResult = await supabase
-                .from('sites')
-                .update(dbUpdates)
-                .eq('id', id)
-                .select()
-                .single();
-        }
-
-        if (updateResult.error) throw updateResult.error;
-        const data = updateResult.data;
-
-        // Update join table if source IDs were explicitly provided
-        if (shouldUpdateSources) {
-            await upsertReplenishmentSources(id, sourceIds);
-        }
-
+        const { data, error } = await supabase.rpc('save_site_configuration', {
+            p_site_id: id, p_changes: dbUpdates, p_source_ids: sourceIds
+        });
+        if (error) throw error;
         const finalSourceIds = shouldUpdateSources
             ? sourceIds
             : (await fetchReplenishmentSourceIds([id]))[id] ?? [];

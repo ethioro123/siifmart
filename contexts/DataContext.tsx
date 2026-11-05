@@ -387,6 +387,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     loadError,
 
     // Site Actions (from hook)
+    applyConfirmedSettings:siteActions.applyConfirmedSettings,
     updateSettings: async (settings, user) => { await siteActions.updateSettings(settings, user); },
     setActiveSite: siteActions.setActiveSite,
     addSite: siteActions.addSite,

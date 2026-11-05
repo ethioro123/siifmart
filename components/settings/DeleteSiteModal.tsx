@@ -1,64 +1,28 @@
 import { Link } from 'react-router-dom';
-import React from 'react';
-import { ShieldAlert, ArrowRight, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../Modal';
-import { Site } from '../../types';
-
+import type { Site } from '../../types';
+import { useSiteClosureRequest } from '../../hooks/useSiteClosureRequest';
 interface DeleteSiteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  siteToDelete: Site | null;
-  confirmDeleteSite: () => void;
-  deleteConfirmText: string;
-  setDeleteConfirmText: (val: string) => void;
-  isDeleting: boolean;
+  isOpen: boolean; onClose: () => void; siteToDelete: Site | null;
+  confirmDeleteSite: () => void; deleteConfirmText: string;
+  setDeleteConfirmText: (val: string) => void; isDeleting: boolean;
 }
-
-export function DeleteSiteModal({
-  isOpen,
-  onClose,
-  siteToDelete,
-}: DeleteSiteModalProps) {
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Facility History Protected">
-      <div className="space-y-5 text-[var(--theme-text-primary)]">
-        <div className="p-4 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] flex items-center justify-center shrink-0">
-            <ShieldAlert size={18} className="text-[var(--theme-status-warning-text)]" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-xs font-semibold text-[var(--theme-status-warning-text)] uppercase tracking-wider">
-              Zero-Trust Audit Enforcement
-            </h4>
-            <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
-              Permanent deletion of <strong className="text-[var(--theme-text-primary)]">"{siteToDelete?.name}"</strong> is prohibited. Stock movements, worker badge assignments, and fiscal transaction history must remain immutable.
-            </p>
-          </div>
-        </div>
-
-        <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
-          To decommission or transition this facility, submit a formal closure request through executive governance. Outstanding orders and stock transfers must be resolved first.
-        </p>
-
-        <div className="pt-3 border-t border-[var(--theme-border)] flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-11 px-4 rounded-xl border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
-          >
-            <X size={14} />
-            Close
-          </button>
-          <Link
-            to="/approvals"
-            onClick={onClose}
-            className="min-h-11 px-5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
-          >
-            <span>Open Approvals Hub</span>
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-      </div>
-    </Modal>
-  );
+export function DeleteSiteModal({ isOpen, onClose, siteToDelete }: DeleteSiteModalProps) {
+  const [reason, setReason] = useState('');
+  const request = useSiteClosureRequest();
+  useEffect(() => { if (isOpen) { setReason(''); request.reset(); } }, [isOpen, siteToDelete?.id]);
+  const control = 'min-h-11 px-4 rounded-xl border border-[var(--theme-border)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]';
+  return <Modal isOpen={isOpen} onClose={() => { if (!request.isPending) onClose(); }} title="Request facility closure">
+    <div className="space-y-4 text-[var(--theme-text-primary)]">
+      <p className="text-sm">Request closure of {siteToDelete?.name}. The facility remains open until the required independent reviews are completed. Its records are retained.</p>
+      {request.isSuccess ? <div role="status" className="space-y-3"><p>Closure request submitted for review.</p><Link className={control} to="/approvals" onClick={onClose}>View requests in Approvals</Link></div> : <>
+        <label className="block text-sm">Reason for closure<textarea className={`${control} block w-full mt-2 bg-[var(--theme-bg-card)] py-3`} value={reason} maxLength={1200} onChange={e => setReason(e.target.value)} disabled={request.isPending} /></label>
+        <p className="text-xs text-[var(--theme-text-secondary)]">Enter at least 10 characters. Open the lifecycle workspace in Approvals to track department clearance.</p>
+        {request.error && <p role="alert" className="text-sm text-[var(--theme-status-danger-text)]">{request.error.message}</p>}
+        <button type="button" className={`${control} bg-[var(--theme-accent)] text-[var(--theme-accent-text)]`} disabled={!siteToDelete || reason.trim().length < 10 || request.isPending} onClick={() => siteToDelete && request.mutate({ siteId: siteToDelete.id, reason })}>{request.isPending ? 'Submitting…' : 'Submit closure request'}</button>
+      </>}
+      <button type="button" className={control} onClick={onClose} disabled={request.isPending}>Close</button>
+    </div>
+  </Modal>;
 }

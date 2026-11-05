@@ -186,11 +186,11 @@ export function SiteCard({
               <button
                 onClick={() => handleDeleteSite(site.id)}
                 className="h-8 px-3 bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
-                title="Delete Location"
+                title="Request facility closure"
                 disabled={isDeleting}
               >
                 <Trash2 size={12} />
-                <span>Delete</span>
+                <span>Request closure</span>
               </button>
             )}
           </div>

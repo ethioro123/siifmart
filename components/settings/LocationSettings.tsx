@@ -109,7 +109,7 @@ export default function LocationSettings() {
             type: 'Store',
             status: 'Active',
             country: activeCountry,
-            currency: countryProfile.currencySymbol
+            currency: countryProfile.currency
         });
         setIsSiteModalOpen(true);
     };
@@ -123,7 +123,7 @@ export default function LocationSettings() {
         setIsSavingSite(true);
         try {
             const siteCountry = newSite.country || activeCountry;
-            const siteCurrency = newSite.currency || (siteCountry === 'KE' ? 'KSh' : 'ETB');
+            const siteCurrency = getCountryProfile(siteCountry).currency;
 
             const commonData = {
                 name: newSite.name,
@@ -141,7 +141,7 @@ export default function LocationSettings() {
                 bayCount: newSite.bayCount,
                 replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
                 replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
-                logisticsZoneId: newSite.logisticsZoneId || undefined,
+                logisticsZoneId: newSite.logisticsZoneId === undefined ? undefined : newSite.logisticsZoneId,
                 region_code: newSite.region_code || newSite.regionCode || undefined,
                 regionCode: newSite.region_code || newSite.regionCode || undefined,
                 country: siteCountry,

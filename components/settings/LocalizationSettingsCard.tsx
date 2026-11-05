@@ -1,3 +1,7 @@
+import {formatPreferredDate} from '../../utils/datePreferences';
+import {useRef} from 'react';
+import {useSettingsDraft} from '../../hooks/useSettingsDraft';
+import {resolveCountryGeneralSettings} from '../../utils/generalSettings';
 import React, { useState, useEffect } from 'react';
 import { Globe, Calendar, Save, CheckCircle2, ShieldCheck, DollarSign, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -23,39 +27,20 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
     selectedCountry,
     cardBase
 }) => {
-    const { setLanguage: setContextLanguage } = useLanguage();
+    const { t,setLanguage: setContextLanguage } = useLanguage();
     const { user, showToast } = useStore();
     const isCeo = canSwitchCountry(user);
     const mutation = useGeneralSettingsMutation();
 
-    const [currency, setCurrency] = useState<string>(() => {
-        const profile = getCountryProfile(selectedCountry);
-        return settings?.currency || profile.currency;
-    });
-
-    const [timezone, setTimezone] = useState<string>(() => {
-        const profile = getCountryProfile(selectedCountry);
-        return settings?.timezone || profile.timezone;
-    });
-
-    const [dateFormat, setDateFormat] = useState<'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'>(
-        settings?.dateFormat || 'DD/MM/YYYY'
-    );
-
-    const [language, setLanguage] = useState<string>(() => {
-        return sanitizeLanguageForCountry(settings?.language, selectedCountry);
-    });
-
-    // Sync state when selected country or settings change
-    useEffect(() => {
-        const profile = getCountryProfile(selectedCountry);
-        const countryPartition = settings?.countryConfigs?.[selectedCountry];
-
-        setCurrency(countryPartition?.currency || (settings?.country === selectedCountry ? settings?.currency : '') || profile.currency);
-        setTimezone(countryPartition?.timezone || (settings?.country === selectedCountry ? settings?.timezone : '') || profile.timezone);
-        setDateFormat(countryPartition?.dateFormat || (settings?.country === selectedCountry ? settings?.dateFormat : '') || profile.dateFormat);
-        setLanguage(sanitizeLanguageForCountry(countryPartition?.language || settings?.language, selectedCountry));
-    }, [selectedCountry, settings]);
+    const resolved=resolveCountryGeneralSettings(settings,selectedCountry);
+    const draft=useSettingsDraft({currency:resolved.currency,timezone:resolved.timezone,dateFormat:resolved.dateFormat,language:resolved.language});
+    const {currency,timezone,dateFormat,language}=draft.value;
+    const setCurrency=(currency:string)=>draft.setValue(previous=>({...previous,currency}));
+    const setTimezone=(timezone:string)=>draft.setValue(previous=>({...previous,timezone}));
+    const setDateFormat=(dateFormat:'DD/MM/YYYY'|'MM/DD/YYYY'|'YYYY-MM-DD')=>draft.setValue(previous=>({...previous,dateFormat}));
+    const setLanguage=(language:string)=>draft.setValue(previous=>({...previous,language:language as typeof previous.language}));
+    const alive=useRef(true);
+    useEffect(()=>{alive.current=true;return ()=>{alive.current=false;};},[]);
 
     const activeProfile = getCountryProfile(selectedCountry);
     const isKenya = selectedCountry === 'KE';
@@ -75,33 +60,20 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
             timezone,
             dateFormat,
             language: cleanLang,
-            taxRate: profile.taxRate,
-            defaultVatRate: profile.taxRate,
-            taxAuthority: profile.taxAuthority,
-            complianceStandard: profile.complianceStandard,
-            eTimsEnabled: selectedCountry === 'KE',
-            posReceiptTaxId: selectedCountry === 'KE' ? 'P051234567Z' : '0001234567',
-            supportPhone: selectedCountry === 'KE' ? '+254 712 345 678' : '+251 911 234 567',
+
         };
 
-        await mutation.mutateAsync({
+        const submitted=draft.value;
+        try { await mutation.mutateAsync({
             section: 'localization',
             targetCountry: selectedCountry,
             data: payload,
-        });
+        }); }catch{return;}
+        if(!alive.current)return;
+        draft.acknowledge(submitted);
 
         setContextLanguage(cleanLang as 'en' | 'am' | 'or');
         showToast(`Market localization updated for ${activeProfile.name}`, 'success');
-    };
-
-    const getFormattedDatePreview = (fmt: string) => {
-        const d = new Date();
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        if (fmt === 'DD/MM/YYYY') return `${day}/${month}/${year}`;
-        if (fmt === 'MM/DD/YYYY') return `${month}/${day}/${year}`;
-        return `${year}-${month}-${day}`;
     };
 
     const isSaving = mutation.isPending;
@@ -149,7 +121,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             <strong className="text-[var(--theme-text-primary)]">{activeProfile.currencySymbol} ({activeProfile.currencyCode})</strong>
                         </div>
                         <div>
-                            <span className="text-[var(--theme-text-muted)] block">Tax Standard:</span>
+                            <span className="text-[var(--theme-text-muted)] block">Reference VAT:</span>
                             <strong className="text-[var(--theme-text-primary)]">{activeProfile.taxRate}% VAT</strong>
                         </div>
                         <div>
@@ -169,9 +141,9 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         <AlertCircle className="w-4 h-4 text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                         <div className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
                             <strong className="font-semibold text-[var(--theme-status-warning-text)] block mb-0.5">
-                                Kenya Localization Active:
+                                Kenya language availability:
                             </strong>
-                            Ethiopian regional languages are disabled. Primary tender locked to M-Pesa. Standard KRA tax rate is 16%.
+                            Ethiopian regional languages are disabled. Tender and tax policies are managed in their dedicated settings.
                         </div>
                     </div>
                 )}
@@ -186,7 +158,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         <select
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
-                            disabled={!isCeo}
+                            disabled={!isCeo || isSaving}
                             className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="KSh">Kenyan Shilling (KSh)</option>
@@ -209,7 +181,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         <select
                             value={timezone}
                             onChange={(e) => setTimezone(e.target.value)}
-                            disabled={!isCeo}
+                            disabled={!isCeo || isSaving}
                             className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="Africa/Nairobi">East Africa Time - Nairobi (UTC+3)</option>
@@ -260,15 +232,17 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                 <Calendar size={13} className="text-[var(--theme-text-muted)]" /> Date Format
                             </label>
                             <span className="text-[11px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">
-                                {getFormattedDatePreview(dateFormat)}
+                                {formatPreferredDate(new Date(),timezone,dateFormat)}
                             </span>
                         </div>
                         <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)] grid-cols-3 gap-1">
                             {(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const).map(fmt => (
                                 <button
                                     key={fmt}
+                                    aria-pressed={dateFormat===fmt}
+                                    aria-label={t('warehouse.datePreferences.'+(fmt==='DD/MM/YYYY'?'dmy':fmt==='MM/DD/YYYY'?'mdy':'ymd'))}
                                     type="button"
-                                    disabled={!isCeo}
+                                    disabled={!isCeo || isSaving}
                                     onClick={() => setDateFormat(fmt)}
                                     className={`h-8 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-50 ${
                                         dateFormat === fmt
@@ -288,7 +262,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                     <button
                         type="button"
                         onClick={handleSaveLocalization}
-                        disabled={isSaving || !isCeo}
+                        disabled={isSaving || !isCeo || !draft.dirty}
                         className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                     >
                         {isSaving ? (

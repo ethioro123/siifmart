@@ -3,15 +3,16 @@ import { z } from 'zod';
 export const optionalString = z.string().optional().nullable();
 
 export const BrandingSettingsSchema = z.object({
-  storeName: z.string().min(1, 'Store name is required').max(100),
+  storeName: z.string().min(1, 'Store name is required').max(100).optional(),
   slogan: z.string().max(200).optional().default(''),
-  brandColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/, 'Must be a valid hex color code'),
+  brandColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/, 'Must be a valid hex color code').optional(),
   logoUrl: optionalString,
   country: z.enum(['ET', 'KE', 'UG', 'RW', 'TZ']).optional(),
 }).passthrough();
 
 export const LegalSettingsSchema = z.object({
   legalBusinessName: z.string().min(1, 'Legal business name is required').max(150),
+  posReceiptTaxId:z.string().max(50).optional().default(''),
   taxId: z.string().max(50).optional().default(''),
   taxVatNumber: z.string().max(50).optional().default(''),
   registeredAddress: z.string().min(1, 'Registered address is required').max(255),
@@ -26,10 +27,10 @@ export const LocalizationSettingsSchema = z.object({
   timezone: z.string().min(1).max(50),
   dateFormat: z.enum(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD']),
   language: z.string().min(2).max(10),
-  taxRate: z.number().nonnegative(),
-  defaultVatRate: z.number().nonnegative(),
-  taxAuthority: z.string().min(1),
-  complianceStandard: z.string().min(1),
+  taxRate: z.number().nonnegative().optional(),
+  defaultVatRate: z.number().nonnegative().optional(),
+  taxAuthority: z.string().min(1).optional(),
+  complianceStandard: z.string().min(1).optional(),
   eTimsEnabled: z.boolean().optional(),
 }).passthrough();
 

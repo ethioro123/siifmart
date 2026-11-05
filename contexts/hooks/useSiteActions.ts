@@ -21,17 +21,11 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
     const { sites, activeSiteId, settings, setSites, setSettings, setActiveSiteId, addNotification, logSystemEvent } = deps;
 
     const updateSettings = useCallback(async (newSettings: Partial<SystemConfig>, user: string) => {
-        let previousSettings: SystemConfig = settings;
-        setSettings(prev => {
-            previousSettings = prev;
-            return { ...prev, ...newSettings };
-        });
-
         try {
             const savedSettings = await systemConfigService.updateSettings(newSettings, user);
             
             // Persist to local React state on confirmed server save
-            setSettings(savedSettings);
+            setSettings(previous=>({...previous,...savedSettings}));
 
             if (savedSettings.currency === 'KES' || savedSettings.currency === 'KSh' || savedSettings.country === 'KE') {
                 setCurrencySymbol('KSh');
@@ -45,7 +39,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
         } catch (error: any) {
             // Rollback optimistic state on server failure
-            setSettings(previousSettings);
+
 
             logger.error('useSiteActions', 'Failed to persist settings to database', error as Error);
             addNotification('alert', `Failed to save settings: ${error?.message || 'Server error'}`);
@@ -105,6 +99,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         } catch (error) {
             logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to create site');
+            throw error;
         }
     }, [sites, logSystemEvent, addNotification, setSites]);
 
@@ -116,6 +111,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         } catch (error) {
             logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to update site');
+            throw error;
         }
     }, [logSystemEvent, addNotification, setSites]);
 
@@ -126,7 +122,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             const countryAdminCount = sites.filter(s => (s.country || 'ET') === siteCountry && isAdminSite(s)).length;
             if (countryAdminCount <= 1) {
                 addNotification('alert', `Cannot delete "${targetSite.name}". Every country must retain an Administration Central HQ.`);
-                return;
+                throw new Error('The final country administration site cannot be closed.');
             }
         }
 
@@ -137,8 +133,10 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         } catch (error: any) {
             logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', error?.message || 'Failed to delete site');
+            throw error;
         }
     }, [sites, logSystemEvent, addNotification, setSites]);
 
-    return { updateSettings, setActiveSite, getTaxForSite, addSite, updateSite, deleteSite };
+    const applyConfirmedSettings=useCallback((confirmed:SystemConfig)=>setSettings(confirmed),[setSettings]);
+    return { applyConfirmedSettings,updateSettings, setActiveSite, getTaxForSite, addSite, updateSite, deleteSite };
 }

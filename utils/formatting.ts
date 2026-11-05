@@ -1,3 +1,4 @@
+import {formatPreferredDate,DatePreference} from './datePreferences';
 import { getJobTitleForRole } from './roles';
 
 /**
@@ -93,6 +94,9 @@ export const formatPriceValue = (val: number | undefined | null): string => {
     });
 };
 
+let globalDateFormat:DatePreference|undefined;
+export const setGlobalDateFormat=(format:DatePreference)=>{globalDateFormat=format;};
+
 // Global timezone for the application
 let globalTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -154,7 +158,7 @@ export const formatDateTime = (date: string | Date | undefined | null, options?:
         if (isYesterday) return `Yesterday at ${timeStr}`;
     }
 
-    const dateStr = d.toLocaleDateString([], {
+    const dateStr = globalDateFormat?formatPreferredDate(d,useTz,globalDateFormat):d.toLocaleDateString([], {
         month: 'short',
         day: 'numeric',
         year: (options?.includeYear || d.getFullYear() !== now.getFullYear()) ? 'numeric' : undefined,

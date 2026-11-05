@@ -123,7 +123,7 @@ export function SiteModal({
                         setNewSite({
                           ...newSite,
                           country: prof.code,
-                          currency: prof.currencySymbol,
+                          currency: prof.currency,
                           language: prof.supportedLanguages[0]?.code || 'en',
                           regionCode: undefined,
                           region_code: undefined,
@@ -224,11 +224,12 @@ export function SiteModal({
                 className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.status || 'Active'}
                 onChange={(e) => setNewSite({ ...newSite, status: e.target.value as Site['status'] })}
+                disabled={newSite.status === 'Closed'}
                 aria-label="Location Status"
               >
                 <option value="Active">Active</option>
                 <option value="Maintenance">Under Maintenance</option>
-                <option value="Closed">Closed</option>
+                {newSite.status === 'Closed' && <option value="Closed">Closed (reviewed)</option>}
               </select>
             </div>
 
@@ -256,7 +257,7 @@ export function SiteModal({
               <select
                 className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.logisticsZoneId || ''}
-                onChange={(e) => setNewSite({ ...newSite, logisticsZoneId: e.target.value || undefined })}
+                onChange={(e) => setNewSite({ ...newSite, logisticsZoneId: e.target.value })}
                 aria-label="Logistics Zone"
               >
                 <option value="">Unassigned / Free Zone</option>

@@ -1,3 +1,5 @@
+import {useSettingsDraft} from '../../hooks/useSettingsDraft';
+import {resolveCountryGeneralSettings} from '../../utils/generalSettings';
 import React, { useState, useEffect } from 'react';
 import { Globe, Building, Mail, Phone, Hash, MapPin, Save, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -60,7 +62,11 @@ const InputGroup: React.FC<InputGroupProps> = ({
     );
 };
 
-export default function GeneralSettings() {
+export default function GeneralSettings(){
+    const {settings,effectiveCountry}=useData();
+    return <GeneralSettingsForm key={effectiveCountry||settings?.country||'ET'}/>;
+}
+function GeneralSettingsForm() {
     const { user, showToast } = useStore();
     const { settings, effectiveCountry } = useData();
     const mutation = useGeneralSettingsMutation();
@@ -70,41 +76,11 @@ export default function GeneralSettings() {
     // Multi-country isolation: country scoped by central global switch
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
 
-    const [slogan, setSlogan] = useState<string>(() => {
-        return getCountryBrandingDefaults('ET').slogan || '';
-    });
-
-    const [legal, setLegal] = useState<{
-        legalBusinessName: string;
-        taxVatNumber: string;
-        taxId: string;
-        registeredAddress: string;
-        supportContact: string;
-        supportPhone: string;
-    }>(() => getCountryLegalDefaults('ET'));
-
-    // Synchronize slogan and legal state per country partition
-    useEffect(() => {
-        const countryDefaults = getCountryBrandingDefaults(activeCountry);
-        const legalDefaults = getCountryLegalDefaults(activeCountry);
-        const countryPartition = settings?.countryConfigs?.[activeCountry] || {};
-
-        setSlogan(
-            countryPartition.slogan ||
-            (settings?.country === activeCountry ? settings?.slogan : '') ||
-            countryDefaults.slogan ||
-            ''
-        );
-
-        setLegal({
-            legalBusinessName: countryPartition.legalBusinessName || (settings?.country === activeCountry ? settings?.legalBusinessName : '') || legalDefaults.legalBusinessName,
-            taxVatNumber: countryPartition.taxVatNumber || (settings?.country === activeCountry ? settings?.taxVatNumber : '') || legalDefaults.taxVatNumber,
-            taxId: countryPartition.posReceiptTaxId || (settings?.country === activeCountry ? settings?.posReceiptTaxId : '') || legalDefaults.taxId,
-            registeredAddress: countryPartition.registeredAddress || (settings?.country === activeCountry ? settings?.registeredAddress : '') || legalDefaults.registeredAddress,
-            supportContact: countryPartition.supportContact || (settings?.country === activeCountry ? settings?.supportContact : '') || legalDefaults.supportContact,
-            supportPhone: countryPartition.supportPhone || (settings?.country === activeCountry ? settings?.supportPhone : '') || legalDefaults.supportPhone,
-        });
-    }, [activeCountry, settings]);
+    const resolved=resolveCountryGeneralSettings(settings,activeCountry);
+    const sloganDraft=useSettingsDraft(resolved.slogan);
+    const {value:slogan,setValue:setSlogan}=sloganDraft;
+    const legalDraft=useSettingsDraft({legalBusinessName:resolved.legalBusinessName,taxVatNumber:resolved.taxVatNumber,taxId:resolved.posReceiptTaxId,registeredAddress:resolved.registeredAddress,supportContact:resolved.supportContact,supportPhone:resolved.supportPhone});
+    const {value:legal,setValue:setLegal}=legalDraft;
 
     const handleSaveSection = async (section: 'branding' | 'legal') => {
         if (!isAuthorized) {
@@ -119,10 +95,7 @@ export default function GeneralSettings() {
 
         const dataPayload = section === 'branding'
             ? {
-                storeName: 'SIIFMART',
                 slogan: slogan.trim(),
-                brandColor: '#10B981',
-                logoUrl: '',
                 country: activeCountry,
             }
             : {
@@ -135,15 +108,17 @@ export default function GeneralSettings() {
                 country: activeCountry,
             };
 
-        await mutation.mutateAsync({
+        try { await mutation.mutateAsync({
             section,
             targetCountry: activeCountry,
             data: dataPayload,
-        });
+        }); }catch{return;}
 
         if (section === 'branding') {
+            sloganDraft.acknowledge(slogan,slogan.trim());
             showToast('Corporate slogan updated successfully', 'success');
         } else {
+            legalDraft.acknowledge(legal,Object.fromEntries(Object.entries(legal).map(([key,value])=>[key,value.trim()])) as typeof legal);
             showToast('Legal entity details saved successfully', 'success');
         }
     };
@@ -188,7 +163,7 @@ export default function GeneralSettings() {
                     <InputGroup
                         label="Store Slogan / Value Proposition"
                         value={slogan}
-                        disabled={!isAuthorized}
+                        disabled={!isAuthorized || isSaving}
                         onChange={(e) => setSlogan(e.target.value)}
                         placeholder="e.g. Your trusted retail and wholesale marketplace"
                         icon={Sparkles}
@@ -199,7 +174,7 @@ export default function GeneralSettings() {
                         <button
                             type="button"
                             onClick={() => handleSaveSection('branding')}
-                            disabled={isSaving || !isAuthorized}
+                            disabled={isSaving || !isAuthorized || !sloganDraft.dirty}
                             className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             {isSaving ? (
@@ -242,7 +217,7 @@ export default function GeneralSettings() {
                         <InputGroup
                             label="Legal Business Name"
                             value={legal.legalBusinessName}
-                            disabled={!isAuthorized}
+                            disabled={!isAuthorized || isSaving}
                             onChange={(e) => setLegal(prev => ({ ...prev, legalBusinessName: e.target.value }))}
                             placeholder={activeProfile.code === 'KE' ? 'e.g. SiifMart Kenya Limited' : 'e.g. SiifMart Technologies PLC'}
                             icon={Building}
@@ -252,7 +227,7 @@ export default function GeneralSettings() {
                             <InputGroup
                                 label={`Tax ID / ${activeProfile.taxIdLabel}`}
                                 value={legal.taxId}
-                                disabled={!isAuthorized}
+                                disabled={!isAuthorized || isSaving}
                                 onChange={(e) => setLegal(prev => ({ ...prev, taxId: e.target.value }))}
                                 placeholder={activeProfile.taxIdPlaceholder}
                                 icon={Hash}
@@ -260,7 +235,7 @@ export default function GeneralSettings() {
                             <InputGroup
                                 label="VAT Registration No"
                                 value={legal.taxVatNumber}
-                                disabled={!isAuthorized}
+                                disabled={!isAuthorized || isSaving}
                                 onChange={(e) => setLegal(prev => ({ ...prev, taxVatNumber: e.target.value }))}
                                 placeholder={`VAT-${activeProfile.taxIdLabel}`}
                                 icon={Hash}
@@ -270,7 +245,7 @@ export default function GeneralSettings() {
                         <InputGroup
                             label="Registered Business Address"
                             value={legal.registeredAddress}
-                            disabled={!isAuthorized}
+                            disabled={!isAuthorized || isSaving}
                             onChange={(e) => setLegal(prev => ({ ...prev, registeredAddress: e.target.value }))}
                             placeholder={activeProfile.code === 'KE' ? 'Westlands Commercial Centre, Nairobi' : 'Bole Sub-City, Addis Ababa'}
                             icon={MapPin}
@@ -280,7 +255,7 @@ export default function GeneralSettings() {
                             <InputGroup
                                 label="Support Email"
                                 value={legal.supportContact}
-                                disabled={!isAuthorized}
+                                disabled={!isAuthorized || isSaving}
                                 onChange={(e) => setLegal(prev => ({ ...prev, supportContact: e.target.value }))}
                                 placeholder={`support.${activeCountry.toLowerCase()}@siifmart.com`}
                                 icon={Mail}
@@ -288,7 +263,7 @@ export default function GeneralSettings() {
                             <InputGroup
                                 label="Support Telephone"
                                 value={legal.supportPhone}
-                                disabled={!isAuthorized}
+                                disabled={!isAuthorized || isSaving}
                                 onChange={(e) => setLegal(prev => ({ ...prev, supportPhone: e.target.value }))}
                                 placeholder={activeProfile.phonePlaceholder}
                                 icon={Phone}
@@ -300,7 +275,7 @@ export default function GeneralSettings() {
                         <button
                             type="button"
                             onClick={() => handleSaveSection('legal')}
-                            disabled={isSaving || !isAuthorized}
+                            disabled={isSaving || !isAuthorized || !legalDraft.dirty}
                             className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             {isSaving ? (

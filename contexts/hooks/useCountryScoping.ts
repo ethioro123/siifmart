@@ -1,3 +1,5 @@
+import {setGlobalTimezone,setGlobalDateFormat} from '../../utils/formatting';
+import {resolveCountryGeneralSettings} from '../../utils/generalSettings';
 import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import {
   Site, PurchaseOrder, SaleRecord, Employee,
@@ -333,21 +335,14 @@ export function useCountryScoping({
 
     return {
       ...settings,
+      ...resolveCountryGeneralSettings(settings,effectiveCountry),
       country: effectiveCountry,
-      currency: partition.currency || profile.currency,
-      timezone: partition.timezone || profile.timezone,
-      dateFormat: partition.dateFormat || profile.dateFormat || 'DD/MM/YYYY',
       taxRate: partition.taxRate ?? profile.taxRate,
       defaultVatRate: partition.taxRate ?? profile.taxRate,
       taxAuthority: partition.taxAuthority || profile.taxAuthority,
       complianceStandard: partition.complianceStandard || profile.complianceStandard,
       eTimsEnabled: isKe,
       storeName: partition.storeName || settings.storeName,
-      legalBusinessName: partition.legalBusinessName || COUNTRY_LEGAL_DEFAULTS[effectiveCountry]?.legalBusinessName || settings.legalBusinessName,
-      registeredAddress: partition.registeredAddress || COUNTRY_LEGAL_DEFAULTS[effectiveCountry]?.registeredAddress || settings.registeredAddress,
-      supportContact: partition.supportContact || settings.supportContact,
-      supportPhone: partition.supportPhone || settings.supportPhone,
-      posReceiptTaxId: partition.posReceiptTaxId || settings.posReceiptTaxId,
       posReceiptHeader: partition.posReceiptHeader || settings.posReceiptHeader,
       posReceiptFooter: partition.posReceiptFooter || settings.posReceiptFooter,
       posReceiptAddress: partition.posReceiptAddress || settings.posReceiptAddress,
@@ -355,6 +350,11 @@ export function useCountryScoping({
       posReceiptEmail: partition.posReceiptEmail || settings.posReceiptEmail,
     };
   }, [settings, isCeo, effectiveCountry]);
+
+  useEffect(()=>{
+    const general=resolveCountryGeneralSettings(settings,effectiveCountry);
+    setGlobalTimezone(general.timezone);setGlobalDateFormat(general.dateFormat);
+  },[effectiveCountry,settings.timezone,settings.dateFormat,settings.countryConfigs]);
 
   // Synchronize category CURRENCY_SYMBOL to the active sovereign country
   useEffect(() => {
