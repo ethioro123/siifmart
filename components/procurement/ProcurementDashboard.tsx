@@ -35,16 +35,16 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
         'var(--theme-status-info)'
     ];
 
-    const KpiCard = ({ title, value, sub, icon: Icon }: any) => (
-        <div className="rounded-2xl p-5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs group">
-            <div className="flex justify-between items-start mb-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center justify-center text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors">
-                    <Icon size={18} strokeWidth={2} />
+    const KpiCard = ({ title, value, sub, icon: Icon, className = '' }: any) => (
+        <div className={`rounded-2xl p-4 sm:p-5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs group ${className}`}>
+            <div className="flex justify-between items-start mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center justify-center text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors">
+                    <Icon size={16} className="sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                 </div>
             </div>
-            <h3 className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1.5">{title}</h3>
-            <div className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight mb-1">{value}</div>
-            <p className="text-xs text-[var(--theme-text-secondary)] font-normal">{sub}</p>
+            <h3 className="text-[10px] sm:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 sm:mb-1.5">{title}</h3>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight mb-0.5 sm:mb-1 truncate">{value}</div>
+            <p className="text-[11px] sm:text-xs text-[var(--theme-text-secondary)] font-normal truncate">{sub}</p>
         </div>
     );
 
@@ -121,7 +121,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative z-0">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative z-0">
                 <KpiCard
                     title={`Total Spend (${dateRange === 'All Time' ? 'Life' : dateRange.replace('This ', '')})`}
                     value={formatCompactNumber(metrics.totalSpend, { currency: currencySymbol })}
@@ -151,17 +151,18 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                     value="94.2%"
                     sub="Rolling 30 Days"
                     icon={Clock}
+                    className="col-span-2 md:col-span-1"
                 />
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-6">
-                    <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-6 text-xs uppercase tracking-wider">Spend by Category</h3>
-                    <div className="h-[300px] w-full min-w-0 touch-pan-y">
-                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-4 sm:p-6">
+                    <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-4 sm:mb-6 text-xs uppercase tracking-wider">Spend by Category</h3>
+                    <div className="h-[260px] sm:h-[300px] w-full min-w-0 touch-pan-y">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
                             <PieChart>
-                                <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value">
+                                <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={4} dataKey="value">
                                     {metrics.categoryData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                     ))}
@@ -174,23 +175,23 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="flex justify-center gap-4 flex-wrap mt-4">
+                    <div className="flex justify-center gap-3 sm:gap-4 flex-wrap mt-3 sm:mt-4">
                         {metrics.categoryData.map((entry, index) => (
-                            <div key={index} className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)]">
+                            <div key={index} className="flex items-center gap-1.5 sm:gap-2 text-xs text-[var(--theme-text-secondary)]">
                                 <div
-                                    className="w-2 h-2 rounded-full"
+                                    className="w-2 h-2 rounded-full shrink-0"
                                     ref={(el) => { if (el) el.style.backgroundColor = COLORS[index % COLORS.length]; }}
                                 />
-                                {entry.name}
+                                <span className="truncate max-w-[140px] sm:max-w-none">{entry.name}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-6">
-                    <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-6 text-xs uppercase tracking-wider">Monthly Spend Trend</h3>
-                    <div className="h-[300px] w-full min-w-0 touch-pan-y">
-                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
+                <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-4 sm:p-6">
+                    <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-4 sm:mb-6 text-xs uppercase tracking-wider">Monthly Spend Trend</h3>
+                    <div className="h-[260px] sm:h-[300px] w-full min-w-0 touch-pan-y">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
                             <AreaChart data={metrics.trendData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.4} vertical={false} />
                                 <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} />

@@ -60,6 +60,14 @@ describe('formatMovementReason', () => {
         expect(formatted).toBe('Transferred stock for order 7E0F10 to staging');
     });
 
+    it('handles putaway destinations with spaces and multi-word names without raw UUID', () => {
+        const raw = 'Putaway job 621f1556-fd41-480e-af91-bce812a70ae9 line 0 to Receiving Dock';
+        const formatted = formatMovementReason(raw);
+
+        expect(formatted).not.toContain('621f1556-fd41-480e-af91-bce812a70ae9');
+        expect(formatted).toBe('Putaway job 621F15 line 1 to Receiving Dock');
+    });
+
     it('returns default fallback when reason is empty or null', () => {
         expect(formatMovementReason(null)).toBe('Receipt recorded');
         expect(formatMovementReason(undefined)).toBe('Receipt recorded');

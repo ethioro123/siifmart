@@ -249,7 +249,7 @@ export const formatMovementReason = (
     let formatted = reason.trim();
 
     // 1. Putaway job pattern: "Putaway job <ref> line <idx> to <location>"
-    const putawayMatch = formatted.match(/^Putaway\s+job\s+([0-9a-zA-Z-]+)\s+(?:line\s+(\d+)\s+)?to\s+([A-Z0-9-]+)$/i);
+    const putawayMatch = formatted.match(/^Putaway\s+job\s+([0-9a-zA-Z-]+)\s+(?:line\s+(\d+)\s+)?to\s+(.+)$/i);
     if (putawayMatch) {
         const [, rawRef, lineIdx, location] = putawayMatch;
         let jobLabel = rawRef;

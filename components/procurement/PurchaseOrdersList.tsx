@@ -123,51 +123,54 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     return (
         <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden transition-all duration-200">
             {/* Modern Filter Toolbar */}
-            <div className="p-5 border-b border-[var(--theme-border)] space-y-4">
+            <div className="p-3.5 sm:p-5 border-b border-[var(--theme-border)] space-y-3 sm:space-y-4">
                 {/* Row 1: Search & Dropdowns */}
-                <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3">
                     {/* Search */}
-                    <div className="flex items-center rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 flex-1 focus-within:border-[var(--theme-accent)] transition-all">
+                    <div className="flex items-center rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3.5 sm:px-4 h-11 flex-1 focus-within:border-[var(--theme-accent)] transition-all">
                         <Search className="w-4 h-4 text-[var(--theme-text-secondary)] shrink-0" />
                         <input
                             type="text"
                             placeholder="Search PO # or Supplier..."
-                            className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder:text-[var(--theme-text-secondary)]/70"
+                            className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-xs sm:text-sm outline-none placeholder:text-[var(--theme-text-secondary)]/70"
                             value={searchTerm}
                             onChange={(e) => onSearchChange(e.target.value)}
                         />
                     </div>
 
-                    {/* Supplier Filter */}
-                    <select
-                        aria-label="Filter by Supplier"
-                        value={supplierFilter}
-                        onChange={(e) => onSupplierFilterChange(e.target.value)}
-                        className="rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] min-w-[160px] transition-all cursor-pointer"
-                    >
-                        <option value="All" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">All Suppliers</option>
-                        {suppliers.map(s => (
-                            <option key={s.id} value={s.id} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{s.name}</option>
-                        ))}
-                    </select>
+                    {/* Dropdowns Row on Mobile */}
+                    <div className="grid grid-cols-2 md:flex gap-2 sm:gap-3">
+                        {/* Supplier Filter */}
+                        <select
+                            aria-label="Filter by Supplier"
+                            value={supplierFilter}
+                            onChange={(e) => onSupplierFilterChange(e.target.value)}
+                            className="w-full md:w-auto rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 sm:px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] md:min-w-[160px] transition-all cursor-pointer truncate"
+                        >
+                            <option value="All" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">All Suppliers</option>
+                            {suppliers.map(s => (
+                                <option key={s.id} value={s.id} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{s.name}</option>
+                            ))}
+                        </select>
 
-                    {/* Sort */}
-                    <select
-                        aria-label="Sort POs"
-                        value={sort}
-                        onChange={(e) => onSortChange(e.target.value as any)}
-                        className="rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] min-w-[160px] transition-all cursor-pointer"
-                    >
-                        <option value="dateDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Newest</option>
-                        <option value="dateAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Oldest</option>
-                        <option value="amountDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: High-Low</option>
-                        <option value="amountAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: Low-High</option>
-                        <option value="priority" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Priority</option>
-                    </select>
+                        {/* Sort */}
+                        <select
+                            aria-label="Sort POs"
+                            value={sort}
+                            onChange={(e) => onSortChange(e.target.value as any)}
+                            className="w-full md:w-auto rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 sm:px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] md:min-w-[160px] transition-all cursor-pointer truncate"
+                        >
+                            <option value="dateDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Newest</option>
+                            <option value="dateAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Oldest</option>
+                            <option value="amountDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: High-Low</option>
+                            <option value="amountAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: Low-High</option>
+                            <option value="priority" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Priority</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Row 2: Status Chips */}
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex items-center overflow-x-auto no-scrollbar gap-1.5 pt-1 -mx-1 px-1 sm:mx-0 sm:px-0 sm:flex-wrap">
                     {['All', 'Draft', 'Pending', 'Approved', 'Partially Received', 'Received', 'Cancelled', 'Rejected'].map(status => {
                         const isChipActive = statusFilter === status;
                         const label = status === 'Draft' ? 'Draft (Completed)' : status;
@@ -175,7 +178,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                             <button
                                 key={status}
                                 onClick={() => onStatusFilterChange(status as any)}
-                                className={`h-8 px-3.5 rounded-full text-xs transition-all active:scale-[0.98] ${
+                                className={`h-9 px-3.5 rounded-full text-xs whitespace-nowrap shrink-0 transition-all active:scale-[0.98] ${
                                     isChipActive
                                         ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold shadow-sm'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-[var(--theme-border-subtle)]'

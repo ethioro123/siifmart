@@ -238,21 +238,21 @@ export default function Procurement() {
 
     return (
         <div className="flex flex-col min-h-screen bg-transparent text-[var(--theme-text-primary)] transition-colors duration-300">
-            <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 pb-20 sm:pb-32">
+            <div className="flex-none p-3.5 sm:p-6 md:p-8 space-y-4 sm:space-y-6 md:space-y-8 pb-24 sm:pb-32">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
                 <div>
-                    <div className="flex items-center gap-3.5 mb-1.5">
-                        <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] flex items-center justify-center shadow-sm">
-                            <Truck size={24} strokeWidth={2} />
+                    <div className="flex items-center gap-3 sm:gap-3.5 mb-1 sm:mb-1.5">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] flex items-center justify-center shadow-sm shrink-0">
+                            <Truck size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] tracking-tight">Procurement</h1>
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-[var(--theme-text-primary)] tracking-tight">Procurement</h1>
                     </div>
                     <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm font-normal max-w-xl">
                         Manage supply chain, purchase orders, and vendor relationships.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                     {/* Maker-Checker Sign-off Hub Badge */}
                     {(() => {
                         const isApproverRole = Boolean(user?.role && ['country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager', 'country_managing_director', 'group_ceo'].includes(user.role));
@@ -265,7 +265,7 @@ export default function Procurement() {
                                     setActiveTab('orders');
                                     setStatusFilter('Draft');
                                 }}
-                                className="min-h-11 px-4 flex items-center gap-2 bg-[var(--theme-status-warning-bg)] hover:opacity-90 border border-[var(--theme-status-warning-border)] rounded-full transition-colors cursor-pointer shadow-xs text-xs font-semibold text-[var(--theme-status-warning-text)] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-warning)]"
+                                className="min-h-11 px-3.5 sm:px-4 flex items-center gap-2 bg-[var(--theme-status-warning-bg)] hover:opacity-90 border border-[var(--theme-status-warning-border)] rounded-full transition-colors cursor-pointer shadow-xs text-xs font-semibold text-[var(--theme-status-warning-text)] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-warning)] active:scale-[0.98]"
                                 title={`${pendingSignOffsCount} PO draft(s) awaiting manager sign-off`}
                             >
                                 <ShieldAlert size={16} className="text-[var(--theme-status-warning-text)] shrink-0" />
@@ -273,7 +273,7 @@ export default function Procurement() {
                             </button>
                         ) : (
                             <div
-                                className="min-h-11 px-4 flex items-center gap-2 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-full text-xs font-semibold text-[var(--theme-status-info-text)] shrink-0"
+                                className="min-h-11 px-3.5 sm:px-4 flex items-center gap-2 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-full text-xs font-semibold text-[var(--theme-status-info-text)] shrink-0"
                                 title={`${pendingSignOffsCount} PO draft(s) in supervisory review`}
                             >
                                 <Clock size={16} className="text-[var(--theme-status-info-text)] shrink-0" />
@@ -286,7 +286,7 @@ export default function Procurement() {
                         <button
                             type="button"
                             onClick={() => handleCreatePOOpen()}
-                            className="min-h-11 px-5 rounded-full bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-colors flex items-center gap-2 shadow-xs shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            className="min-h-11 px-4 sm:px-5 rounded-full bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] font-semibold text-xs sm:text-sm hover:opacity-90 active:scale-[0.98] transition-colors flex items-center gap-2 shadow-xs shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <Plus size={18} strokeWidth={2.5} />
                             Create Order
@@ -306,7 +306,7 @@ export default function Procurement() {
             />
 
             {/* Navigation Tabs */}
-            <div role="group" aria-label="Procurement sections" className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
+            <div role="group" aria-label="Procurement sections" className="flex items-center overflow-x-auto no-scrollbar gap-1 p-1 rounded-2xl sm:rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] w-full sm:w-fit touch-manipulation">
                 {(isRegionalStaff
                     ? (['overview', 'orders', 'suppliers', 'vendor_relations', 'inbound_qc'] as const)
                     : (['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const)
@@ -318,7 +318,7 @@ export default function Procurement() {
                             type="button"
                             onClick={() => setActiveTab(tab)}
                             aria-pressed={isActive}
-                            className={`min-h-11 px-4 py-2 rounded-full text-xs sm:text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                            className={`min-h-11 px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap shrink-0 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] active:scale-[0.98] ${
                                 isActive
                                     ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-accent)]'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'

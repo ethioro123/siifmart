@@ -12,6 +12,12 @@ BEGIN
  AND EXISTS(SELECT 1 FROM public.products WHERE site_id=st.id) ORDER BY st.id LIMIT 1;
  SELECT * INTO e FROM public.employees WHERE site_id=s.id AND role='picker' AND lower(status)='active' LIMIT 1;
  SELECT * INTO base FROM public.products WHERE site_id=s.id LIMIT 1;
+ -- Empty production warehouses use disposable stock and the existing CEO identity.
+ -- This remains inside the rollback transaction and creates no employee accounts.
+ PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
+ IF s.id IS NULL THEN SELECT * INTO s FROM public.sites WHERE country='ET' AND type IN('Warehouse','Distribution Center') ORDER BY id LIMIT 1; END IF;
+ IF e.id IS NULL THEN SELECT * INTO e FROM public.employees WHERE role='group_ceo' AND lower(status)='active' LIMIT 1; END IF;
+ IF base.id IS NULL THEN INSERT INTO public.products(name,sku,category,price,stock,status,location,site_id) VALUES('Rollback cooking oil',sku||'-BASE','Pantry',10,0,'active','On Order',s.id) RETURNING * INTO base; END IF;
  IF s.id IS NULL OR e.id IS NULL OR base.id IS NULL THEN RAISE EXCEPTION 'Missing warehouse regression fixture'; END IF;
  PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
  FOR v IN SELECT * FROM (VALUES(early,'EARLY',2,current_date+1),(late,'LATE',5,current_date+5),(expired,'EXPIRED',50,current_date-1),(undated,'UNDATED',2,NULL::date))t(id,batch,stock,expiry) LOOP
@@ -32,6 +38,7 @@ BEGIN
  IF NOT blocked THEN RAISE EXCEPTION 'Reserved or expired stock allocated'; END IF;
  blocked:=false;BEGIN UPDATE public.products SET stock=stock-1 WHERE id=early;EXCEPTION WHEN raise_exception THEN blocked:=SQLERRM LIKE '%reserved%';END;
  IF NOT blocked THEN RAISE EXCEPTION 'Another writer consumed reserved pick stock'; END IF;
+ IF private.fefo_today(s.id) IS DISTINCT FROM (now() AT TIME ZONE 'Africa/Addis_Ababa')::date THEN RAISE EXCEPTION 'Expiry uses the wrong country date'; END IF;
  proof:=private.pick_location_barcode(CASE WHEN nullif(s.barcode_prefix,'') IS NULL THEN s.code WHEN length(s.barcode_prefix)=4 THEN 'SITE-'||s.barcode_prefix ELSE 'SITE-8888' END,'A-01-01');
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',e.id,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';
  blocked:=false;BEGIN PERFORM public.record_pick_line(first_job,0,2,proof,sku,NULL);EXCEPTION WHEN raise_exception THEN blocked:=true;END;

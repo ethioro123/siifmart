@@ -187,17 +187,17 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                         {/* Actions & request info */}
                         <div className="flex items-center justify-between pt-1 border-t border-[var(--theme-border-subtle)]">
                             <span className="text-[10px] text-[var(--theme-text-secondary)]">By: {po.requestedBy || po.createdBy || 'Unknown'}</span>
-                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => setSelectedPO(po)}
-                                    className="h-7 px-3 text-[11px] font-medium rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all active:scale-[0.98]"
+                                    className="min-h-[38px] px-3.5 text-xs font-semibold rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all active:scale-[0.98] cursor-pointer touch-manipulation shadow-xs"
                                 >
                                     Details
                                 </button>
                                 {isDraft && canApprove && (
                                     <button
                                         onClick={(e) => handleSingleApprove(e, po)}
-                                        className="h-7 px-3 text-[11px] font-medium rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] transition-all active:scale-[0.98]"
+                                        className="min-h-[38px] px-3.5 text-xs font-semibold rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] transition-all active:scale-[0.98] cursor-pointer touch-manipulation shadow-xs"
                                     >
                                         Review
                                     </button>
@@ -208,11 +208,11 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                         (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={() => onEdit(po)}
-                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"
+                                        className="min-w-[38px] min-h-[38px] rounded-full flex items-center justify-center border border-[var(--theme-border-subtle)] hover:border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95] cursor-pointer touch-manipulation"
                                         title="Edit PO"
                                         aria-label="Edit Purchase Order"
                                     >
-                                        <Edit3 size={13} />
+                                        <Edit3 size={15} />
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
@@ -221,11 +221,11 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                         (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}
-                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.95]"
+                                        className="min-w-[38px] min-h-[38px] rounded-full flex items-center justify-center border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.95] cursor-pointer touch-manipulation"
                                         title="Cancel PO"
                                         aria-label="Cancel Purchase Order"
                                     >
-                                        <Trash2 size={13} />
+                                        <Trash2 size={15} />
                                     </button>
                                 )}
                             </div>
