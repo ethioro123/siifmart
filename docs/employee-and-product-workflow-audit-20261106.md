@@ -2,7 +2,7 @@
 
 ## Result and scope
 
-This third investigation found **12 additional gaps**, centered on employee authority, confidential personnel data and payroll integrity. This is an investigation report; the findings below have not been fixed by this audit.
+This third investigation found **12 additional gaps**, centered on employee authority, confidential personnel data and payroll integrity. The findings below describe the original audit state. The subsequent [repair and staging verification record](employee-and-product-workflow-fixes-20261106.md) documents their fixes; original reproduction scripts remain historical evidence in commit `297e91d7`.
 
 The highest priorities are executive-role assignment, administrative password resets, payroll approval/settlement authority and personnel-data exposure. Employee authority is upstream of procurement, receiving, warehouse supervision, transfers and finance: a role-assignment gap can undermine otherwise correct operation-specific checks.
 
