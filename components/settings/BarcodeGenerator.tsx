@@ -57,8 +57,8 @@ export const BarcodeGenerator: React.FC = () => {
     };
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 mt-6 shadow-xs">
-            <div className="flex items-start justify-between">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 mt-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div>
                     <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                         <Barcode size={20} className="text-[var(--theme-accent)]" />
@@ -73,8 +73,8 @@ export const BarcodeGenerator: React.FC = () => {
                 <button
                     onClick={generateCSV}
                     disabled={isGenerating}
-                    className={`px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all min-h-[44px] cursor-pointer ${isComplete
-                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                    className={`px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all min-h-11 cursor-pointer touch-manipulation ${isComplete
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                         : 'bg-[var(--theme-accent)] text-[var(--theme-accent-text)] hover:opacity-90 shadow-xs'
                         }`}
                 >
@@ -97,7 +97,7 @@ export const BarcodeGenerator: React.FC = () => {
                 </button>
             </div>
 
-            <div className="mt-4 flex gap-4 text-xs font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] p-3 rounded-xl border-[var(--theme-border)]">
+            <div className="mt-4 flex flex-wrap gap-4 text-xs font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] p-3 rounded-xl border border-[var(--theme-border)]">
                 <div>Format: <span className="text-[var(--theme-accent)] font-semibold">PPPP-ZZ-AA-BB-UUUU-C</span></div>
                 <div>Count: <span className="text-[var(--theme-text-primary)] font-semibold">4,000 Locations</span></div>
                 <div>Example: <span className="text-[var(--theme-text-primary)] font-semibold">888801050200005</span> (A-05-02)</div>

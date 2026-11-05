@@ -158,12 +158,12 @@ export default function POSSettings() {
     const isSavingGateways = posSettingsMutation.isPending && posSettingsMutation.variables?.section === 'gateways';
 
     return (
-        <div className="w-full flex-col gap-6 transition-opacity duration-200 relative">
+        <div className="w-full flex flex-col gap-6 transition-opacity duration-200 relative">
 
             {/* ── ROLE GATE ── */}
             {!canConfigurePOS && (
-                <div className="flex-col items-center justify-center py-24 gap-4 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center">
                         <Lock size={22} className="text-[var(--theme-text-secondary)]" />
                     </div>
                     <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm">Access Restricted</h3>
@@ -177,7 +177,7 @@ export default function POSSettings() {
             {canConfigurePOS && (
             <>
             {/* Top Tab Bar */}
-            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] mb-6">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
                 {([
                     { id: 'station' as const, label: 'Retail Station', icon: Monitor },
                     { id: 'connectivity' as const, label: 'Tender & Connectivity', icon: Globe },
@@ -189,7 +189,7 @@ export default function POSSettings() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`min-h-[38px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                            className={`min-h-11 sm:min-h-[38px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer touch-manipulation ${active
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
                                 }`}
@@ -205,7 +205,7 @@ export default function POSSettings() {
                 <button
                     onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                     title="Toggle Receipt Preview"
-                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
+                    className="fixed bottom-8 right-8 min-h-11 sm:h-10 px-4 rounded-xl z-[60] bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs touch-manipulation"
                 >
                     <Receipt size={16} />
                     <span>{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>
@@ -258,18 +258,18 @@ export default function POSSettings() {
                 transform transition-transform duration-200 ease-out shadow-2xl
                 ${isPreviewOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
-                <div className="h-full flex-col p-6 sm:p-8 pt-16 overflow-y-auto relative">
+                <div className="h-full flex flex-col p-6 sm:p-8 pt-16 overflow-y-auto relative">
                     <button
                         onClick={() => setIsPreviewOpen(false)}
                         title="Close Live Preview"
-                        className="absolute top-6 right-6 p-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        className="absolute top-6 right-6 p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center touch-manipulation"
                     >
                         <Plus className="rotate-45" size={18} />
                     </button>
 
                     <div className="mb-6 text-center space-y-1">
                         <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">Thermal Slip Preview</h2>
-                        <p className="text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold">
+                        <p className="text-xs text-[var(--theme-accent)] font-semibold">
                             {receiptBranding.posReceiptWidth} Standard ESC/POS
                         </p>
                     </div>

@@ -105,7 +105,7 @@ export function SiteModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Facility Country Immutability Notice */}
                 {!!newSite.id && (
-                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
+                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
                     <Lock size={14} className="shrink-0" />
                     <span>Operating market is permanently locked for existing facilities. Sovereign borders cannot be altered after creation.</span>
                   </div>
@@ -130,16 +130,16 @@ export function SiteModal({
                           areaManagerId: null
                         });
                       }}
-                      className={`p-3.5 rounded-2xl border text-left transition-all ${
+                      className={`p-3.5 rounded-2xl border text-left transition-all min-h-11 touch-manipulation ${
                         isExisting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
                       } ${
                         isSelected
-                          ? 'border-[var(--theme-accent)] dark:border-[var(--theme-accent)] bg-[var(--theme-accent)]/10 shadow-xs'
+                          ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10 shadow-xs'
                           : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:border-[var(--theme-border-hover)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono font-semibold text-xs flex items-center justify-center shrink-0">
+                        <span className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] font-mono font-semibold text-xs flex items-center justify-center shrink-0">
                           {prof.code}
                         </span>
                         <div>
@@ -155,15 +155,15 @@ export function SiteModal({
               </div>
 
               {/* Country ID & Human-Readable Site ID Sequencing Preview */}
-              <div className="mt-3.5 p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="mt-3.5 p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Hash size={16} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Country ID:</span>
-                      <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-full border-[var(--theme-border)]">
+                      <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">
                         {selectedCountry}
                       </span>
                     </div>
@@ -175,7 +175,7 @@ export function SiteModal({
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Site ID:</span>
-                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20 shadow-xs">
+                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shadow-xs">
                     {displaySiteCode}
                   </span>
                   {newSite.id && (
@@ -294,7 +294,7 @@ export function SiteModal({
                 <div>
                   <label htmlFor="warehouse-manager-account" className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Warehouse Manager account</label>
                   {newSite.id && canAssignAreaManager ? <select id="warehouse-manager-account"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] touch-manipulation"
                     value={newSite.warehouseManagerId || ''}
                     onChange={e => setNewSite({ ...newSite, warehouseManagerId: e.target.value || null })}>
                     <option value="">Unassigned</option>
@@ -304,7 +304,7 @@ export function SiteModal({
                 {newSite.id && (
                   <div>
                     <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Site Code (ID)</label>
-                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
+                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
                     <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
@@ -316,7 +316,7 @@ export function SiteModal({
                     type="number"
                     min="100"
                     placeholder="e.g. 5000"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.capacity || ''}
                     onChange={(e) => setNewSite({ ...newSite, capacity: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Storage Capacity"
@@ -328,7 +328,7 @@ export function SiteModal({
                     type="number"
                     min="0"
                     placeholder="e.g. 4"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.terminalCount || ''}
                     onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Loading Docks"
@@ -348,7 +348,7 @@ export function SiteModal({
                 <div>
                   <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Store Manager</label>
                   <input
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     placeholder="Manager name..."
                     value={newSite.manager || ''}
                     onChange={(e) => setNewSite({ ...newSite, manager: e.target.value })}
@@ -362,7 +362,7 @@ export function SiteModal({
                     </label>
                     <select
                       id="store-area-manager"
-                      className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                      className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] touch-manipulation"
                       value={newSite.areaManagerId || ''}
                       onChange={(e) => setNewSite({ ...newSite, areaManagerId: e.target.value || null })}
                     >
@@ -379,7 +379,7 @@ export function SiteModal({
                 {newSite.id && (
                   <div>
                     <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Site Code (ID)</label>
-                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
+                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
                     <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>

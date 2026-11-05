@@ -28,15 +28,15 @@ export default function GamificationSettings() {
         <GamificationProvider value={contextValue}>
             <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
                 {/* HEADER BANNER with SAVE BUTTON */}
-                <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl shadow-xs flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Trophy size={20} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
                                 <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Gamification & Performance Bonuses</h4>
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]">
                                     {countryProfile.name} ({activeCountry})
                                 </span>
                             </div>
@@ -49,7 +49,7 @@ export default function GamificationSettings() {
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
+                        className="min-h-11 sm:h-9 px-4 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0 touch-manipulation"
                     >
                         {isSaving ? (
                             <>
@@ -66,29 +66,29 @@ export default function GamificationSettings() {
                 </div>
 
                 {/* TABS: Warehouse vs POS */}
-                <div className="flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)]">
+                <div className="flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                     <button
                         type="button"
                         onClick={() => setActiveTab('warehouse')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-11 sm:min-h-[36px] touch-manipulation ${
                             activeTab === 'warehouse'
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <Trophy size={15} className={activeTab === 'warehouse' ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : ''} />
+                        <Trophy size={15} className={activeTab === 'warehouse' ? 'text-[var(--theme-accent)]' : ''} />
                         <span>Warehouse Operations</span>
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('pos')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer min-h-11 sm:min-h-[36px] touch-manipulation ${
                             activeTab === 'pos'
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <ShoppingBag size={15} className={activeTab === 'pos' ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : ''} />
+                        <ShoppingBag size={15} className={activeTab === 'pos' ? 'text-[var(--theme-accent)]' : ''} />
                         <span>POS Team Rewards</span>
                     </button>
                 </div>
@@ -102,7 +102,7 @@ export default function GamificationSettings() {
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="min-h-11 sm:h-9 px-4 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 touch-manipulation"
                     >
                         {isSaving ? (
                             <>
