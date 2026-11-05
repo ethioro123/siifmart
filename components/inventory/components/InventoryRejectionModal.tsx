@@ -1,7 +1,6 @@
 import React from 'react';
 import { Product, PendingInventoryChange } from '../../../types';
 import Modal from '../../Modal';
-import Button from '../../shared/Button';
 
 interface InventoryRejectionModalProps {
     isOpen: boolean;
@@ -31,6 +30,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
             isOpen={isOpen}
             onClose={onClose}
             title="Reject Request"
+            mobileFullScreen
         >
             <div className="space-y-4">
                 <p className="text-[var(--theme-text-secondary)] text-[13px] leading-relaxed">
@@ -48,7 +48,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                     <button
                         type="button"
                         onClick={onClose}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
@@ -63,7 +63,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                             }
                             onClose();
                         }}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 touch-manipulation"
                     >
                         <span>Confirm Rejection</span>
                     </button>

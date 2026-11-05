@@ -212,7 +212,7 @@ export interface POSContextType {
     handleValidateDiscountCode: () => void;
     handleRemoveDiscount: () => void;
     handleInitiatePayment: () => void;
-    handleProcessPayment: (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => Promise<void>;
+    handleProcessPayment: (mobileDetails?: { channel?: string; ref?: string; phone?: string; verified?: boolean }) => Promise<void>;
     handlePrintReceipt: () => void;
     handleConfirmPrint: () => void;
     handleEmailReceipt: () => void;

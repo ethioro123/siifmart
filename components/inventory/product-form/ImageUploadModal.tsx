@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../../Modal';
 import ImageUpload from '../../ImageUpload';
-import { Camera, Image as ImageIcon, X } from 'lucide-react';
+import { Camera } from 'lucide-react';
 
 interface ImageUploadModalProps {
     isOpen: boolean;
@@ -33,6 +33,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             onClose={onClose}
             title="Update Product Image"
             size="md"
+            mobileFullScreen
         >
             <div className="p-4 space-y-6 text-[var(--theme-text-primary)]">
                 <div className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
@@ -58,14 +59,14 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2.5 text-xs font-semibold rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all cursor-pointer"
+                        className="min-h-11 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         onClick={handleApply}
-                        className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 active:scale-[0.98] shadow-xs transition-all cursor-pointer"
+                        className="min-h-11 px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 active:scale-[0.98] shadow-xs transition-all cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Apply Photo
                     </button>

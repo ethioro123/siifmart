@@ -52,7 +52,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         receiptNumber?: string,
         roundedTotal?: number,
         discountCodeId?: string | null,
-        mobileDetails?: {channel?: string; ref?: string; phone?: string}
+        mobileDetails?: {channel?: string; ref?: string; phone?: string; verified?: boolean}
     ): Promise<{ saleId: string; receiptNumber: string; offlineReceiptNumber?: string; pointsResult?: any }> => {
         try {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -103,7 +103,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 type,
                 discountCodeId: discountCodeId || null,
                 pointsRedeemed: pointsRedeemed || 0,
-                mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
+                manualPaymentVerified: mobileDetails?.verified, mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
                 receiptNumber: finalReceiptNumber,
                 offlineReceiptNumber: offlineReceiptReference

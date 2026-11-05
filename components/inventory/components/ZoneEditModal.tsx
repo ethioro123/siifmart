@@ -98,7 +98,7 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs">
-            <form onSubmit={handleSubmit} className="relative w-full h-full sm:h-auto sm:max-w-lg rounded-none sm:rounded-3xl bg-[var(--theme-bg-card)] border-0 sm:border border-[var(--theme-border)] shadow-xl p-4 sm:p-6 space-y-4 max-h-none sm:max-h-[90dvh] overflow-y-auto">
+            <form onSubmit={handleSubmit} className="relative w-full h-full sm:h-auto sm:max-w-lg rounded-none sm:rounded-3xl bg-[var(--theme-bg-card)] border-0 sm:border border-[var(--theme-border)] shadow-xl p-4 sm:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4 max-h-none sm:max-h-[90dvh] overflow-y-auto">
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
@@ -106,7 +106,7 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
                         </div>
                         <span>Configure Zone: {zone.name}</span>
                     </h3>
-                    <button type="button" onClick={onClose} title="Close" aria-label="Close" className="p-1.5 rounded-lg hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-muted)] cursor-pointer transition-colors"><X size={18} /></button>
+                    <button type="button" onClick={onClose} title="Close" aria-label="Close" className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 flex items-center justify-center p-1.5 rounded-lg hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-muted)] cursor-pointer transition-colors touch-manipulation"><X size={18} /></button>
                 </div>
 
                 <div className="space-y-4 text-left">
@@ -282,7 +282,7 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
                                     onChange={(e) => setIsLocked(e.target.checked)}
                                     className="sr-only peer"
                                 />
-                                <div className="w-10 h-6 bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-panel)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--theme-border)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--theme-bg-card)] after:border-[var(--theme-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--theme-status-danger-bg)]"></div>
+                                <div className="w-10 h-6 bg-[var(--theme-bg-panel)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--theme-border)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--theme-bg-card)] after:border-[var(--theme-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--theme-status-danger-bg)]"></div>
                             </label>
                         </div>
                         {isLocked && (

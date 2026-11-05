@@ -2,8 +2,10 @@ import { barcodeResolution } from './barcodeResolution';
 import { counterControl } from './counterControl';
 import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
+import { manualPayments } from './manualPayments';
 
 export const pos: TranslationBlock = {
+    ...manualPayments,
     ...barcodeResolution,
     printPreparing: { en: 'Preparing print…', am: 'ህትመት በማዘጋጀት ላይ…', or: 'Maxxansa qopheessaa jira…' },
     printLabelCount: { en: 'Print {count} labels', am: '{count} መለያዎችን አትም', or: 'Asxaawwan {count} maxxansi' },

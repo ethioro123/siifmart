@@ -2,7 +2,6 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import React from 'react';
 import { Plus, Minus, Shield } from 'lucide-react';
 import Modal from '../../Modal';
-import Button from '../../shared/Button';
 import { Product } from '../../../types';
 
 interface AdjustStockModalProps {
@@ -67,7 +66,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                     <button
                         type="button"
                         onClick={() => setAdjustType('IN')}
-                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
+                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] touch-manipulation ${
                             adjustType === 'IN'
                                 ? 'bg-[var(--theme-status-success-bg)]/10 border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] shadow-xs'
                                 : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-hover)]'
@@ -81,7 +80,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                     <button
                         type="button"
                         onClick={() => setAdjustType('OUT')}
-                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
+                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] touch-manipulation ${
                             adjustType === 'OUT'
                                 ? 'bg-[var(--theme-status-danger-bg)]/10 border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] shadow-xs'
                                 : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-hover)]'

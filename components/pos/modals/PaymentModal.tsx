@@ -41,9 +41,10 @@ export const PaymentModal: React.FC = () => {
     const handleComplete = () => {
         if (selectedPaymentMethod === 'Mobile Money') {
             handleProcessPayment({
-                channel: mobilePayment.getChannelLabel(mobilePayment.channel),
+                channel: mobilePayment.channel,
+                verified: mobilePayment.paymentVerified,
                 ref: mobilePayment.transactionRef || undefined,
-                phone: mobilePayment.customerPhone ? `+254${mobilePayment.customerPhone}` : undefined
+                phone: mobilePayment.customerPhone ? mobilePayment.customerPhone : undefined
             });
         } else {
             handleProcessPayment();

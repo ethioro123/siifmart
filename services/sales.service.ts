@@ -112,6 +112,7 @@ export const salesService = {
     async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'> & { pointsRedeemed?: number }, items: any[], discountCodeId?: string | null) {
         const { data, error } = await supabase.rpc('create_pos_sale_atomic', {
             p_sale: {
+                manual_payment_verified: (sale as SaleRecord & {manualPaymentVerified?: boolean}).manualPaymentVerified === true,
                 id: sale.id,
                 site_id: sale.siteId,
                 customer_id: sale.customerId,

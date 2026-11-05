@@ -179,7 +179,7 @@ export const usePOSCheckoutActions = ({
         setIsPaymentModalOpen(true);
     }, [cart, total, hasStaleCartPriceChanges, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
 
-    const handleProcessPayment = React.useCallback(async (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => {
+    const handleProcessPayment = React.useCallback(async (mobileDetails?: { channel?: string; ref?: string; phone?: string; verified?: boolean }) => {
         if (hasStaleCartPriceChanges) {
             addNotification('alert', 'A product price changed while in the cart. Update the cart line before charging.');
             setIsPaymentModalOpen(false);

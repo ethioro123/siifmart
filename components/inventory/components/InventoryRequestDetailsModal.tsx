@@ -41,6 +41,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
             onClose={onClose}
             title={`Request Details: ${requestForDetails?.productName || 'Inventory Change'}`}
             size="lg"
+            mobileFullScreen
         >
             <div className="space-y-5">
                 <div className="flex items-center justify-between p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
@@ -73,8 +74,8 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                 {requestForDetails && isPriceChangeRequest(requestForDetails) && (
                     <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
                         requiresFinanceCoApproval(requestForDetails)
-                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
-                            : 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]'
+                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]'
+                            : 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)]'
                     }`}>
                         <ShieldAlert size={16} className="shrink-0 mt-0.5" />
                         <div>
@@ -147,7 +148,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                             }
                                         }
                                     }}
-                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 min-h-11 h-11 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                                 >
                                     <CheckCircle size={16} />
                                     <span>Approve Request</span>
@@ -166,7 +167,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                             setIsApprovalModalOpen(true);
                                         }
                                     }}
-                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 min-h-11 h-11 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                                 >
                                     <XCircle size={16} />
                                     <span>Reject Request</span>
