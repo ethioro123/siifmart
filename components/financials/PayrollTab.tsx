@@ -349,9 +349,9 @@ export const PayrollTab: React.FC = () => {
 
             {/* Right 1 Col: Summary & Actions Component */}
             {summaryError ? <p role="alert">Payroll summary unavailable. <button type="button" className="min-h-11 px-4 underline" onClick={refreshPayrollState}>Retry payroll summary</button></p> : <PayrollSummaryCard
-                totalSalaries={totalSalaries}
-                totalBonuses={totalBonuses}
-                employeeCount={employees.length}
+                totalSalaries={latestRun?.totalGrossSalaries ?? totalSalaries}
+                totalBonuses={latestRun?.totalBonuses ?? totalBonuses}
+                employeeCount={latestRun?.employeeCount ?? employees.length}
                 currencySymbol={currencySymbol}
                 latestRun={latestRun}
                 pendingSalaryCount={pendingSalaryCount}

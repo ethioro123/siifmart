@@ -1,3 +1,4 @@
+import { useEmployeeProfileDecision } from '../../../hooks/useEmployeeReviewCommands';
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Check, X, ArrowRight, Loader2, User, Building2, DollarSign, AlertCircle, Clock } from 'lucide-react';
 import Modal from '../../Modal';
@@ -19,7 +20,8 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
     onRequestsUpdated
 }) => {
     const { user } = useStore();
-    const { effectiveCountry, employees, updateEmployee, addNotification } = useData();
+    const decision = useEmployeeProfileDecision();
+    const { effectiveCountry, employees, addNotification } = useData();
 
     const [requests, setRequests] = useState<EmployeeProfileChangeRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -70,12 +72,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
 
         setActionId(req.id);
         try {
-            const updated = await employeeChangesService.approve(
-                req.id,
-                user?.name || (isCEO ? 'CEO Executive' : 'Authorized Approver'),
-                user?.role || 'country_managing_director',
-                'Approved via Cross-Department Governance Portal'
-            );
+            const updated = await decision.mutateAsync({ id: req.id, approve: true, reason: 'Approved via Cross-Department Governance Portal' });
 
             setRequests(prev => prev.map(r => r.id === req.id ? updated : r));
             addNotification(updated.status === 'approved' ? 'success' : 'info', updated.status === 'approved' ? `Profile changes applied to ${req.employeeName}` : 'Department decision saved. Remaining independent approvals are required.');
@@ -91,11 +88,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
         if (!rejectionReason.trim()) return;
         setActionId(req.id);
         try {
-            const updated = await employeeChangesService.reject(
-                req.id,
-                user?.name || 'Authorized Approver',
-                rejectionReason.trim()
-            );
+            const updated = await decision.mutateAsync({ id: req.id, approve: false, reason: rejectionReason.trim() });
 
             setRequests(prev => prev.map(r => r.id === req.id ? updated : r));
             setRejectionModalId(null);

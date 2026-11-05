@@ -102,9 +102,11 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                                 : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         }`}>
                             {latestRun.status === 'disbursed'
-                                ? 'Disbursed'
+                                ? 'Payment recorded'
                                 : latestRun.status === 'approved'
                                 ? 'Dual Approved'
+                                : latestRun.status === 'prepared'
+                                ? 'Prepared · unpaid'
                                 : latestRun.status === 'pending_finance'
                                 ? 'Pending Finance'
                                 : latestRun.status === 'pending_hr'
@@ -160,7 +162,7 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                 )}
             </button>
 
-            {/* Download Bank File */}
+            {/* Download payroll review */}
             <button
                 type="button"
                 onClick={onDownloadBankFile}
@@ -168,7 +170,7 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                 className="w-full py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium rounded-xl text-xs border border-[var(--theme-border)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
             >
                 {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
-                {isSubmitting ? 'Downloading Bank File...' : 'Download Bank File'}
+                {isSubmitting ? 'Downloading payroll review...' : 'Download payroll review'}
             </button>
         </div>
     );

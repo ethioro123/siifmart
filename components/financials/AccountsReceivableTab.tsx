@@ -15,6 +15,7 @@ import { useFinance } from './FinanceContext';
 import { accountsReceivableService } from '../../services/accounts-receivable.service';
 import type { ArInvoice, ArAgingReport } from '../../types';
 import { ArInvoiceModal } from './ArInvoiceModal';
+import { AccountsReceivableMobileList } from './AccountsReceivableMobileList';
 
 export const AccountsReceivableTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, addNotification } = useFinance();
@@ -171,8 +172,19 @@ export const AccountsReceivableTab: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
+                {/* Mobile Card List View */}
+                <div className="block md:hidden">
+                    <AccountsReceivableMobileList
+                        invoices={filteredInvoices}
+                        loading={loading}
+                        currencySymbol={currencySymbol}
+                        canManageCredit={canManageCredit}
+                        onSelectInvoice={setSelectedInvoice}
+                    />
+                </div>
+
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>

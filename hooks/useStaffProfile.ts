@@ -286,8 +286,8 @@ export function useStaffProfile({
             return;
         }
 
-        if (passwordInput.length < 6) {
-            addNotification('alert', 'Password must be at least 6 characters');
+        if (passwordInput.length < 12) {
+            addNotification('alert', 'Password must be at least 12 characters');
             return;
         }
         setIsResetting(true);

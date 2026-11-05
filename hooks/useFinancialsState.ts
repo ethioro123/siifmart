@@ -1,3 +1,6 @@
+import { payrollRunsService } from '../services/payroll-runs.service';
+import { getPayrollReviewExport } from '../services/payroll-review-export.service';
+import { downloadPayrollReview } from '../utils/payrollReviewExport';
 import { useState, useMemo } from 'react';
 import { ExpenseRecord, Employee } from '../types';
 import { expensesService } from '../services/expenses.service';
@@ -19,7 +22,6 @@ import {
 import {
    exportPnLReportJson,
    exportTaxDeclarationFile,
-   exportBankDisbursementFile,
    generateQuarterlyPdf
 } from './financialsExportHelpers';
 import { useFinancialPayrollState } from './useFinancialPayrollState';
@@ -422,22 +424,19 @@ export function useFinancialsState(initialTab: 'overview' | 'payroll' | 'margin'
       }
    };
 
-   const handleDownloadBankFile = () => {
+   const handleDownloadBankFile = async () => {
       setIsSubmitting(true);
       try {
-         const filename = exportBankDisbursementFile({
-            activeCountry,
-            currencySymbol,
-            employees,
-            calculateEmployeeBonus: localCalculateEmployeeBonus
-         });
-         addNotification('success', `Generated bulk bank disbursement file: ${filename}`);
+         if (!activeSite?.id) throw new Error('Select the payroll workplace');
+         const period = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
+         const run = await payrollRunsService.getLatestRun(activeSite.id, activeCountry, period);
+         if (!run) throw new Error('No approved payroll exists for this workplace and period');
+         const review = await getPayrollReviewExport(run.id);
+         const filename = downloadPayrollReview(review);
+         addNotification('success', `Payroll review downloaded: ${filename}`);
       } catch (error) {
-         logger.error('useFinancialsState', 'Failed to export bank file', error as Error);
-         addNotification('alert', 'Failed to export bank disbursement file');
-      } finally {
-         setIsSubmitting(false);
-      }
+         addNotification('alert', error instanceof Error ? error.message : 'Payroll review could not be exported');
+      } finally { setIsSubmitting(false); }
    };
 
    const localGetQuarterInfo = (d = new Date()) => getQuarterInfo(d);

@@ -82,6 +82,7 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
         });
 
         (supabase.from as any).mockImplementation((table: string) => {
+            if (table === 'employee_directory') return { select: () => ({ eq: () => ({ single: async () => ({ data: { id: '6c38f106-4590-4ff3-ae68-b9ab657fff8e', code: 'ET-SIIF0040', name: 'New Officer', email: 'officer@siifmart.com', role: 'cashier', status: 'Pending Approval' }, error: null }) }) }) };
             if (table === 'employees') {
                 return {
                     insert: vi.fn().mockImplementation((payload: any) => ({

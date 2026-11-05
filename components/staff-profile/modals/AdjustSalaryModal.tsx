@@ -1,10 +1,10 @@
+import { useSalaryDecision, useSalaryProposal } from '../../../hooks/useEmployeeReviewCommands';
 import React, { useState, useMemo, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, ShieldAlert, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
-import { salaryRequestsService } from '../../../services/salary-requests.service';
 import type { Employee } from '../../../types';
 import { getEmployeeJobTitle, getRoleHierarchy } from '../../../utils/roles';
 
@@ -28,6 +28,8 @@ export default function AdjustSalaryModal({
     onSuccess
 }: AdjustSalaryModalProps) {
     const { user } = useStore();
+    const decision = useSalaryDecision();
+    const proposal = useSalaryProposal();
     const { settings, activeSite, sites, effectiveCountry, updateEmployee, addNotification } = useData();
 
     const initialSalaryStr = salaryInput !== undefined && salaryInput !== ''
@@ -115,7 +117,7 @@ export default function AdjustSalaryModal({
         try {
             if (isExecutive && directOverride) {
                 // Executive Direct Override: Create request + approve immediately
-                const created = await salaryRequestsService.create({
+                const created = await proposal.mutateAsync({
                     employeeId: employee.id,
                     employeeName: employee.name,
                     currentSalary,
@@ -130,16 +132,12 @@ export default function AdjustSalaryModal({
                     requestedAt: new Date().toISOString()
                 });
 
-                await salaryRequestsService.approve(created.id, {
-                    id: user?.id,
-                    name: user?.name || 'Executive',
-                    role: user?.role || 'group_ceo'
-                });
+                await decision.mutateAsync({ id: created.id, approve: true, reason: 'CEO compensation override' });
 
                 addNotification('success', `Salary updated to ${currency} ${parsedProposed.toLocaleString()} (Executive Override).`);
             } else {
                 // Standard Dual-Control: Propose to approval queue
-                await salaryRequestsService.create({
+                await proposal.mutateAsync({
                     employeeId: employee.id,
                     employeeName: employee.name,
                     currentSalary,

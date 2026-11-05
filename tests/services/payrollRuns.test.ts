@@ -1,314 +1,44 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
+import type { PayrollRun } from '../../types';
+const mock = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn() }));
+vi.mock('../../lib/supabase', () => ({ supabase: mock }));
 import { payrollRunsService } from '../../services/payroll-runs.service';
-
-let inMemoryPayrollDb: any[] = [];
-vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({ id: 'audit' }) } }));
-
-vi.mock('../../lib/supabase', () => ({
-  supabase: {
-    rpc: vi.fn().mockImplementation(async (_functionName: string, args: { p_run_id: string; p_notes: string | null }) => {
-      const index = inMemoryPayrollDb.findIndex(run => run.id === args.p_run_id);
-      if (index === -1) return { data: null, error: { message: 'Payroll run not found' } };
-      inMemoryPayrollDb[index] = {
-        ...inMemoryPayrollDb[index],
-        regional_attested_by: 'Verified Regional Officer',
-        regional_attested_by_id: 'auth-user-001',
-        regional_attested_by_role: 'regional_hr_manager',
-        regional_attested_at: new Date().toISOString(),
-        regional_notes: args.p_notes || null
-      };
-      return { data: inMemoryPayrollDb[index], error: null };
-    }),
-    from: vi.fn().mockImplementation((table: string) => {
-      let filtered = [...inMemoryPayrollDb];
-      const chainable: any = {
-        select: vi.fn().mockImplementation(() => chainable),
-        single: vi.fn().mockImplementation(() => Promise.resolve({ data: filtered[0] || null, error: null })),
-        eq: vi.fn().mockImplementation((col: string, val: any) => {
-          filtered = filtered.filter(r => r[col] === val || r.id === val);
-          return chainable;
-        }),
-        insert: vi.fn().mockImplementation((record: any) => {
-          inMemoryPayrollDb.push(record);
-          return Promise.resolve({ data: record, error: null });
-        }),
-        update: vi.fn().mockImplementation((updates: any) => {
-          return {
-            eq: vi.fn().mockImplementation((col: string, val: any) => {
-              const idx = inMemoryPayrollDb.findIndex(r => r[col] === val || r.id === val);
-              if (idx !== -1) {
-                inMemoryPayrollDb[idx] = { ...inMemoryPayrollDb[idx], ...updates };
-              }
-              return Promise.resolve({ data: inMemoryPayrollDb[idx] || updates, error: null });
-            })
-          };
-        }),
-        order: vi.fn().mockImplementation(() => {
-          return {
-            limit: vi.fn().mockResolvedValue({ data: [...filtered], error: null })
-          };
-        })
-      };
-      return chainable;
-    })
-  }
-}));
-
-describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
-  beforeEach(() => {
-    inMemoryPayrollDb = [];
-    if (typeof localStorage !== 'undefined') {
-      localStorage.clear();
-    }
-    (payrollRunsService as any)._clearCache();
-  });
-
-  it('initiates a new payroll run with pending status', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      siteId: 'SITE-0001',
-      employeeCount: 15,
-      currency: 'ETB',
-      totalGrossSalaries: 180000,
-      totalBonuses: 12000,
-      totalDeductions: 0,
-      totalNetPayout: 192000,
-      status: 'pending_verification',
-      initiatedBy: 'HR Officer Martha',
-      initiatedByRole: 'hr'
-    });
-
-    expect(run.id).toContain('PAYROLL-');
-    expect(run.period).toBe('October 2026');
-    expect(run.countryCode).toBe('ET');
-    expect(run.status).toBe('pending_verification');
-    expect(run.hrApprovedBy).toBeUndefined();
-    expect(run.financeApprovedBy).toBeUndefined();
-  });
-
-  it('allows HR to certify first, advancing status to pending_finance', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      employeeCount: 20,
-      currency: 'ETB',
-      totalGrossSalaries: 240000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 240000,
-      status: 'pending_verification',
-      initiatedBy: 'Admin',
-      initiatedByRole: 'admin'
-    });
-
-    const hrSigned = await payrollRunsService.signAsHR(
-      run.id,
-      'Sarah Jenkins',
-      'country_hr_director',
-      'Audited Bole Store headcount and October clock-in records.'
-    );
-
-    expect(hrSigned.hrApprovedBy).toBe('Sarah Jenkins');
-    expect(hrSigned.hrApprovedByRole).toBe('country_hr_director');
-    expect(hrSigned.hrApprovedAt).toBeDefined();
-    expect(hrSigned.hrNotes).toBe('Audited Bole Store headcount and October clock-in records.');
-    expect(hrSigned.status).toBe('pending_finance');
-    expect(hrSigned.financeApprovedBy).toBeUndefined();
-  });
-
-  it('allows Finance to authorize after HR, transitioning status to approved', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'KE',
-      employeeCount: 10,
-      currency: 'KSh',
-      totalGrossSalaries: 350000,
-      totalBonuses: 15000,
-      totalDeductions: 0,
-      totalNetPayout: 365000,
-      status: 'pending_verification',
-      initiatedBy: 'HR Lead Dennis',
-      initiatedByRole: 'hr'
-    });
-
-    await payrollRunsService.signAsHR(run.id, 'Dennis Wanjiku', 'hr');
-    const fullyApproved = await payrollRunsService.signAsFinance(
-      run.id,
-      'Peter Omondi',
-      'country_finance_director',
-      'KCB Operating balance confirmed and statutory withholdings verified.'
-    );
-
-    expect(fullyApproved.hrApprovedBy).toBe('Dennis Wanjiku');
-    expect(fullyApproved.financeApprovedBy).toBe('Peter Omondi');
-    expect(fullyApproved.status).toBe('approved');
-  });
-
-  it('STRICTLY ENFORCES anti-self-approval under 4-Eyes Zero-Trust', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      employeeCount: 5,
-      currency: 'ETB',
-      totalGrossSalaries: 60000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 60000,
-      status: 'pending_verification',
-      initiatedBy: 'HR',
-      initiatedByRole: 'hr'
-    });
-
-    // Alice Jenkins signs as HR
-    await payrollRunsService.signAsHR(run.id, 'Alice Jenkins', 'country_hr_director');
-
-    // Alice Jenkins tries to also authorize as Finance
-    await expect(
-      payrollRunsService.signAsFinance(run.id, 'Alice Jenkins', 'country_finance_director')
-    ).rejects.toThrow(/Zero-Trust 4-Eyes Violation/);
-  });
-
-  it('BLOCKS payout disbursement if missing HR or Finance authorization', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      employeeCount: 8,
-      currency: 'ETB',
-      totalGrossSalaries: 96000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 96000,
-      status: 'pending_verification',
-      initiatedBy: 'Finance Lead',
-      initiatedByRole: 'country_finance_director'
-    });
-
-    // Finance signed, but HR has not signed
-    await payrollRunsService.signAsFinance(run.id, 'Kebede Michael', 'country_finance_director');
-
-    // Attempt to disburse
-    await expect(
-      payrollRunsService.disburse(run.id, 'Kebede Michael')
-    ).rejects.toThrow(/Zero-Trust Security Enforcement: Cannot disburse payroll without complete dual approval/);
-  });
-
-  it('disburses successfully only when dual approval is complete', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      employeeCount: 12,
-      currency: 'ETB',
-      totalGrossSalaries: 144000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 144000,
-      status: 'pending_verification',
-      initiatedBy: 'Admin',
-      initiatedByRole: 'admin'
-    });
-
-    await payrollRunsService.signAsHR(run.id, 'HR Officer Mary', 'hr');
-    await payrollRunsService.signAsFinance(run.id, 'Head of Finance John', 'country_finance_director');
-
-    const disbursed = await payrollRunsService.disburse(run.id, 'Head of Finance John', 'EXP-PAYROLL-01');
-
-    expect(disbursed.status).toBe('disbursed');
-    expect(disbursed.disbursedBy).toBe('Head of Finance John');
-    expect(disbursed.disbursedAt).toBeDefined();
-    expect(disbursed.expenseId).toBe('EXP-PAYROLL-01');
-  });
-
-  it('handles batch rejection with mandatory audit reason', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'KE',
-      employeeCount: 14,
-      currency: 'KSh',
-      totalGrossSalaries: 400000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 400000,
-      status: 'pending_verification',
-      initiatedBy: 'HR Officer',
-      initiatedByRole: 'hr'
-    });
-
-    const rejected = await payrollRunsService.reject(
-      run.id,
-      'Auditor Samuel',
-      'auditor',
-      'Overtime discrepancies detected on Mombasa dark store shift punch logs.'
-    );
-
-    expect(rejected.status).toBe('rejected');
-    expect(rejected.rejectedBy).toBe('Auditor Samuel');
-    expect(rejected.rejectionReason).toContain('Overtime discrepancies');
-  });
-
-  it('enforces multi-country tenant isolation for payroll runs', async () => {
-    await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      employeeCount: 20,
-      currency: 'ETB',
-      totalGrossSalaries: 200000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 200000,
-      status: 'pending_verification',
-      initiatedBy: 'ET HR',
-      initiatedByRole: 'hr'
-    });
-
-    await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'KE',
-      employeeCount: 15,
-      currency: 'KSh',
-      totalGrossSalaries: 500000,
-      totalBonuses: 0,
-      totalDeductions: 0,
-      totalNetPayout: 500000,
-      status: 'pending_verification',
-      initiatedBy: 'KE HR',
-      initiatedByRole: 'hr'
-    });
-
-    const etRuns = await payrollRunsService.getAll(undefined, 'ET');
-    const keRuns = await payrollRunsService.getAll(undefined, 'KE');
-
-    expect(etRuns.every(r => r.countryCode === 'ET')).toBe(true);
-    expect(keRuns.every(r => r.countryCode === 'KE')).toBe(true);
-    expect(etRuns.some(r => r.currency === 'KSh')).toBe(false);
-    expect(keRuns.some(r => r.currency === 'ETB')).toBe(false);
-  });
-
-  it('records regional HR audit attestation on payroll run', async () => {
-    const run = await payrollRunsService.create({
-      period: 'October 2026',
-      countryCode: 'ET',
-      siteId: 'SITE-0001',
-      employeeCount: 15,
-      currency: 'ETB',
-      totalGrossSalaries: 180000,
-      totalBonuses: 12000,
-      totalDeductions: 0,
-      totalNetPayout: 192000,
-      status: 'pending_verification',
-      initiatedBy: 'Accountant Abebe',
-      initiatedByRole: 'country_finance_director'
-    });
-
-    const attested = await payrollRunsService.attestAsRegionalHR(
-      run.id,
-      'Audited site headcounts, attendance and approved leaves.'
-    );
-
-    expect(attested.regionalAttestedBy).toBe('Verified Regional Officer');
-    expect(attested.regionalAttestedById).toBe('auth-user-001');
-    expect(attested.regionalAttestedByRole).toBe('regional_hr_manager');
-    expect(attested.regionalAttestedAt).toBeDefined();
-    expect(attested.regionalNotes).toContain('Audited site headcounts');
-  });
+beforeEach(() => vi.clearAllMocks());
+it('prepares the server roster using only proposal adjustments and scope, not client salary totals or identity', async () => {
+ mock.rpc.mockResolvedValue({ data: { id: 'server-run', country_code: 'ET', status: 'pending_verification', total_gross_salaries: 500, total_net_payout: 510, employee_count: 2, initiated_by: 'Authenticated maker' }, error: null });
+ const saved = await payrollRunsService.create({ period: 'November 2026', siteId: 'warehouse', countryCode: 'ET', totalBonuses: 10, totalDeductions: 0, totalGrossSalaries: 999999, totalNetPayout: 999999, initiatedBy: 'Forged maker' } as PayrollRun);
+ expect(saved.totalGrossSalaries).toBe(500); expect(saved.initiatedBy).toBe('Authenticated maker');
+ expect(mock.rpc).toHaveBeenCalledWith('create_payroll_run', { p_id: expect.any(String), p_period: 'November 2026', p_site: 'warehouse', p_country: 'ET', p_bonus: 10, p_deductions: 0 });
+ expect(mock.from).not.toHaveBeenCalled();
+});
+it('requires a workplace for payroll preparation', async () => { await expect(payrollRunsService.create({ countryCode: 'ET' } as PayrollRun)).rejects.toThrow('workplace'); expect(mock.rpc).not.toHaveBeenCalled(); });
+it.each(['hr', 'finance'] as const)('sends %s approval without trusting a supplied name or role', async action => {
+ mock.rpc.mockResolvedValue({ data: { id: 'run', status: 'pending_finance', hr_approved_by_id: 'authenticated-hr' }, error: null });
+ const save = action === 'hr' ? payrollRunsService.signAsHR : payrollRunsService.signAsFinance;
+ const run = await save('run', 'Forged identity', 'group_ceo', 'Evidence reviewed');
+ expect(run.hrApprovedById).toBe('authenticated-hr');
+ expect(mock.rpc).toHaveBeenCalledWith('payroll_command', { p_run: 'run', p_action: action, p_notes: 'Evidence reviewed', p_reference: null });
+});
+it('propagates rejected dual-control decisions', async () => {
+ mock.rpc.mockResolvedValue({ data: null, error: new Error('Distinct Finance authority required') });
+ await expect(payrollRunsService.signAsFinance('run', 'Alias', 'group_ceo')).rejects.toThrow('Distinct Finance');
+});
+it('prepares an unpaid expense rather than calling settlement', async () => {
+ mock.rpc.mockResolvedValue({ data: { id: 'run', status: 'prepared', expense_id: 'expense' }, error: null });
+ expect((await payrollRunsService.prepare('run')).status).toBe('prepared');
+ expect(mock.rpc).toHaveBeenCalledWith('payroll_command', { p_run: 'run', p_action: 'prepare', p_notes: null, p_reference: null });
+});
+it('refuses disbursement without completed payment evidence', () => {
+ expect(() => payrollRunsService.disburse('run', 'Finance')).toThrow('Completed payment reference'); expect(mock.rpc).not.toHaveBeenCalled();
+});
+it('records settlement through the trusted command and preserves the server expense association', async () => {
+ mock.rpc.mockResolvedValue({ data: { id: 'run', status: 'disbursed', expense_id: 'trusted-expense', settlement_reference: 'BANK-REF' }, error: null });
+ const run = await payrollRunsService.disburse('run', 'Ignored caller name', 'BANK-REF', 'Bank statement independently checked');
+ expect(run.expenseId).toBe('trusted-expense'); expect(run.settlementReference).toBe('BANK-REF');
+ expect(mock.rpc).toHaveBeenCalledWith('payroll_command', { p_run: 'run', p_action: 'settle', p_notes: 'Bank statement independently checked', p_reference: 'BANK-REF' });
+});
+it('uses the deployed regional attestation command and rejects missing confirmation', async () => {
+ mock.rpc.mockResolvedValue({ data: null, error: new Error('Out of regional scope') });
+ await expect(payrollRunsService.attestAsRegionalHR('run', 'Roster reviewed')).rejects.toThrow('Out of regional scope');
+ expect(mock.rpc).toHaveBeenCalledWith('attest_payroll_regional_hr', { p_run_id: 'run', p_notes: 'Roster reviewed' });
 });

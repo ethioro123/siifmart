@@ -330,11 +330,7 @@ export function useEmployeeWizard({
    };
 
    const submitEmployeeData = async () => {
-      const isAutoApproved = isDirectOnboardingAuthorized(
-         user?.role,
-         newEmpData.role,
-         Boolean(quotaResult?.canAutoActivate)
-      );
+      const isAutoApproved = user?.role === 'group_ceo';
       const initialStatus = isAutoApproved ? 'Active' : 'Pending Approval';
       const onboardingTier = isAutoApproved
          ? (quotaResult?.canAutoActivate ? 'FRONTLINE_FAST_TRACK' : 'HQ_GOVERNANCE')
@@ -428,7 +424,7 @@ export function useEmployeeWizard({
 
          resetWizard();
 
-         if (quotaResult?.canAutoActivate) {
+         if (isAutoApproved && quotaResult?.canAutoActivate) {
             addNotification('success', `Frontline Fast-Track Active!\n\n${newEmpData.firstName} has been activated immediately within pre-approved site quota.`);
          } else if (isAutoApproved) {
             addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);

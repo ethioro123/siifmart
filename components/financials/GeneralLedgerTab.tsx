@@ -15,6 +15,7 @@ import { useFinance } from './FinanceContext';
 import { generalLedgerService } from '../../services/general-ledger.service';
 import type { AccountRecord, TrialBalanceRow, FiscalPeriod } from '../../types';
 import { FiscalCloseModal } from './FiscalCloseModal';
+import { GeneralLedgerMobileList } from './GeneralLedgerMobileList';
 
 export const GeneralLedgerTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, addNotification } = useFinance();
@@ -212,96 +213,110 @@ export const GeneralLedgerTab: React.FC = () => {
 
             {/* Table Container */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
-                {selectedView === 'trial_balance' ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left font-mono">
-                            <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)] font-sans">
-                                <tr>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Code</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Title</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Category</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Debit Total</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Credit Total</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right font-bold">Net Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--theme-border)]">
-                                {loading ? (
+                {/* Mobile Card View */}
+                <div className="block md:hidden">
+                    <GeneralLedgerMobileList
+                        selectedView={selectedView}
+                        loading={loading}
+                        trialBalance={trialBalance}
+                        accounts={accounts}
+                        currencySymbol={currencySymbol}
+                    />
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block">
+                    {selectedView === 'trial_balance' ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left font-mono">
+                                <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)] font-sans">
                                     <tr>
-                                        <td colSpan={6} className="py-16 text-center text-[var(--theme-text-secondary)] font-sans">
-                                            <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
-                                            <span className="text-xs">Loading Trial Balance...</span>
-                                        </td>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Code</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Title</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Category</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Debit Total</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Credit Total</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right font-bold">Net Balance</th>
                                     </tr>
-                                ) : (
-                                    trialBalance.map((row) => (
-                                        <tr key={row.accountCode} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
-                                            <td className="py-3.5 px-4 font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
-                                                {row.accountCode}
-                                            </td>
-                                            <td className="py-3.5 px-4 text-xs font-sans text-[var(--theme-text-primary)] font-medium">
-                                                {row.accountName}
-                                            </td>
-                                            <td className="py-3.5 px-4 font-sans text-xs text-[var(--theme-text-secondary)]">
-                                                <span className="px-2 py-0.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[11px]">
-                                                    {row.category}
-                                                </span>
-                                            </td>
-                                            <td className="py-3.5 px-4 text-xs text-right text-[var(--theme-text-secondary)] tabular-nums">
-                                                {row.debitTotal > 0 ? `${currencySymbol} ${row.debitTotal.toLocaleString()}` : '-'}
-                                            </td>
-                                            <td className="py-3.5 px-4 text-xs text-right text-[var(--theme-text-secondary)] tabular-nums">
-                                                {row.creditTotal > 0 ? `${currencySymbol} ${row.creditTotal.toLocaleString()}` : '-'}
-                                            </td>
-                                            <td className="py-3.5 px-4 text-xs text-right font-semibold text-[var(--theme-text-primary)] tabular-nums">
-                                                {currencySymbol} {row.netBalance.toLocaleString()}
+                                </thead>
+                                <tbody className="divide-y divide-[var(--theme-border)]">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan={6} className="py-16 text-center text-[var(--theme-text-secondary)] font-sans">
+                                                <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
+                                                <span className="text-xs">Loading Trial Balance...</span>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left font-sans">
-                            <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
-                                <tr>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Code</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Title</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Classification</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Normal Balance</th>
-                                    <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--theme-border)]">
-                                {accounts.map((acc) => (
-                                    <tr key={acc.code} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
-                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
-                                            {acc.code}
-                                        </td>
-                                        <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)]">
-                                            {acc.name}
-                                        </td>
-                                        <td className="py-3.5 px-4 text-xs text-[var(--theme-text-secondary)]">
-                                            <span className="px-2 py-0.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[11px]">
-                                                {acc.category}
-                                            </span>
-                                        </td>
-                                        <td className="py-3.5 px-4 font-mono text-xs text-[var(--theme-text-secondary)]">
-                                            {acc.normalBalance}
-                                        </td>
-                                        <td className="py-3.5 px-4 text-center">
-                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
-                                                Active
-                                            </span>
-                                        </td>
+                                    ) : (
+                                        trialBalance.map((row) => (
+                                            <tr key={row.accountCode} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                                                <td className="py-3.5 px-4 font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
+                                                    {row.accountCode}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-xs font-sans text-[var(--theme-text-primary)] font-medium">
+                                                    {row.accountName}
+                                                </td>
+                                                <td className="py-3.5 px-4 font-sans text-xs text-[var(--theme-text-secondary)]">
+                                                    <span className="px-2 py-0.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[11px]">
+                                                        {row.category}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3.5 px-4 text-xs text-right text-[var(--theme-text-secondary)] tabular-nums">
+                                                    {row.debitTotal > 0 ? `${currencySymbol} ${row.debitTotal.toLocaleString()}` : '-'}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-xs text-right text-[var(--theme-text-secondary)] tabular-nums">
+                                                    {row.creditTotal > 0 ? `${currencySymbol} ${row.creditTotal.toLocaleString()}` : '-'}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-xs text-right font-semibold text-[var(--theme-text-primary)] tabular-nums">
+                                                    {currencySymbol} {row.netBalance.toLocaleString()}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left font-sans">
+                                <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
+                                    <tr>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Code</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Account Title</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Classification</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Normal Balance</th>
+                                        <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                </thead>
+                                <tbody className="divide-y divide-[var(--theme-border)]">
+                                    {accounts.map((acc) => (
+                                        <tr key={acc.code} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                                            <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
+                                                {acc.code}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)]">
+                                                {acc.name}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs text-[var(--theme-text-secondary)]">
+                                                <span className="px-2 py-0.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[11px]">
+                                                    {acc.category}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 font-mono text-xs text-[var(--theme-text-secondary)]">
+                                                {acc.normalBalance}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center">
+                                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
+                                                    Active
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
 
                 {/* Footer Count */}
                 <div className="p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-xs text-[var(--theme-text-secondary)] flex justify-between items-center">

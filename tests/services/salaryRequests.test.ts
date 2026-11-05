@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { supabase } from '../../lib/supabase';
 import { salaryRequestsService } from '../../services/salary-requests.service';
 import { authService } from '../../services/auth.service';
 import { hasPermission } from '../../utils/permissions';
@@ -6,8 +7,11 @@ import { CONFLICTING_DUTIES } from '../../services/permissions.service';
 
 let inMemoryDb: any[] = [];
 
+vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({}) } }));
+
 vi.mock('../../lib/supabase', () => ({
     supabase: {
+        rpc: vi.fn(),
         from: vi.fn().mockImplementation((_table: string) => {
             const createQuery = (conditions: { col: string; val: any }[] = [], limitVal?: number, offsetVal: number = 0) => {
                 const getFiltered = () => {
@@ -152,6 +156,9 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
                 requestedAt: new Date().toISOString()
             });
 
+            const server = inMemoryDb.find(row => row.id === req.id);
+            Object.assign(server, { status: 'approved', approved_by: 'David Finance', approved_by_role: 'country_finance_director', approved_at: new Date().toISOString() });
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: server, error: null } as never);
             const approved = await salaryRequestsService.approve(req.id, {
                 id: 'fin-001',
                 name: 'David Finance',
@@ -184,6 +191,9 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
                 requestedAt: new Date().toISOString()
             });
 
+            const server = inMemoryDb.find(row => row.id === req.id);
+            Object.assign(server, { status: 'rejected', rejected_by: 'David Finance', rejection_reason: 'Exceeds departmental Q4 compensation budget ceiling', rejected_at: new Date().toISOString() });
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: server, error: null } as never);
             const rejected = await salaryRequestsService.reject(
                 req.id,
                 { id: 'fin-001', name: 'David Finance', role: 'country_finance_director' },

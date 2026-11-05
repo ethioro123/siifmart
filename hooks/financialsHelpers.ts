@@ -243,55 +243,7 @@ export function exportSovereignBankFile(
     employees: any[],
     calculateBonus: (emp: any) => number
 ) {
-    const isKenya = (country || '').toUpperCase() === 'KE';
-    const timestamp = new Date().toISOString().split('T')[0];
-    const activeStaff = (employees || []).filter(e => e.status === 'Active');
-
-    let csvContent = '';
-    let filename = '';
-
-    if (isKenya) {
-        filename = `siifmart_ke_mpesa_b2c_payroll_${timestamp}.csv`;
-        const headers = ['Phone Number', 'Full Name', 'Worker Code', 'Department', 'Net Amount (KSh)', 'Reference'];
-        const rows = activeStaff.map(emp => {
-            const bonus = calculateBonus(emp);
-            const total = (Number(emp.salary) || 0) + bonus;
-            const phone = (emp.phone || '').replace(/[\s-]/g, '') || '254700000000';
-            const name = `"${(emp.name || '').replace(/"/g, '""')}"`;
-            const code = emp.code || 'KE-STAFF';
-            const dept = `"${(emp.department || 'Retail').replace(/"/g, '""')}"`;
-            const ref = `SALARY-${timestamp}-${code}`;
-            return [phone, name, code, dept, total.toFixed(2), ref].join(',');
-        });
-        csvContent = [headers.join(','), ...rows].join('\n');
-    } else {
-        filename = `siifmart_et_cbe_telebirr_payroll_${timestamp}.csv`;
-        const headers = ['Beneficiary Account / Telebirr', 'Employee Name', 'Worker Code', 'Department', 'Amount (ETB)', 'Currency', 'Payment Details'];
-        const rows = activeStaff.map(emp => {
-            const bonus = calculateBonus(emp);
-            const total = (Number(emp.salary) || 0) + bonus;
-            const account = (emp.phone || '').replace(/[\s-]/g, '') || '0911000000';
-            const name = `"${(emp.name || '').replace(/"/g, '""')}"`;
-            const code = emp.code || 'ET-STAFF';
-            const dept = `"${(emp.department || 'Retail').replace(/"/g, '""')}"`;
-            const ref = `SALARY-${timestamp}-${code}`;
-            return [account, name, code, dept, total.toFixed(2), 'ETB', ref].join(',');
-        });
-        csvContent = [headers.join(','), ...rows].join('\n');
-    }
-
-    if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof URL !== 'undefined') {
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-    return filename;
+    throw new Error('Bank payment exports require verified recipient details and an approved payroll snapshot. Use the payroll review export.');
 }
 
 /**

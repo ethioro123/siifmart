@@ -8,7 +8,7 @@ vi.mock('../../components/Modal', () => ({ default: ({ children }: { children: R
 vi.mock('../../services/payroll-runs.service', () => ({ payrollRunsService: { getLatestRun: mock.latest } }));
 vi.mock('../../hooks/usePayrollCommands', () => ({ usePayrollCommands: () => ({ mutateAsync: mock.mutate, isPending: false }) }));
 import { PayrollModal } from '../../components/financials/PayrollModal';
-beforeEach(() => { vi.clearAllMocks(); mock.latest.mockResolvedValue({ id: 'run', period: 'November 2026', countryCode: 'ET', status: 'approved', hrApprovedBy: 'HR', financeApprovedBy: 'Finance', totalNetPayout: 100 }); }); afterEach(cleanup);
+beforeEach(() => { vi.clearAllMocks(); mock.latest.mockResolvedValue({ id: 'run', period: 'November 2026', countryCode: 'ET', status: 'approved', hrApprovedBy: 'HR', hrApprovedById: 'hr-id', financeApprovedBy: 'Finance', financeApprovedById: 'finance-id', totalNetPayout: 100 }); }); afterEach(cleanup);
 it('prepares the expense and never invokes the former local Paid expense or claims disbursement', async () => {
  mock.mutate.mockResolvedValue({ id: 'run', status: 'prepared', totalNetPayout: 100, hrApprovedBy: 'HR', financeApprovedBy: 'Finance' });
  render(<PayrollModal />); fireEvent.click(await screen.findByRole('button', { name: 'Prepare payroll expense' }));

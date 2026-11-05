@@ -18,6 +18,7 @@ import { useFinance } from './FinanceContext';
 import { drawerReconciliationService } from '../../services/drawer-reconciliation.service';
 import type { DrawerReconciliationRecord } from '../../types';
 import { DrawerSignOffModal } from './DrawerSignOffModal';
+import { DrawerReconciliationMobileList } from './DrawerReconciliationMobileList';
 import { formatCompactNumber } from '../../utils/formatting';
 
 export const DrawerReconciliationTab: React.FC = () => {
@@ -237,8 +238,19 @@ export const DrawerReconciliationTab: React.FC = () => {
                     </label>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
+                {/* Mobile Card List View */}
+                <div className="block md:hidden">
+                    <DrawerReconciliationMobileList
+                        shifts={filteredShifts}
+                        loading={loading}
+                        currencySymbol={currencySymbol}
+                        canSignOff={canSignOff}
+                        onSelectShift={setSelectedShift}
+                    />
+                </div>
+
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>

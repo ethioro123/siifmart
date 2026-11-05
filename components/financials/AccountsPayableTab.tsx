@@ -17,6 +17,7 @@ import { accountsPayableService } from '../../services/accounts-payable.service'
 import type { VendorInvoice } from '../../types';
 import { InvoiceDetailsModal } from './InvoiceDetailsModal';
 import { InvoiceOverrideModal } from './InvoiceOverrideModal';
+import { AccountsPayableMobileList } from './AccountsPayableMobileList';
 import { isAdminSite } from '../../utils/countryAdmin';
 
 export const AccountsPayableTab: React.FC = () => {
@@ -265,8 +266,21 @@ export const AccountsPayableTab: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
+                {/* Mobile Card List View */}
+                <div className="block md:hidden">
+                    <AccountsPayableMobileList
+                        invoices={filteredInvoices}
+                        loading={loading}
+                        currencySymbol={currencySymbol}
+                        selectedInvoiceIds={selectedInvoiceIds}
+                        canCreatePaymentRun={canCreatePaymentRun}
+                        toggleSelect={toggleSelect}
+                        onSelectInvoice={setSelectedInvoice}
+                    />
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>

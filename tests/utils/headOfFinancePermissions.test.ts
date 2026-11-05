@@ -90,12 +90,9 @@ describe('Head of Finance Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
     });
 
     describe('Sovereign Bank & Tax Filing File Generation', () => {
-        it('generates sovereign Ethiopian CBE/Telebirr bank file and ERCA Form 21 tax filing', async () => {
+        it('rejects unverified Ethiopian payment instructions and retains the tax filing export', async () => {
             const { exportSovereignBankFile, exportSovereignTaxFiling } = await import('../../hooks/financialsHelpers');
-            const bankFile = exportSovereignBankFile('ET', 'ETB', [
-                { id: '1', code: 'ET-EMP001', name: 'Almaz Tadesse', salary: 15000, status: 'Active', department: 'Finance' }
-            ], () => 500);
-            expect(bankFile).toContain('et_cbe_telebirr_payroll');
+            expect(() => exportSovereignBankFile('ET', 'ETB', [], () => 0)).toThrow('verified recipient details');
 
             const taxFile = exportSovereignTaxFiling('ET', 'ETB', {
                 authority: 'Ministry of Revenues (ERCA)',
@@ -112,12 +109,9 @@ describe('Head of Finance Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
             expect(taxFile).toContain('et_erca_form_21');
         });
 
-        it('generates sovereign Kenyan M-Pesa B2C bank file and KRA VAT 3 tax filing', async () => {
+        it('rejects unverified Kenyan payment instructions and retains the tax filing export', async () => {
             const { exportSovereignBankFile, exportSovereignTaxFiling } = await import('../../hooks/financialsHelpers');
-            const bankFile = exportSovereignBankFile('KE', 'KSh', [
-                { id: '2', code: 'KE-EMP002', name: 'Juma Otieno', salary: 45000, status: 'Active', department: 'Retail Operations' }
-            ], () => 1000);
-            expect(bankFile).toContain('ke_mpesa_b2c_payroll');
+            expect(() => exportSovereignBankFile('KE', 'KSh', [], () => 0)).toThrow('verified recipient details');
 
             const taxFile = exportSovereignTaxFiling('KE', 'KSh', {
                 authority: 'Kenya Revenue Authority (KRA)',

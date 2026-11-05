@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+const EMPLOYEE_COLUMNS = 'id,site_id,name,role,job_title,email,phone,status,join_date,department,avatar,performance_score,specialization,salary,badges,attendance_rate,created_at,updated_at,code,last_login_gps,last_login_at,last_login_device,login_history,age,date_of_birth,region_code,scope_level,emergency_contact,address,national_id_number,home_site_id,is_loaned,loaned_at,quota_approved_by,onboarding_tier,quota_status,credentials_handed_over_at,credentials_handed_over_by,reports_to_employee_id,functional_manager_employee_id';
 import { isRegionalWorkforceRole, resolveEmployeeScopeLevel } from '../utils/roleSegregation';
 import type { Employee } from '../types';
 import type { Country } from '../utils/localization';
@@ -104,7 +105,7 @@ export const employeesService = {
     async getAll(siteId?: string | string[], onlyManagers: boolean = false) {
         let query = supabase
             .from('employee_directory')
-            .select('*')
+            .select(EMPLOYEE_COLUMNS)
             .order('created_at', { ascending: false });
 
         if (Array.isArray(siteId)) {
@@ -126,7 +127,7 @@ export const employeesService = {
     async getPendingApproval(country?: string, countrySiteIds?: string[], allowUnassigned: boolean = false): Promise<Employee[]> {
         let query = supabase
             .from('employee_directory')
-            .select('*')
+            .select(EMPLOYEE_COLUMNS)
             .eq('status', 'Pending Approval')
             .order('created_at', { ascending: false });
 
@@ -226,7 +227,7 @@ export const employeesService = {
         // Step 4: Fetch full details for the sliced IDs
         const { data: details, error: detailsError } = await supabase
             .from('employee_directory')
-            .select('*')
+            .select(EMPLOYEE_COLUMNS)
             .in('id', pageIds);
 
         if (detailsError) throw detailsError;
@@ -244,7 +245,7 @@ export const employeesService = {
     async getById(id: string) {
         const { data, error } = await supabase
             .from('employee_directory')
-            .select('*')
+            .select(EMPLOYEE_COLUMNS)
             .eq('id', id)
             .single();
 
@@ -255,7 +256,7 @@ export const employeesService = {
     async getByEmail(email: string) {
         const { data, error } = await supabase
             .from('employee_directory')
-            .select('*')
+            .select(EMPLOYEE_COLUMNS)
             .ilike('email', email)
             .single();
 

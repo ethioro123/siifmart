@@ -1,10 +1,7 @@
 import { supabase } from '../lib/supabase';
+const CHANGE_COLUMNS = 'id,employee_id,employee_name,country_code,site_id,requested_by,requested_by_role,requested_at,status,governance_category,required_approvers,diffs,full_proposed_employee,reason,approved_by,approved_by_role,approved_at,rejection_reason,rejected_by,rejected_at';
 import { EmployeeProfileChangeRequest } from '../types/employee-change';
-import { employeesService } from './employees.service';
-import { systemLogsService } from './system-logs.service';
 import { logger } from '../utils/logger';
-import { isSovereignCEO } from '../utils/employeeGovernance';
-import { getRoleHierarchy } from '../utils/roles';
 
 const LOCAL_STORAGE_KEY = 'siifmart_employee_change_requests_backup';
 
@@ -47,7 +44,7 @@ export const employeeChangesService = {
     async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<EmployeeProfileChangeRequest[]> {
         try {
             // RULE 10: 25-record shelf limit
-            let query = supabase.from('employee_change_requests').select('*').limit(limit);
+            let query = supabase.from('employee_change_requests').select(CHANGE_COLUMNS).limit(limit);
             if (siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
@@ -101,7 +98,7 @@ export const employeeChangesService = {
         const { data, error } = await supabase
             .from('employee_change_requests')
             .insert([dbRecord])
-            .select()
+            .select(CHANGE_COLUMNS)
             .single();
 
         if (error) {

@@ -1,3 +1,4 @@
+import { useSalaryDecision } from '../../hooks/useEmployeeReviewCommands';
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, AlertTriangle, ShieldCheck, UserCheck, ArrowRight, Loader2, History, Filter } from 'lucide-react';
 import Modal from '../Modal';
@@ -18,6 +19,7 @@ export default function SalaryApprovalQueueModal({
     onRequestsUpdated
 }: SalaryApprovalQueueModalProps) {
     const { user } = useStore();
+    const decision = useSalaryDecision();
     const { activeSite, effectiveCountry, addNotification } = useData();
 
     const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
@@ -113,11 +115,7 @@ export default function SalaryApprovalQueueModal({
 
         setProcessingId(request.id);
         try {
-            await salaryRequestsService.approve(request.id, {
-                id: user?.id,
-                name: user?.name || 'Approver',
-                role: user?.role || 'country_finance_director'
-            });
+            await decision.mutateAsync({ id: request.id, approve: true, reason: 'Salary evidence reviewed' });
 
             addNotification('success', `Approved salary update for ${request.employeeName}.`);
             await loadRequests();
@@ -137,11 +135,7 @@ export default function SalaryApprovalQueueModal({
 
         setProcessingId(requestId);
         try {
-            await salaryRequestsService.reject(
-                requestId,
-                { id: user?.id, name: user?.name || 'Reviewer', role: user?.role || 'country_finance_director' },
-                rejectionReason.trim()
-            );
+            await decision.mutateAsync({ id: requestId, approve: false, reason: rejectionReason.trim() });
 
             addNotification('info', 'Salary adjustment request rejected.');
             setRejectingId(null);
