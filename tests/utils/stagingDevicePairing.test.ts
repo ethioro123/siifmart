@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { createStagingDevicePairing } from '../../dev/stagingDevicePairing';
+import { createStagingDevicePairing, PAIRING_CODE_TTL_MS } from '../../dev/stagingDevicePairing';
 import { isPrivateNetworkHost } from '../../utils/privateNetworkHost';
 
 const request = (local = false, body?: unknown, overrides: Record<string, unknown> = {}) => Object.assign(Readable.from(body ? [JSON.stringify(body)] : []), {
@@ -47,13 +47,13 @@ it('expires paired access after two hours and clears it on restart', async () =>
     expect(service.authorized(request(false, undefined, { cookie }))).toBe(false);
     expect(createStagingDevicePairing().authorized(request(false, undefined, { cookie }))).toBe(false);
 });
-it('expires codes after five minutes and limits guesses', async () => {
+it('expires codes after five hours and limits guesses', async () => {
     const service = createStagingDevicePairing(() => clock); const code = response();
     await service.handle(request(true, {}), code.raw, '/pair-code');
     for (let n = 0; n < 8; n++) await service.handle(request(false, { code: 'invalid' }), response().raw, '/pair-device');
     const denied = response(); await service.handle(request(false, { code: code.body.code }), denied.raw, '/pair-device');
     expect(denied.status).toBe(403);
-    await service.handle(request(true, {}), code.raw, '/pair-code'); clock += 300_001;
+    await service.handle(request(true, {}), code.raw, '/pair-code'); clock += PAIRING_CODE_TTL_MS + 1;
     const expired = response(); await service.handle(request(false, { code: code.body.code }), expired.raw, '/pair-device');
     expect(expired.status).toBe(403);
 });

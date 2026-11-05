@@ -3,6 +3,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { isLocalQuickLoginRequest } from './stagingQuickLoginPolicy';
 import { isPrivateNetworkHost } from '../utils/privateNetworkHost';
 
+export const PAIRING_CODE_TTL_MS = 5 * 60 * 60 * 1000;
+
 type Request = Pick<IncomingMessage, 'headers' | 'socket' | 'method'>;
 function privateRequest(request: Request): boolean {
     if (!isPrivateNetworkHost(request.socket.remoteAddress || '')) return false;
@@ -37,7 +39,7 @@ export function createStagingDevicePairing(now = Date.now) {
             if (!local && !privateRequest(request)) { reply(response, 403, { error: 'Local staging access required' }); return true; }
             if (path === '/pair-status' && request.method === 'GET') { reply(response, 200, { paired: authorized(request) }); return true; }
             if (path === '/pair-code' && request.method === 'POST' && local) {
-                code = { value: String(randomInt(10_000_000, 100_000_000)), expires: now() + 300_000, attempts: 0 };
+                code = { value: String(randomInt(10_000_000, 100_000_000)), expires: now() + PAIRING_CODE_TTL_MS, attempts: 0 };
                 reply(response, 200, { code: code.value }); return true;
             }
             if (path !== '/pair-device' || request.method !== 'POST' || !request.headers['content-type']?.startsWith('application/json')) {
