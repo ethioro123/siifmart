@@ -59,8 +59,168 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
 
     return (
         <div className="relative overflow-hidden rounded-2xl group mt-6 transition-all duration-300">
-            <div className="relative bg-[var(--theme-bg-panel)] rounded-2xl overflow-x-auto border border-[var(--theme-border)] shadow-sm">
-                <table className="w-full text-left border-collapse min-w-[700px]">
+            <div className="relative bg-[var(--theme-bg-panel)] rounded-2xl overflow-hidden border border-[var(--theme-border)] shadow-sm">
+                {/* Mobile Card List View */}
+                <div className="block md:hidden divide-y divide-[var(--theme-border-subtle)]">
+                    {items.map((item, i) => {
+                        const pkg = getPOItemPackagingSummary(item);
+                        const phys = getPOItemPhysicalSummary(item);
+                        const isEditingThis = editingIndex === i && editValues !== null;
+
+                        return (
+                            <div key={i} className="p-3.5 space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] flex items-center justify-center border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] shrink-0 mt-0.5">
+                                        <Package size={18} />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="text-[var(--theme-text-primary)] text-sm font-bold tracking-tight">
+                                            {formatPOItemDescription(item)}
+                                        </div>
+                                        <div className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5 flex items-center gap-1.5 flex-wrap">
+                                            <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[11px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
+                                            {item.identityType === 'new' && (
+                                                <span className="text-[10px] px-2 py-0.5 border border-[var(--theme-status-warning-border)] rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] font-semibold tracking-wider">
+                                                    CUSTOM
+                                                </span>
+                                            )}
+                                            {phys.specBadge && (
+                                                <span className="bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
+                                                    {phys.specBadge}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <SmartProductAttributeStrip
+                                            item={item}
+                                            currencySymbol={currencySymbol}
+                                            maxPills={4}
+                                            showDomainSpecs={true}
+                                            showUnitPrice={false}
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Order & Pricing Summary Box */}
+                                {!isEditingThis ? (
+                                    <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-[var(--theme-bg-subtle)]/70 border border-[var(--theme-border-subtle)] text-center">
+                                        <div>
+                                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Quantity</span>
+                                            <p className="text-xs font-bold font-mono text-[var(--theme-text-primary)] mt-0.5">
+                                                {pkg.sellableQty.toLocaleString()} <span className="text-[10px] text-[var(--theme-text-secondary)] font-normal">{pkg.sellUnitLabel}</span>
+                                            </p>
+                                            {pkg.hasMultiplier && (
+                                                <span className="text-[9px] text-[var(--theme-text-secondary)] block">({item.quantity} {pkg.manifestUnitName.toLowerCase()})</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Unit Cost</span>
+                                            <p className="text-xs font-semibold font-mono text-[var(--theme-text-primary)] mt-0.5">
+                                                {formatCompactNumber(item.unitCost, { currency: currencySymbol })}
+                                            </p>
+                                            {pkg.hasMultiplier && (
+                                                <span className="text-[9px] text-[var(--theme-text-secondary)] block">~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Total</span>
+                                            <p className="text-xs font-bold font-mono text-[var(--theme-text-primary)] mt-0.5">
+                                                {formatCompactNumber(item.totalCost, { currency: currencySymbol })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-accent)] space-y-2.5">
+                                        <div className="grid grid-cols-2 gap-2.5">
+                                            <div>
+                                                <label className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mb-1">
+                                                    Qty ({pkg.hasMultiplier ? pkg.manifestUnitName.toLowerCase() : pkg.sellUnitLabel})
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    step="1"
+                                                    className="w-full h-10 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 text-xs font-bold font-mono outline-none"
+                                                    value={editValues.qty}
+                                                    onChange={e => setEditValues({ ...editValues, qty: Math.max(0, parseInt(e.target.value) || 0) })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mb-1">
+                                                    Cost ({currencySymbol})
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="w-full h-10 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 text-xs font-bold font-mono outline-none"
+                                                    value={editValues.price}
+                                                    onChange={e => setEditValues({ ...editValues, price: Math.max(0, Math.round(parseFloat(e.target.value) || 0)) })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs font-mono font-bold text-[var(--theme-text-primary)] pt-1">
+                                            <span>New Total:</span>
+                                            <span>{formatCompactNumber(editValues.qty * editValues.price, { currency: currencySymbol })}</span>
+                                        </div>
+                                        <div className="flex gap-2 pt-1">
+                                            <button
+                                                onClick={cancelInlineEdit}
+                                                className="flex-1 min-h-[38px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] text-xs font-semibold text-[var(--theme-text-secondary)] touch-manipulation cursor-pointer"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={saveInlineEdit}
+                                                className="flex-1 min-h-[38px] rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-xs font-semibold touch-manipulation cursor-pointer shadow-sm"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                {!isEditingThis && (
+                                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-[var(--theme-border-subtle)]">
+                                        <button
+                                            onClick={() => onFullEdit(i)}
+                                            className="min-h-[36px] px-3 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold flex items-center gap-1.5 touch-manipulation cursor-pointer"
+                                        >
+                                            <Edit3 size={13} /> Full Edit
+                                        </button>
+                                        <button
+                                            onClick={() => startInlineEdit(i)}
+                                            className="min-h-[36px] px-3 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] border border-[var(--theme-border)] text-xs font-semibold flex items-center gap-1.5 touch-manipulation cursor-pointer"
+                                        >
+                                            <FileText size={13} /> Quick Adjust
+                                        </button>
+                                        <button
+                                            onClick={() => onRemoveItem(i)}
+                                            className="min-h-[36px] px-3 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-xs font-semibold flex items-center gap-1.5 touch-manipulation cursor-pointer"
+                                        >
+                                            <Trash2 size={13} /> Remove
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+
+                    {items.length === 0 && (
+                        <div className="p-8 text-center">
+                            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center mb-2 mx-auto text-[var(--theme-status-success-text)]">
+                                <Package size={22} />
+                            </div>
+                            <h3 className="text-sm font-bold text-[var(--theme-text-primary)]">No Products Added Yet</h3>
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1">Select a product from the catalog or generate custom line items to build this PO.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[700px] hidden md:table">
                     <thead>
                         <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold">
                             <th className="p-4 pl-6">Product Details</th>

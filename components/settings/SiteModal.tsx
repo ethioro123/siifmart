@@ -306,7 +306,7 @@ export function SiteModal({
                     <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
-                    <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
+                    <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
                   </div>
                 )}
                 <div>
@@ -381,7 +381,7 @@ export function SiteModal({
                     <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
-                    <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
+                    <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
                   </div>
                 )}
                 <div>
@@ -405,17 +405,17 @@ export function SiteModal({
           <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed flex items-center gap-2">
             {newSite.type === 'Administration' ? (
               <>
-                <Briefcase size={16} className="text-[var(--theme-accent)] text-[var(--theme-accent)] shrink-0" />
+                <Briefcase size={16} className="text-[var(--theme-accent)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">Administrative locations</strong> are central offices for executive leadership, HR, Finance, and non-operational governance.</span>
               </>
             ) : newSite.type === 'Warehouse' || newSite.type === 'Distribution Center' ? (
               <>
-                <Package size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
+                <Package size={16} className="text-[var(--theme-accent)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">{newSite.type}s</strong> are inventory storage facilities handling inbound receiving, FEFO putaway, and stock replenishment.</span>
               </>
             ) : (
               <>
-                <Store size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
+                <Store size={16} className="text-[var(--theme-status-success-text)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">Retail Stores</strong> are customer-facing supermarkets and convenience stations equipped with POS cash tills.</span>
               </>
             )}
