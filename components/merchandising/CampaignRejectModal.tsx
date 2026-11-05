@@ -35,7 +35,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
    return (
       <Modal isOpen={isOpen} onClose={onClose} title={`Reject Proposal: ${proposal.code}`} mobileFullScreen>
          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3.5 text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-start gap-2.5">
+            <div className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3.5 text-xs text-[var(--theme-status-danger-text)] flex items-start gap-2.5">
                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                <div>
                   <p className="font-semibold">Governance Rejection Audit</p>
@@ -77,7 +77,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
+                  className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

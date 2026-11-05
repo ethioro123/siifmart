@@ -29,8 +29,8 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
          mobileFullScreen
       >
          <div className="space-y-4">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium">
-               <ShieldAlert size={14} className="shrink-0 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[11px] font-medium">
+               <ShieldAlert size={14} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                <span>Proposals need regional Operations, Supply Chain and Merchandising approval. Prices below the 15% margin floor also need independent Finance signoff. Selling prices round to whole numbers.</span>
             </div>
 
@@ -40,7 +40,7 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
             <div>
                <label className="text-xs font-medium text-[var(--theme-text-secondary)] mb-1 block">Discount Percentage</label>
                <input
-                  type="number" min="0.01" max="99.99" step="0.01"
+                  type="number" min="1" max="99" step="1"
                   className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                   placeholder="e.g. 20 for 20% off"
                   value={bulkDiscountValue}

@@ -99,14 +99,14 @@ export const purchaseOrdersApprovalService = {
     }
     // Tier 2: 10M < PO <= 100M (Country Autonomous Limit)
     else if (currentPO.totalAmount <= countryLimit) {
-      if (approverRole === 'regional_procurement_manager') {
+      if (approverRole === 'regional_procurement_manager' || approverRole === 'regional_operations_manager') {
         throw new Error('This order exceeds the configured regional PO limit and requires country leadership approval.');
       }
       if (!isFinanceCleared) {
         throw new Error('Country finance clearance is required before approving this order.');
       }
-      if (!['country_commercial_director', 'country_managing_director', 'head_of_procurement', 'group_cfo', 'group_ceo', 'super_admin'].includes(approverRole)) {
-        throw new Error('Order between 10M and 100M requires Country Commercial Director or Country MD approval.');
+      if (!['country_commercial_director', 'country_managing_director', 'country_operations_director', 'head_of_procurement', 'group_cfo', 'group_ceo', 'super_admin'].includes(approverRole)) {
+        throw new Error('Order between 10M and 100M requires Country Commercial Director, Country Operations Director, or Country MD approval.');
       }
     }
     // Tier 3: PO > 100M (Above Country Autonomous Limit)
