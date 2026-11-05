@@ -1,3 +1,4 @@
+import { TransferVariancePanel } from '../transfer/TransferVariancePanel';
 import { ReceivingReviewEvidence } from './ReceivingReviewEvidence';
 import { operationStatusLabel,operationValueLabel,operationReference } from '../../../utils/operationsReviewLabels';
 import React,{useState,useRef} from 'react';
@@ -24,6 +25,7 @@ export function OperationEvidence({value:v,api,site,country,page,t,onSaved,onOpe
   </div>);
  return <div className="space-y-4">
   <div><h3 className="text-lg font-semibold break-words">{operationReference(v.summary)}</h3><p className="text-sm text-[var(--theme-text-secondary)]">{t(`warehouse.opOperation_${v.summary.operation}`)} · {operationStatusLabel(t,v.summary.status)} · {v.summary.handler}</p></div>
+  {v.summary.operation==='TRANSFER'&&page===0&&<TransferVariancePanel jobId={v.summary.id}/>}
   {v.receiving&&<ReceivingReviewEvidence value={v.receiving} t={t} onOpen={onRelated}/>}
   <dl className="grid sm:grid-cols-2 gap-3 text-sm">{fields.map(([key,value])=><div key={key}><dt className="text-[var(--theme-text-secondary)]">{t(`warehouse.opField_${key}`)}</dt><dd className="break-words">{operationValueLabel(t,key,value)}</dd></div>)}</dl>
   <div className="space-y-3">{v.lines.map((line,index)=><dl key={index} className="flex flex-wrap gap-x-6 gap-y-2 border-t border-[var(--theme-border)] py-3 text-sm">{Object.entries(line).filter(([,value])=>value!==null&&value!=='').map(([key,value])=><div key={key}><dt className="text-[var(--theme-text-secondary)]">{t(`warehouse.opField_${key}`)}</dt><dd className="break-words">{key==='request'?<button type="button" className={`${control} underline`} onClick={()=>onInventory(String(value))}>{t('warehouse.opOpenInventory')}</button>:operationValueLabel(t,key,value)}</dd></div>)}</dl>)}</div>

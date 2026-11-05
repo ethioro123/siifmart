@@ -396,14 +396,14 @@ export const POSCartPanel: React.FC = () => {
 
             {/* Mobile Floating Checkout Bar - Visible when cart is closed and has items */}
             {!showCart && cart.length > 0 && (
-                <div className="lg:hidden fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="lg:hidden fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-300">
                     <button
                         type="button"
                         onClick={() => {
                             setShowCart(true);
                             native.haptic();
                         }}
-                        className="w-full min-h-14 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full min-h-14 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold transition-all active:scale-[0.99] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="flex items-center gap-2.5">
                             <div className="bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">

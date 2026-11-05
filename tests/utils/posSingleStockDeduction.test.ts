@@ -1,4 +1,5 @@
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn(), setQueryData: vi.fn() }) }));
+vi.mock('../../contexts/LanguageContext', () => ({ useLanguage: () => ({ t: (k: string) => k }) }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useSaleActions } from '../../contexts/hooks/useSaleActions';
 import { useRealtimeUpdates } from '../../contexts/hooks/useRealtimeUpdates';

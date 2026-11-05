@@ -343,7 +343,7 @@ export const usePOSReceiving = ({
             setSelectedTransferForReceiving(null);
         } catch (err: any) {
             logger.error('usePOSReceiving', 'Error confirming receipt:', err);
-            addNotification('alert', `${t('posCommand.failedToFinalize')} ${err.message}`);
+            addNotification('alert', err?.details === 'TRANSFER_VARIANCE_REVIEW_REQUIRED' ? t('warehouse.varianceHold') : `${t('posCommand.failedToFinalize')} ${err.message}`);
         } finally {
             setIsConfirmingReceive(false);
         }

@@ -83,27 +83,8 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 estimatedDuration = Math.max(20, job.items * 4);
             }
 
-            const updatedJob = await wmsJobsService.update(jobId, {
-                assignedTo: employee.id,
-                status: 'In-Progress',
-                assignedBy: source || user?.name || 'System'
-            });
-
-            try {
-                const assignment: Partial<JobAssignment> = {
-                    jobId: job.id,
-                    employeeId: employee.id,
-                    employeeName: employee.name,
-                    assignedAt: new Date().toISOString(),
-                    status: 'Assigned',
-                    estimatedDuration
-                };
-
-                const createdAssignment = await jobAssignmentsService.create(assignment);
-                setJobAssignments(prev => [createdAssignment, ...prev]);
-            } catch (assignError) {
-                logger.warn('useJobActions', 'Job assignment saved, but assignment history could not be recorded', { jobId });
-            }
+            const { job: updatedJob, assignment } = await jobAssignmentsService.assignAtomic(jobId, employee.id, estimatedDuration);
+            setJobAssignments(prev => [assignment, ...prev.filter(row => row.id !== assignment.id)]);
 
             // If this is a DISPATCH job linked to a parent TRANSFER job (orderRef), synchronize assignedTo & carrier to parent TRANSFER job!
             if (job.type === 'DISPATCH' && job.orderRef) {

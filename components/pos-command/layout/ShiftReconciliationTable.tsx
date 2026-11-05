@@ -63,7 +63,7 @@ export const ShiftReconciliationTable: React.FC = () => {
     };
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs space-y-6 isolate">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xs space-y-4 sm:space-y-6 isolate">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <div className="flex items-center gap-3">
@@ -81,8 +81,8 @@ export const ShiftReconciliationTable: React.FC = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-1 items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs">
                         <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0 group-focus-within:bg-[var(--theme-primary)] group-focus-within:text-[var(--theme-primary-text)] transition-all">
                             <Search size={12} />
                         </div>
@@ -91,13 +91,13 @@ export const ShiftReconciliationTable: React.FC = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder={t('posCommand.searchCashierOrId') || "Search cashier or ID..."}
-                            className="bg-transparent border-none ml-2 text-xs text-[var(--theme-text-primary)] font-mono outline-none placeholder-[var(--theme-text-muted)] w-36 sm:w-48"
+                            className="bg-transparent border-none ml-2 text-xs text-[var(--theme-text-primary)] font-mono outline-none placeholder-[var(--theme-text-muted)] w-full sm:w-48"
                         />
                         {searchTerm ? (
                             <button
                                 type="button"
                                 onClick={() => setSearchTerm('')}
-                                className="w-4 h-4 rounded-full bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                                className="w-5 h-5 rounded-full bg-[var(--theme-bg-panel)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 touch-manipulation"
                                 aria-label="Clear search"
                             >
                                 <X size={10} />
@@ -108,7 +108,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value as any)}
-                        className="bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer transition-colors shadow-2xs"
+                        className="min-h-11 sm:min-h-0 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer transition-colors shadow-2xs touch-manipulation"
                     >
                         <option value="All">{t('posCommand.filterAllShifts')}</option>
                         <option value="Open">{t('posCommand.filterOpenShifts')}</option>
@@ -119,8 +119,118 @@ export const ShiftReconciliationTable: React.FC = () => {
                 </div>
             </div>
 
-            {/* Shift List Table */}
-            <div className="overflow-x-auto border border-[var(--theme-border)] rounded-xl isolate">
+            {/* Mobile Shift Cards View (Small screens) */}
+            <div className="block md:hidden space-y-3">
+                {filteredShifts.length === 0 ? (
+                    <div className="p-8 text-center text-[var(--theme-text-muted)] font-sans text-xs bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                        {t('posCommand.noShiftsMatching')}
+                    </div>
+                ) : (
+                    filteredShifts.map((shift: ShiftRecord) => {
+                        const hasVariance = Math.abs(shift.variance || 0) > 0.01;
+                        return (
+                            <div key={shift.id} className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-3 shadow-2xs">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
+                                                {shift.cashierCode || shift.cashier_code || 'STAFF'}
+                                            </span>
+                                            <span className="font-semibold text-xs text-[var(--theme-text-primary)]">{shift.cashierName}</span>
+                                        </div>
+                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-0.5">
+                                            {shift.counterNumber || shift.counter_number || 'Counter 1'}
+                                            {shift.startTime ? ` • ${formatDateTime(shift.startTime)}` : ''}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {shift.status === 'Open' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
+                                                <Clock size={10} /> {t('posCommand.statusOpen')}
+                                            </span>
+                                        ) : shift.status === 'Audited' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
+                                                <CheckCircle size={10} /> {t('posCommand.statusAudited')}
+                                            </span>
+                                        ) : shift.status === 'Flagged' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
+                                                <AlertTriangle size={10} /> {t('posCommand.statusFlagged')}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
+                                                <Clock size={10} /> {t('posCommand.statusAwaitingHQ')}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border-subtle)]">
+                                    <div>
+                                        <span className="text-[10px] font-sans text-[var(--theme-text-muted)] uppercase block">{t('posCommand.thExpected')}</span>
+                                        <span className="font-semibold text-[var(--theme-text-secondary)]">{currency} {(shift.expectedCash || 0).toLocaleString()}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-sans text-[var(--theme-text-muted)] uppercase block">{t('posCommand.thActualCount')}</span>
+                                        <span className="font-bold text-[var(--theme-text-primary)]">
+                                            {shift.status === 'Open' ? (t('posCommand.statusActive') || 'Active...') : `${currency} ${(shift.actualCash || 0).toLocaleString()}`}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-sans text-[var(--theme-text-muted)] uppercase block">{t('posCommand.thCashSales')}</span>
+                                        <span className="font-semibold text-[var(--theme-text-primary)]">{currency} {(shift.cashSales || 0).toLocaleString()}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-sans text-[var(--theme-text-muted)] uppercase block">{t('posCommand.thVariance')}</span>
+                                        <span className={`font-bold ${hasVariance ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'}`}>
+                                            {shift.status === 'Open' ? '-' : `${(shift.variance || 0) > 0 ? '+' : ''}${(shift.variance || 0).toLocaleString()}`}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2 pt-1">
+                                    {shift.status !== 'Open' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handlePrintShiftZReport(shift)}
+                                            className="flex-1 min-h-11 px-3 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl transition-all flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-98 shadow-2xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                        >
+                                            <Printer size={13} className="text-[var(--theme-accent)]" />
+                                            <span>{t('posCommand.zReportBtn')}</span>
+                                        </button>
+                                    )}
+                                    {shift.status === 'Closed' && isHQOrManager && (
+                                        <>
+                                            <button
+                                                onClick={() => handleReconcile(shift.id, 'Reconciled')}
+                                                disabled={reconcilingId === shift.id}
+                                                className="flex-1 min-h-11 px-3 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-98 disabled:opacity-50 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                            >
+                                                {t('posCommand.signOff')}
+                                            </button>
+                                            <button
+                                                onClick={() => handleReconcile(shift.id, 'Discrepancy_Flagged')}
+                                                disabled={reconcilingId === shift.id}
+                                                className="flex-1 min-h-11 px-3 py-2 bg-[var(--theme-status-danger)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-98 disabled:opacity-50 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                                            >
+                                                {t('posCommand.flagDiscrepancy')}
+                                            </button>
+                                        </>
+                                    )}
+                                    {shift.reconciledBy && (
+                                        <div className="w-full text-[11px] text-[var(--theme-text-muted)] flex items-center gap-1 font-sans">
+                                            <CheckCircle size={12} className="text-[var(--theme-status-success)] shrink-0" />
+                                            <span>{shift.reconciledBy}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* Desktop Shift List Table */}
+            <div className="hidden md:block overflow-x-auto border border-[var(--theme-border)] rounded-xl isolate">
                 <table className="w-full text-left text-xs">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/70">

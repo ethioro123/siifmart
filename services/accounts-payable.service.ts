@@ -175,48 +175,22 @@ export const accountsPayableService = {
             created_by_id: creator.id
         };
 
-        const { data: invData, error: invError } = await supabase
-            .from('vendor_invoices')
-            .insert(dbInvoice)
-            .select()
-            .single();
-
-        if (invError) {
-            logger.error('accountsPayableService', 'createInvoice header failed:', invError);
-            throw invError;
-        }
-
-        const invoiceId = invData.id;
-        const lineRows = matchResult.evaluatedItems.map(item => ({
-            invoice_id: invoiceId,
-            product_id: item.productId,
-            sku: item.sku || null,
-            item_name: item.itemName,
-            po_quantity: item.poQuantity,
-            received_quantity: item.receivedQuantity,
-            invoiced_quantity: item.invoicedQuantity,
-            po_unit_price: item.poUnitPrice,
-            invoiced_unit_price: item.invoicedUnitPrice,
-            tax_rate: item.taxRate,
-            total_price: item.totalPrice,
-            match_variance_pct: item.matchVariancePct
+        const lineRows = items.map(item => ({
+            product_id: item.productId, sku: item.sku || null, item_name: item.itemName,
+            invoiced_quantity: item.invoicedQuantity, invoiced_unit_price: item.invoicedUnitPrice, tax_rate: item.taxRate
         }));
 
-        const { data: itemData, error: itemError } = await supabase
-            .from('invoice_items')
-            .insert(lineRows)
-            .select();
-
-        if (itemError) {
-            logger.error('accountsPayableService', 'createInvoice lines failed:', itemError);
-            throw itemError;
-        }
+        const { data: saved, error } = await supabase.rpc('create_vendor_invoice_atomic', { p_header: dbInvoice, p_items: lineRows });
+        if (error) throw error;
+        if (!saved?.invoice?.id || !Array.isArray(saved.items)) throw new Error('Invoice confirmation is missing');
+        const invData = saved.invoice;
+        const itemData = saved.items;
 
         await systemLogsService.create({
             user_name: creator.name,
             action: 'INVOICE_CREATED',
             module: 'Financials',
-            details: `Created Vendor Invoice ${invoice.invoiceNumber} (${invoice.vendorName}) for ${totalAmount} ${invoice.currency}. 3-Way Match: ${matchResult.status}.`
+            details: `Created Vendor Invoice ${invoice.invoiceNumber} (${invoice.vendorName}) for ${totalAmount} ${invoice.currency}. 3-Way Match: ${invData.match_status}.`
         });
 
         const savedItems = (itemData || []).map((i: any) => ({
@@ -290,48 +264,20 @@ export const accountsPayableService = {
         countryCode: string = 'ET',
         currency: string = 'ETB'
     ): Promise<PaymentRun> {
-        const { data: invoices, error: invError } = await supabase
-            .from('vendor_invoices')
-            .select('*')
-            .in('id', invoiceIds);
-
-        if (invError) throw invError;
-        if (!invoices || invoices.length === 0) {
-            throw new Error('No invoices selected for payment run.');
-        }
-
-        const totalAmount = invoices.reduce((sum: number, inv: any) => sum + (Number(inv.total_amount) - Number(inv.amount_paid)), 0);
-        const runNumber = `PR-${countryCode}-${Date.now().toString().slice(-6)}`;
-
-        const { data: runData, error: runError } = await supabase
-            .from('payment_runs')
-            .insert({
-                run_number: runNumber,
-                country_code: countryCode,
-                currency,
-                total_invoices: invoices.length,
-                total_amount: totalAmount,
-                status: 'Pending_Approval',
-                created_by_id: creator.id,
-                created_by_name: creator.name,
-                payment_channel: paymentChannel
-            })
-            .select()
-            .single();
-
-        if (runError) throw runError;
-
-        // Associate invoices with payment run
-        await supabase
-            .from('vendor_invoices')
-            .update({ payment_run_id: runData.id })
-            .in('id', invoiceIds);
+        const { data: runData, error } = await supabase.rpc('create_payment_run_atomic', {
+            p_ids: invoiceIds, p_country: countryCode, p_currency: currency, p_channel: paymentChannel
+        });
+        if (error) throw error;
+        if (!runData?.id) throw new Error('Payment run confirmation is missing');
+        const runNumber: string = runData.run_number;
+        const totalAmount = Number(runData.total_amount);
+        const invoiceCount = Number(runData.total_invoices);
 
         await systemLogsService.create({
             user_name: creator.name,
             action: 'PAYMENT_RUN_CREATED',
             module: 'Financials',
-            details: `Created Payment Run ${runNumber} with ${invoices.length} invoices totaling ${totalAmount} ${currency}.`
+            details: `Created Payment Run ${runNumber} with ${invoiceCount} invoices totaling ${totalAmount} ${currency}.`
         });
 
         return {

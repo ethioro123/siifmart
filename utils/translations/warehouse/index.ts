@@ -1,3 +1,4 @@
+import { movementIntegrity } from './movementIntegrity';
 import {datePreferences} from './datePreferences';
 import {fefo} from './fefo';
 import { operationsReview } from './operationsReview';
@@ -26,6 +27,7 @@ import { labels } from './labels';
 import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
+    ...movementIntegrity,
     datePreferences,
     ...fefo,
     ...operationsReview,

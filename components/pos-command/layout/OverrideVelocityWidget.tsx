@@ -31,7 +31,7 @@ export const OverrideVelocityWidget: React.FC = () => {
     if (!stats) return null;
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs space-y-6 isolate">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xs space-y-4 sm:space-y-6 isolate">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <div className="flex items-center gap-3">
@@ -136,20 +136,20 @@ export const OverrideVelocityWidget: React.FC = () => {
                         </div>
                     ) : (
                         recentOverrides.map((ov) => (
-                            <div key={ov.id} className="p-2.5 flex items-center justify-between text-xs font-mono hover:bg-[var(--theme-bg-card-hover)] transition-colors">
-                                <div className="flex items-center gap-2.5">
+                            <div key={ov.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <span className="px-2 py-0.5 rounded-lg bg-[var(--theme-bg-card)] text-[10px] font-bold uppercase text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                         {ov.override_type.replace(/_/g, ' ')}
                                     </span>
                                     <span className="font-sans font-semibold text-[var(--theme-text-primary)]">
                                         {t('posCommand.cashierPrefix')} {ov.cashier_name}
                                     </span>
-                                    <span className="text-[var(--theme-border)]">|</span>
+                                    <span className="text-[var(--theme-border)] hidden sm:inline">|</span>
                                     <span className="text-[var(--theme-text-secondary)] font-sans text-[11px]">
                                         {t('posCommand.reasonPrefix')} {OVERRIDE_REASON_LABELS[ov.reason_code] || ov.reason_code}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-3 text-right">
+                                <div className="flex items-center justify-between sm:justify-end gap-3 text-right pt-1 sm:pt-0 border-t sm:border-t-0 border-[var(--theme-border-subtle)]">
                                     <span className="text-[var(--theme-text-primary)] font-sans font-semibold text-[11px]">
                                         {t('posCommand.authPrefix')} {ov.supervisor_name} ({ov.supervisor_role})
                                     </span>

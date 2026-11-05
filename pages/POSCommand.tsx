@@ -86,7 +86,7 @@ const POSCommandContent: React.FC = () => {
 
   return (
     <div className="min-h-full w-full relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
-      <div className="relative z-10 max-w-[1600px] mx-auto p-4 lg:p-6 space-y-6">
+      <div className="relative z-10 max-w-[1600px] mx-auto p-3.5 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
 
         {/* ===== TWO-TIER REORGANIZED HEADER & COMMAND TOOLBAR ===== */}
         <POSCommandHeader
@@ -103,7 +103,7 @@ const POSCommandContent: React.FC = () => {
 
         {/* ===== PANEL NAVIGATION TABS (Apple Segmented Control) ===== */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-b border-[var(--theme-border)]">
-          <div role="group" aria-label="POS command panels" className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto max-w-full">
+          <div role="group" aria-label="POS command panels" className="flex w-full sm:w-auto items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto max-w-full no-scrollbar touch-manipulation">
             {[
               { id: 'overview', label: t('posCommand.tabOverview'), icon: ReceiptText },
               { id: 'audit', label: t('posCommand.tabAudit'), icon: ShieldCheck },
@@ -115,7 +115,7 @@ const POSCommandContent: React.FC = () => {
                 type="button"
                 onClick={() => setActiveTab(tab.id as 'overview' | 'audit' | 'roster' | 'all')}
                 aria-pressed={activeTab === tab.id}
-                className={`min-h-11 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                className={`min-h-11 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors flex flex-1 sm:flex-initial justify-center items-center gap-2 whitespace-nowrap touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                   activeTab === tab.id
                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs border border-[var(--theme-border)]'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
@@ -177,11 +177,11 @@ const POSCommandContent: React.FC = () => {
             )}
 
             {/* Shift Roster & Schedules Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-xs isolate">
                 <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
               </div>
-              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
+              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-xs isolate">
                 <RosterManager />
               </div>
             </div>

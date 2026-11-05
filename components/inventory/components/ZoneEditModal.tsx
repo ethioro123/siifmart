@@ -97,8 +97,8 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs">
-            <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4 max-h-[90dvh] overflow-y-auto">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs">
+            <form onSubmit={handleSubmit} className="relative w-full h-full sm:h-auto sm:max-w-lg rounded-none sm:rounded-3xl bg-[var(--theme-bg-card)] border-0 sm:border border-[var(--theme-border)] shadow-xl p-4 sm:p-6 space-y-4 max-h-none sm:max-h-[90dvh] overflow-y-auto">
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
@@ -303,18 +303,18 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
                     </div>
                 </div>
 
-                <div className="flex gap-3 justify-end border-t border-[var(--theme-border)] pt-4 mt-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 justify-end border-t border-[var(--theme-border)] pt-4 mt-2">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] font-semibold text-xs rounded-xl border border-[var(--theme-border)] transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
+                        className="min-h-11 px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] font-semibold text-xs rounded-xl border border-[var(--theme-border)] transition-colors uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-xs uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                        className="min-h-11 px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-xs uppercase tracking-wider cursor-pointer disabled:opacity-50 flex items-center justify-center touch-manipulation"
                     >
                         {isLoading ? 'Saving...' : 'Save Changes'}
                     </button>

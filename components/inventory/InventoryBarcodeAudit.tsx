@@ -199,10 +199,10 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                         />
                     </div>
 
-                    <div className="flex items-center gap-2.5 w-full md:w-auto">
+                    <div className="flex items-center gap-2 sm:gap-2.5 w-full md:w-auto flex-wrap sm:flex-nowrap">
                         {isReadOnly && (
-                            <div className="relative group min-w-[160px]">
-                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={13} />
+                            <div className="relative group flex-1 sm:flex-initial min-w-[140px]">
+                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={13} />
                                 <select
                                     aria-label="Filter by Location"
                                     value={barcodeSiteFilter}
@@ -210,7 +210,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                         setBarcodeSiteFilter(e.target.value);
                                         setCurrentBarcodePage(1);
                                     }}
-                                    className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-8 pr-8 text-[13px] font-medium text-[var(--theme-text-primary)] appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
+                                    className="w-full min-h-11 sm:h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-8 pr-8 text-[13px] font-medium text-[var(--theme-text-primary)] appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
                                 >
                                     <option value="All">All Locations</option>
                                     {sites.map(s => (
@@ -221,8 +221,8 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                             </div>
                         )}
 
-                        <div className="relative group min-w-[150px]">
-                            <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={13} />
+                        <div className="relative group flex-1 sm:flex-initial min-w-[140px]">
+                            <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={13} />
                             <select
                                 aria-label="Sort Audit Log"
                                 value={`${barcodeSort.key}-${barcodeSort.direction}`}
@@ -230,7 +230,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                     const [key, direction] = e.target.value.split('-');
                                     setBarcodeSort({ key, direction: direction as 'asc' | 'desc' });
                                 }}
-                                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-8 pr-8 text-[13px] font-medium text-[var(--theme-text-primary)] appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
+                                className="w-full min-h-11 sm:h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-8 pr-8 text-[13px] font-medium text-[var(--theme-text-primary)] appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
                             >
                                 <option value="date-desc">Newest First</option>
                                 <option value="date-asc">Oldest First</option>
@@ -248,7 +248,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                     setBarcodeSiteFilter('All');
                                     setCurrentBarcodePage(1);
                                 }}
-                                className="h-10 px-3 rounded-xl text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
+                                className="min-h-11 sm:h-10 px-3.5 rounded-xl text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98] touch-manipulation flex-1 sm:flex-initial"
                                 title="Clear all filters"
                             >
                                 <X size={14} />
@@ -357,14 +357,14 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                             </div>
 
                                             {/* Right: Actions */}
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-2 w-full md:w-auto">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         setSelectedAuditRecord(approval);
                                                         setIsApprovalDetailsOpen(true);
                                                     }}
-                                                    className="h-8 px-3 rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] active:scale-[0.98] transition-all flex items-center gap-1 text-[12px] font-semibold cursor-pointer shadow-xs"
+                                                    className="min-h-11 sm:h-8 flex-1 md:flex-initial px-3.5 sm:px-3 rounded-xl sm:rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] active:scale-[0.98] transition-all flex items-center justify-center gap-1 text-[12px] font-semibold cursor-pointer shadow-xs touch-manipulation"
                                                 >
                                                     <span>Details</span>
                                                     <ChevronRight size={13} />
@@ -373,10 +373,10 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => handleDeleteAuditRecord(approval)}
-                                                        className="w-8 h-8 rounded-lg bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 hover:bg-[var(--theme-status-danger-bg)]/15 transition-all flex items-center justify-center cursor-pointer active:scale-[0.98]"
+                                                        className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 hover:bg-[var(--theme-status-danger-bg)]/15 transition-all flex items-center justify-center cursor-pointer active:scale-[0.98] touch-manipulation"
                                                         title="Delete Mapping"
                                                     >
-                                                        <Trash2 size={13} />
+                                                        <Trash2 size={14} />
                                                     </button>
                                                 )}
                                             </div>

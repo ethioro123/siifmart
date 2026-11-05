@@ -54,36 +54,13 @@ export const accountsReceivableService = {
      * Compute Accounts Receivable Aging report
      */
     async getAgingReport(countryCode: string = 'ET'): Promise<ArAgingReport> {
-        const invoices = await this.getInvoices(countryCode);
-        const now = new Date().getTime();
-
-        const report: ArAgingReport = {
-            current: 0,
-            days31to60: 0,
-            days61to90: 0,
-            days90Plus: 0,
-            totalOutstanding: 0
+        const { data, error } = await supabase.rpc('ar_aging_totals', { p_country: countryCode });
+        if (error) throw error;
+        if (!data) throw new Error('Receivables totals unavailable');
+        return {
+            current: Number(data.current), days31to60: Number(data.days31to60),
+            days61to90: Number(data.days61to90), days90Plus: Number(data.days90Plus), totalOutstanding: Number(data.totalOutstanding)
         };
-
-        invoices.forEach(inv => {
-            if (inv.status === 'Paid' || inv.status === 'Voided') return;
-            const balance = inv.balanceDue;
-            const dueTime = new Date(inv.dueDate).getTime();
-            const daysPastDue = Math.floor((now - dueTime) / (1000 * 60 * 60 * 24));
-
-            if (daysPastDue <= 0) {
-                report.current += balance;
-            } else if (daysPastDue <= 30) {
-                report.days31to60 += balance;
-            } else if (daysPastDue <= 60) {
-                report.days61to90 += balance;
-            } else {
-                report.days90Plus += balance;
-            }
-            report.totalOutstanding += balance;
-        });
-
-        return report;
     },
 
     /**

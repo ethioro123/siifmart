@@ -1,3 +1,4 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { Globe, Layers, Clock, MapPin, Play } from 'lucide-react';
 import { Site, FulfillmentStrategy, SaleRecord } from '../../../types';
@@ -20,6 +21,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
     onReleaseOrder,
     refreshData,
 }) => {
+    const { t } = useLanguage();
     const { showToast } = useStore();
     const [activeSubTab, setActiveSubTab] = useState<'strategies' | 'zones' | 'release'>('strategies');
     const [selectedSiteId, setSelectedSiteId] = useState<string>(fulfillmentSites[0]?.id || '');
@@ -79,7 +81,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
         setIsSaving(saleId);
         try {
             await onReleaseOrder(saleId);
-            showToast('Order released to pick queue', 'success');
+            showToast(t('warehouse.releaseSaved'), 'success');
         } catch (error) {
             logger.error('WMSSettings', 'caught error', error as Error);
             showToast('Failed to release order', 'error');

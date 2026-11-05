@@ -73,6 +73,7 @@ export const InventoryProductModal: React.FC<InventoryProductModalProps> = ({
             onClose={onClose}
             title={editingProduct ? "Edit Product Profile & Inventory Console" : "Create Product"}
             size="xl"
+            mobileFullScreen
         >
             <div className="max-h-[85vh] overflow-y-auto custom-scrollbar p-1">
                 {!editingProduct && (

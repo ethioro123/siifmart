@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { mapWmsJobRow } from './wms-jobs.mapper';
 import type { JobAssignment } from '../types';
 
 export const mapJobAssignmentRow = (row: any): JobAssignment => {
@@ -31,6 +32,12 @@ export const mapJobAssignmentRow = (row: any): JobAssignment => {
 };
 
 export const jobAssignmentsService = {
+    async assignAtomic(jobId: string, employeeId: string, minutes: number) {
+        const { data, error } = await supabase.rpc('assign_warehouse_job_atomic', { p_job: jobId, p_employee: employeeId, p_minutes: minutes });
+        if (error) throw error;
+        if (data?.job?.id !== jobId || data?.assignment?.job_id !== jobId || data?.assignment?.employee_id !== employeeId) throw new Error('Assignment confirmation is missing');
+        return { job: mapWmsJobRow(data.job), assignment: mapJobAssignmentRow(data.assignment) };
+    },
     /** Call with IDs from the authorized active-job read; avoid rejoining WMS RLS. */
     async getForJobs(jobs: readonly { id: string; siteId: string }[], siteId: string): Promise<JobAssignment[]> {
         if (!siteId) return [];

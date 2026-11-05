@@ -71,15 +71,15 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
   return (
     <div className="space-y-3">
       {/* ===== TIER 1: STATION IDENTITY & SECURITY HEADER ===== */}
-      <header className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 lg:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         {/* Left: Back Button + Store Identity & Shift Status */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             type="button"
             title={t('common.back') || 'Back'}
             aria-label={t('common.back') || 'Back'}
             onClick={handleBack}
-            className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-colors border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+            className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-colors border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
           >
             <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-accent)_12%,transparent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
               <ArrowLeft size={13} />
@@ -104,14 +104,14 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
           {/* Counter & Shift Status Pill */}
           {currentShift ? (
             <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs font-semibold text-[var(--theme-status-success-text)] shadow-2xs"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs font-semibold text-[var(--theme-status-success-text)] shadow-2xs max-w-full truncate"
               title={`Cashier: ${currentShift.cashierName || user?.name || 'Staff'} • Float: ${(currentShift.openingFloat || 0).toLocaleString()}`}
             >
-              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] animate-pulse shrink-0" />
               <span className="font-mono font-bold">{currentShift.cashierCode || currentShift.cashier_code || user?.code || 'STAFF'}</span>
               <span className="text-[10px] opacity-60">•</span>
               <span>{currentShift.counterNumber || currentShift.counter_number || 'Counter 1'}</span>
-              <span className="text-[10px] opacity-75 font-mono">
+              <span className="text-[10px] opacity-75 font-mono hidden xs:inline">
                 ({new Date(currentShift.startTime).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -128,7 +128,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
         </div>
 
         {/* Right: Sovereign Live Clock & Terminal Security Lifecycle */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
           <div className="hidden lg:flex items-center">
             <CyberClock country={activeCountry} compact />
           </div>
@@ -137,7 +137,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
           <button
             type="button"
             onClick={handleLockScreen}
-            className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl border border-[var(--theme-border)] shadow-2xs transition-colors flex items-center gap-2 text-xs font-semibold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+            className="flex-1 sm:flex-initial justify-center min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl border border-[var(--theme-border)] shadow-2xs transition-colors flex items-center gap-2 text-xs font-semibold group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             title="Lock Terminal Screen"
           >
             <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
@@ -151,7 +151,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
             <button
               type="button"
               onClick={handleEndShift}
-              className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-2xl border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-2 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+              className="flex-1 sm:flex-initial justify-center min-h-11 px-4 bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-2xl border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-2 shadow-2xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
               title="End Shift and Reconcile Cash Drawer"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-status-danger)_20%,transparent)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
@@ -163,7 +163,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsStartShiftModalOpen(true)}
-              className="min-h-11 px-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="flex-1 sm:flex-initial justify-center min-h-11 px-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Input opening float and start daily cashier shift"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-primary-text)_20%,transparent)] text-[var(--theme-primary-text)] flex items-center justify-center shrink-0">
@@ -176,15 +176,15 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
       </header>
 
       {/* ===== TIER 2: COMMAND TOOLBAR & ANALYTICS SCOPE ===== */}
-      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2.5 sm:p-3 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 sm:gap-3">
         {/* Left: Operations & Tools */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar max-w-full pb-0.5 sm:pb-0">
           {/* Segmented Store Inventory Group */}
-          <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
+          <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5 overflow-x-auto no-scrollbar touch-manipulation shrink-0">
             <button
               type="button"
               onClick={() => setIsStockListOpen(true)}
-              className="min-h-10 px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="min-h-11 px-2.5 sm:px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Stock Catalog & Pricing"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-accent)_12%,transparent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -196,7 +196,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsReceivingModalOpen(true)}
-              className="min-h-10 px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="min-h-11 px-2.5 sm:px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Receive Stock"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-accent)_12%,transparent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -208,7 +208,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenSafeLedger}
-              className="min-h-10 px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="min-h-11 px-2.5 sm:px-3 hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Drop Safe Ledger & Armored Pickups"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-accent)_12%,transparent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -225,7 +225,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
               onClick={() => setIsPrintMenuOpen(prev => !prev)}
               aria-expanded={isPrintMenuOpen}
               aria-controls="pos-command-print-menu"
-              className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] shadow-2xs transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="min-h-11 px-3 sm:px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] shadow-2xs transition-colors flex items-center gap-2 group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Unified Print Center (Receipts, Barcodes & Shelf Tags)"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-accent)_12%,transparent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -281,7 +281,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenOnboardTalent}
-              className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+              className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-2 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               title="Onboard store cashiers, sales staff & stock clerks"
             >
               <div className="w-5 h-5 rounded-md bg-[color-mix(in_srgb,var(--theme-primary-text)_20%,transparent)] text-[var(--theme-primary-text)] flex items-center justify-center shrink-0">
@@ -293,7 +293,7 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
         </div>
 
         {/* Right: Product Updates Notice & Analytical Time Window Selector */}
-        <div className="flex flex-wrap items-center gap-2 self-start xl:self-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-between xl:justify-end">
           <CommandProductUpdatesNotice />
           <DateRangeSelector value={dateRange} onChange={setDateRange} align="right" />
         </div>

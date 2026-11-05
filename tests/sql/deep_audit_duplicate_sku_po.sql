@@ -28,7 +28,7 @@ END $$;
 SET LOCAL ROLE authenticated;
 DO $$ DECLARE result jsonb; BEGIN
  result:=public.finalize_po_from_putaway(current_setting('test.duplicate.job')::uuid);
- ASSERT result->>'state'='needs_review','Reproduction changed: explicit PO line identities now reconcile';
+ ASSERT result->>'state'='synced','Reproduction changed: explicit PO line identities did not reconcile';
 END $$;
 ROLLBACK;
-SELECT 'CONFIRMED: same SKU on two PO lines requires review despite explicit poItemId and matching placement evidence; rolled back' AS result;
+SELECT 'PASS: same SKU on two PO lines reconciles using explicit poItemId and matching placement evidence; rolled back' AS result;

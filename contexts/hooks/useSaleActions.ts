@@ -1,3 +1,4 @@
+import { useLanguage } from '../LanguageContext';
 import { useCallback,useRef } from 'react';
 import type {
     CartItem, SaleRecord, Site, Product, Customer, SystemConfig,
@@ -32,6 +33,7 @@ interface UseSaleActionsDeps {
 }
 
 export function useSaleActions(deps: UseSaleActionsDeps) {
+    const { t } = useLanguage();
     const {
         activeSite, settings, products, customers,
         setSales, setAllSales, setProducts, setAllProducts, setCustomers,
@@ -271,18 +273,11 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
     }, [addNotification, setProducts, setSales, setAllSales, deps.products, deps.settings]);
 
     const releaseOrder = useCallback(async (saleId: string) => {
-        try {
-            if (navigator.onLine) {
-                await salesService.update(saleId, { fulfillmentStatus: 'Delivered' });
-            }
-            setSales(prev => prev.map(s => s.id === saleId ? { ...s, fulfillmentStatus: 'Delivered' } : s));
-            setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, fulfillmentStatus: 'Delivered' } : s));
-            addNotification('success', 'Order marked as delivered');
-        } catch (error: any) {
-            logger.error('useSaleActions', 'releaseOrder failed:', error);
-            addNotification('alert', `Failed to release order: ${error?.message || 'Unknown error'}`);
-        }
-    }, [addNotification, setSales, setAllSales]);
+        if (!navigator.onLine || !activeSite?.id) throw new Error(t('warehouse.releaseOnline'));
+        await salesService.releaseOrder(saleId, activeSite.id);
+        setSales(prev => prev.map(s => s.id === saleId ? { ...s, release_status: 'RELEASED', fulfillmentStatus: 'Picking' } : s));
+        setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, release_status: 'RELEASED', fulfillmentStatus: 'Picking' } : s));
+    }, [activeSite?.id, t, setSales, setAllSales]);
 
     return { processSale, processReturn, releaseOrder };
 }

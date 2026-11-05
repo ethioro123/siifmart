@@ -75,7 +75,7 @@ export const DashboardKPIs: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(true)}
-                        className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full sm:w-auto min-h-11 justify-center px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 shadow-2xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Play size={13} className="fill-current" />
                         <span>{t('posCommand.startDailyShift')}</span>
@@ -86,7 +86,7 @@ export const DashboardKPIs: React.FC = () => {
             {/* Apple Pro 4-Card Unified Command Deck */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 {/* Card 1: Shift Progress & Target */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
                             <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -140,7 +140,7 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 2: Cash Drawer & Blind Protocol */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
                             <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
@@ -154,7 +154,7 @@ export const DashboardKPIs: React.FC = () => {
                                         title={isRevealed ? "Hide Cash Total" : "Reveal Cash Total"}
                                         aria-label={isRevealed ? 'Hide cash total' : 'Reveal cash total'}
                                         aria-pressed={isRevealed}
-                                        className="min-h-9 min-w-9 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                                        className="min-h-9 min-w-9 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                     >
                                         {isRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
                                     </button>
@@ -182,7 +182,7 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 3: Total Transactions / Volume */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
                             <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -203,7 +203,7 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 4: Returns & Policy Compliance */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${

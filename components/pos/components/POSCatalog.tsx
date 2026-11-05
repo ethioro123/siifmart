@@ -264,7 +264,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(prev => Math.min(prev + 1, totalPages));
                                         native.haptic();
                                     }}
-                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronRight size={16} />
                                 </button>

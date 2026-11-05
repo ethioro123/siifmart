@@ -28,34 +28,42 @@ export default function ResetPasswordModal({
 }: ResetPasswordModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Reset Security Credentials" size="sm">
-            <div className="p-6">
-                <p className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mb-4 text-sm">
-                    Set a new secure password for <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{employee.name}</span>. The user will be notified.
+            <div className="space-y-4">
+                <p className="text-[var(--theme-text-secondary)] text-sm">
+                    Set a new secure password for <span className="text-[var(--theme-text-primary)] font-bold">{employee.name}</span>. The user will be notified upon update.
                 </p>
-                <div className="relative mb-6">
-                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
+                <div className="relative">
+                    <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)]" size={16} />
                     <input
                         type={showResetPassword ? "text" : "password"}
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
                         autoComplete="new-password"
-                        className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-10 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none font-mono placeholder:text-[var(--theme-text-muted)]"
-                        placeholder="New Password"
+                        className="w-full min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-[var(--theme-text-primary)] text-sm focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 outline-none font-mono placeholder:text-[var(--theme-text-muted)] transition-all"
+                        placeholder="New Secure Password"
                     />
                     <button
                         type="button"
                         onClick={() => setShowResetPassword(!showResetPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-muted)] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
+                        aria-label={showResetPassword ? "Hide password" : "Show password"}
                     >
                         {showResetPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                 </div>
-                <div className="flex justify-end gap-3">
-                    <button onClick={onClose} className="px-4 py-2 text-[var(--theme-text-muted)] font-bold text-xs uppercase">Cancel</button>
+                <div className="flex justify-end gap-2.5 pt-2">
                     <button
+                        type="button"
+                        onClick={onClose}
+                        className="min-h-11 px-4 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] font-semibold text-xs transition-colors cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
                         onClick={handleConfirmResetPassword}
-                        disabled={isResetting}
-                        className="px-6 py-2 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-black rounded-lg text-xs uppercase tracking-widest transition-all"
+                        disabled={isResetting || !passwordInput.trim()}
+                        className="min-h-11 px-5 bg-[var(--theme-status-warning-bg)] hover:bg-[var(--theme-status-warning)]/20 border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] font-semibold rounded-xl text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs active:scale-[0.98]"
                     >
                         {isResetting ? 'Processing...' : 'Reset Password'}
                     </button>

@@ -25,7 +25,7 @@ export const BarcodeImageLightbox: React.FC<BarcodeImageLightboxProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-[var(--theme-bg-card)]/90 backdrop-blur-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center"
+                        className="min-h-11 min-w-11 sm:min-h-8 sm:min-w-8 sm:w-8 sm:h-8 rounded-full bg-[var(--theme-bg-card)]/90 backdrop-blur-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] transition-all cursor-pointer shadow-xs active:scale-95 flex items-center justify-center touch-manipulation"
                         aria-label="Close Fullscreen View"
                     >
                         <X size={16} />

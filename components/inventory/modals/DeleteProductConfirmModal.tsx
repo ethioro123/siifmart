@@ -21,9 +21,9 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
     isSubmitting
 }) => {
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Delete Product">
+        <Modal isOpen={isOpen} onClose={onClose} title="Delete Product" mobileFullScreen>
             <div className="space-y-4">
-                <div className="p-4 bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-2xl flex items-center gap-3.5 text-[var(--theme-status-danger-text)]">
+                <div className="p-3.5 sm:p-4 bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-2xl flex items-center gap-3.5 text-[var(--theme-status-danger-text)]">
                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-danger-bg)]/15 flex items-center justify-center shrink-0 text-[var(--theme-status-danger-text)]">
                         <AlertTriangle size={20} />
                     </div>
@@ -43,11 +43,11 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
                     placeholder="Type DELETE"
                     autoFocus
                 />
-                <div className="flex justify-end items-center gap-2.5 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 pt-2">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
@@ -55,7 +55,7 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
                         type="button"
                         disabled={deleteInput !== 'DELETE' || isSubmitting}
                         onClick={onConfirm}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 touch-manipulation"
                     >
                         <span>Delete Product</span>
                     </button>

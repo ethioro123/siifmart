@@ -65,25 +65,25 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
 
                 {/* Filter Bar */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <div className="relative flex-1 min-w-[200px] max-w-xs">
-                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
+                    <div className="relative flex-1 min-w-[200px] w-full sm:max-w-xs">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Filter by product, SKU, user..."
-                            className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-hidden focus:border-[var(--theme-accent)] transition-colors"
+                            className="w-full pl-8 pr-3 h-11 sm:h-9 text-xs bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-hidden focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
 
                     {/* Change Type Filter */}
-                    <div className="flex items-center gap-1 bg-[var(--theme-bg-hover)]/60 p-1 rounded-xl border border-[var(--theme-border)] text-[11px]">
+                    <div className="flex items-center gap-1 bg-[var(--theme-bg-hover)]/60 p-1 rounded-xl border border-[var(--theme-border)] text-[11px] overflow-x-auto no-scrollbar w-full sm:w-auto touch-manipulation">
                         {(['All', 'edit', 'stock_adjustment', 'create', 'delete'] as const).map(type => (
                             <button
                                 key={type}
                                 type="button"
                                 onClick={() => setTypeFilter(type)}
-                                className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                                className={`min-h-9 sm:min-h-0 px-2.5 py-1.5 sm:py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
                                     typeFilter === type
                                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -95,13 +95,13 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                     </div>
 
                     {/* Status Filter */}
-                    <div className="flex items-center gap-1 bg-[var(--theme-bg-hover)]/60 p-1 rounded-xl border border-[var(--theme-border)] text-[11px]">
+                    <div className="flex items-center gap-1 bg-[var(--theme-bg-hover)]/60 p-1 rounded-xl border border-[var(--theme-border)] text-[11px] overflow-x-auto no-scrollbar w-full sm:w-auto touch-manipulation">
                         {(['All', 'approved', 'rejected'] as const).map(status => (
                             <button
                                 key={status}
                                 type="button"
                                 onClick={() => setStatusFilter(status)}
-                                className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                                className={`min-h-9 sm:min-h-0 px-2.5 py-1.5 sm:py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
                                     statusFilter === status
                                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -114,7 +114,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                 </div>
             </div>
 
-            {/* Table Content */}
+            {/* Content */}
             {filteredHistory.length === 0 ? (
                 <div className="p-12 text-center">
                     <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mx-auto mb-3">
@@ -124,7 +124,77 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                     <p className="text-[12px] text-[var(--theme-text-secondary)] mt-0.5">Approved or rejected inventory edit requests will appear here with complete before-and-after audit logs.</p>
                 </div>
             ) : (
-                <div className="overflow-x-auto">
+                <>
+                    {/* Mobile Cards List */}
+                    <div className="md:hidden divide-y divide-[var(--theme-border)]">
+                        {filteredHistory.map((item) => (
+                            <article key={item.id} className="p-3.5 space-y-2.5">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                                        item.changeType === 'edit'
+                                            ? 'text-[var(--theme-accent)] border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10'
+                                            : item.changeType === 'delete'
+                                            ? 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]/20 bg-[var(--theme-status-danger-bg)]/10'
+                                            : item.changeType === 'stock_adjustment'
+                                            ? 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/20 bg-[var(--theme-status-warning-bg)]/10'
+                                            : 'text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/20 bg-[var(--theme-status-success-bg)]/10'
+                                    }`}>
+                                        {item.changeType === 'stock_adjustment' ? 'Stock Adj.' : item.changeType}
+                                    </span>
+                                    {item.status === 'approved' ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
+                                            <CheckCircle2 size={11} />
+                                            <span>Approved</span>
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20">
+                                            <XCircle size={11} />
+                                            <span>Rejected</span>
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <h4 className="font-semibold text-sm text-[var(--theme-text-primary)] break-words">
+                                        {item.productName}
+                                    </h4>
+                                    <p className="font-mono text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                                        {item.productSku}
+                                    </p>
+                                </div>
+
+                                {/* What changed preview */}
+                                <div className="text-xs text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] p-2 rounded-xl">
+                                    {item.changeType === 'edit' && renderChangeDiff(item, allProducts)}
+                                    {item.changeType === 'stock_adjustment' && (
+                                        <span className={item.adjustmentType === 'IN' ? 'text-[var(--theme-status-success-text)] font-semibold' : 'text-[var(--theme-status-danger-text)] font-semibold'}>
+                                            {item.adjustmentType === 'IN' ? '+' : '-'}{item.adjustmentQty} units {item.adjustmentReason ? `(${item.adjustmentReason})` : ''}
+                                        </span>
+                                    )}
+                                    {item.changeType === 'create' && <span className="text-[var(--theme-status-success-text)]">New product added</span>}
+                                    {item.changeType === 'delete' && <span className="text-[var(--theme-status-danger-text)]">Product removal request</span>}
+                                </div>
+
+                                <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] pt-1">
+                                    <div className="space-y-0.5">
+                                        <span className="font-semibold text-[var(--theme-text-primary)] block">{item.requestedBy}</span>
+                                        <span className="font-mono text-[11px] block">{item.requestedAt ? formatDateTime(item.requestedAt, { showTime: true }) : '—'}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => onViewDetails(item)}
+                                        className="min-h-11 px-3.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-hover)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-2xs transition-all active:scale-[0.98] cursor-pointer inline-flex items-center gap-1.5 touch-manipulation"
+                                    >
+                                        <Search size={13} />
+                                        <span>View Diff</span>
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--theme-bg-hover)]/40 border-b border-[var(--theme-border)]">
                             <tr>
@@ -272,6 +342,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
         </div>
     );

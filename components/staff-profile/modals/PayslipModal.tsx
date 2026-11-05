@@ -38,42 +38,42 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
         >
             <div className="space-y-6 print:m-0 print:p-0">
                 {/* Header Statement */}
-                <div className="p-5 rounded-2xl bg-[var(--theme-bg-app)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h3 className="text-xl font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-tight">
+                        <h3 className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             SIIFMART ENTERPRISE
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Official Compensation & Earnings Statement • {siteName}
                         </p>
                     </div>
-                    <div className="text-right">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] block">
+                    <div className="text-left sm:text-right">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-accent)] block">
                             Payslip ID
                         </span>
-                        <span className="font-mono text-xs font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">
+                        <span className="font-mono text-xs font-bold text-[var(--theme-text-primary)]">
                             {payslip.id}
                         </span>
                     </div>
                 </div>
 
                 {/* Employee Info Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs">
                     <div>
                         <span className="text-[var(--theme-text-muted)] text-[10px] uppercase font-bold block">Employee Name</span>
-                        <span className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{employee.name}</span>
+                        <span className="font-bold text-[var(--theme-text-primary)]">{employee.name}</span>
                     </div>
                     <div>
                         <span className="text-[var(--theme-text-muted)] text-[10px] uppercase font-bold block">Employee Code</span>
-                        <span className="font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{formatDisplayEmployeeId(employee)}</span>
+                        <span className="font-mono font-bold text-[var(--theme-text-primary)]">{formatDisplayEmployeeId(employee)}</span>
                     </div>
                     <div>
                         <span className="text-[var(--theme-text-muted)] text-[10px] uppercase font-bold block">Job Title</span>
-                        <span className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{getEmployeeJobTitle(employee)}</span>
+                        <span className="font-bold text-[var(--theme-text-primary)]">{getEmployeeJobTitle(employee)}</span>
                     </div>
                     <div>
                         <span className="text-[var(--theme-text-muted)] text-[10px] uppercase font-bold block">Pay Period</span>
-                        <span className="font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">{payslip.period}</span>
+                        <span className="font-bold text-[var(--theme-accent)]">{payslip.period}</span>
                     </div>
                 </div>
 

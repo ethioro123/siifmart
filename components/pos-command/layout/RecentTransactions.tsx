@@ -19,7 +19,7 @@ export const RecentTransactions: React.FC = () => {
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs isolate">
             {/* Header */}
-            <div className="px-5 py-3.5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
+            <div className="px-4 sm:px-5 py-3 sm:py-3.5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
                 <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Receipt className="w-3.5 h-3.5" />
@@ -30,15 +30,66 @@ export const RecentTransactions: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => navigate('/sales')}
-                        className="min-h-9 inline-flex items-center px-3 rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="min-h-9 inline-flex items-center px-3 rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('posCommand.viewAllHistory')}
                     </button>
                 )}
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
+            {/* Mobile Card View (Small screens) */}
+            <div className="block sm:hidden divide-y divide-[var(--theme-border)]">
+                {(() => {
+                    if (filteredSales.length === 0) {
+                        return (
+                            <div className="px-4 py-8 text-center text-xs text-[var(--theme-text-muted)] font-medium">
+                                {t('posCommand.noTransactionsFound') || 'No transactions found in this period.'}
+                            </div>
+                        );
+                    }
+
+                    const startIndex = (txPage - 1) * TX_PER_PAGE;
+                    const paginatedTx = filteredSales.slice(startIndex, startIndex + TX_PER_PAGE);
+
+                    return paginatedTx.map((sale) => (
+                        <div key={sale.id} className="p-3.5 space-y-2 hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                            <div className="flex items-center justify-between">
+                                <span className="font-mono text-xs font-bold text-[var(--theme-text-primary)]">
+                                    {sale.id.substring(0, 8).toUpperCase()}
+                                </span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
+                                    sale.status === 'Completed'
+                                        ? 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
+                                        : sale.status === 'Pending'
+                                            ? 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
+                                            : 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
+                                }`}>
+                                    {sale.status === 'Completed'
+                                        ? t('common.completed')
+                                        : sale.status === 'Pending'
+                                            ? t('common.pending')
+                                            : sale.status === 'Partially Refunded'
+                                                ? t('posCommand.partiallyRefunded') || 'Partially refunded'
+                                                : t('posCommand.refunded') || 'Refunded'}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-[var(--theme-text-secondary)]">
+                                    {sale.method === 'Cash' ? t('pos.cashSales') :
+                                        sale.method === 'Card' ? t('pos.cardSales') :
+                                            sale.method === 'Mobile Money' ? t('pos.mobileSales') : sale.method}
+                                </span>
+                                <span className="font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                    {CURRENCY_SYMBOL} {sale.total.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    ));
+                })()}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-left">
                     <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                         <tr>
@@ -97,7 +148,7 @@ export const RecentTransactions: React.FC = () => {
             </div>
 
             {/* Pagination footer */}
-            <div className="px-5 py-3.5 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between">
+            <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between">
                 <div className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider select-none">
                     {t('common.page')} {txPage} {t('common.of')} {Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
                 </div>
@@ -107,7 +158,7 @@ export const RecentTransactions: React.FC = () => {
                         onClick={() => setTxPage(p => Math.max(1, p - 1))}
                         disabled={txPage <= 1}
                         aria-label="Previous transaction page"
-                        className="min-h-11 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.previous')}
                     </button>
@@ -116,7 +167,7 @@ export const RecentTransactions: React.FC = () => {
                         onClick={() => setTxPage(p => Math.min(Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE)), p + 1))}
                         disabled={txPage >= Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
                         aria-label="Next transaction page"
-                        className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.next')}
                     </button>

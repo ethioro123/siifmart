@@ -123,7 +123,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 <div className="flex-1 space-y-6 w-full">
                     <div>
                         <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] mb-2 flex items-center gap-2">
-                            <CreditCard className="text-cyber-primary" />
+                            <CreditCard className="text-[var(--theme-accent)]" />
                             Employee ID Generator
                         </h2>
                         <p className="text-[var(--theme-text-secondary)]">Generate and print official identification cards for staff members.</p>
@@ -163,7 +163,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                     {/* THE CARD ITSELF - CR80 Size (85.6mm x 54mm) -> Scaled up for display */}
                     {/* Aspect Ratio: 1.586 */}
                     <div
-                        className="relative w-[340px] h-[214px] bg-gradient-to-br from-gray-900 via-cyber-gray to-gray-900 rounded-xl overflow-hidden shadow-2xl flex flex-col"
+                        className="relative w-[340px] h-[214px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-2xl flex flex-col"
                         ref={(el) => {
                             if (el) {
                                 el.style.setProperty('--role-color', roleColor);

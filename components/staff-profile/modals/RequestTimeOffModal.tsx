@@ -46,13 +46,13 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 block">
+                    <label className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
                         Leave Type
                     </label>
                     <select
                         value={leaveType}
                         onChange={(e) => setLeaveType(e.target.value as any)}
-                        className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                        className="w-full min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-colors"
                     >
                         <option value="Annual Leave">Annual Vacation Leave</option>
                         <option value="Sick Leave">Sick / Medical Leave</option>
@@ -63,40 +63,40 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 flex items-center gap-1">
-                            <Calendar size={12} className="text-[var(--theme-primary)]" /> Start Date
+                        <label className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-1.5 flex items-center gap-1.5">
+                            <Calendar size={13} className="text-[var(--theme-accent)]" /> Start Date
                         </label>
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
                             min={today}
-                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-colors"
                             required
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 flex items-center gap-1">
-                            <Calendar size={12} className="text-[var(--theme-primary)]" /> End Date
+                        <label className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-1.5 flex items-center gap-1.5">
+                            <Calendar size={13} className="text-[var(--theme-accent)]" /> End Date
                         </label>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
                             min={startDate}
-                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-colors"
                             required
                         />
                     </div>
                 </div>
 
-                <div className="p-3 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-xl text-xs font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex items-center justify-between">
+                <div className="p-3.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] flex items-center justify-between">
                     <span>Duration:</span>
-                    <span className="font-mono text-sm">{days} {days === 1 ? 'Day' : 'Days'}</span>
+                    <span className="font-mono text-sm font-bold tabular-nums">{days} {days === 1 ? 'Day' : 'Days'}</span>
                 </div>
 
                 <div>
-                    <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 block">
+                    <label className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
                         Reason / Notes
                     </label>
                     <textarea
@@ -104,21 +104,21 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="Briefly state reason for leave..."
                         rows={3}
-                        className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
+                        className="w-full p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-muted)]"
                     />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
+                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[var(--theme-border-subtle)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
+                        className="min-h-11 px-4 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="woody-btn-primary px-5 py-2 text-xs font-bold rounded-xl cursor-pointer"
+                        className="min-h-11 px-5 text-xs font-semibold rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] shadow-xs active:scale-[0.98] transition-all cursor-pointer"
                     >
                         Submit Request
                     </button>

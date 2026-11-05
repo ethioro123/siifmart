@@ -38,7 +38,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
     if (!product) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Adjust Stock Level" size="md">
+        <Modal isOpen={isOpen} onClose={onClose} title="Adjust Stock Level" size="md" mobileFullScreen>
             <div className="space-y-5">
                 <p className="text-sm text-[var(--theme-text-secondary)]">{t('inventory.adjustmentLocationScope', { location: product.location || t('inventory.locationUnassigned'), batch: product.batchNumber || '—' })}</p>
                 {!canApprove && (
@@ -121,11 +121,11 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         <option>Other</option>
                     </select>
                 </div>
-                <div className="flex justify-end items-center gap-2.5 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 pt-2">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
@@ -133,7 +133,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         type="button"
                         onClick={onConfirm}
                         disabled={!adjustQty || parseFloat(adjustQty) <= 0 || isSubmitting}
-                        className={`h-9 px-4 rounded-xl text-[13px] font-semibold text-[var(--theme-text-primary)] shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                        className={`min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold text-[var(--theme-text-primary)] shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center touch-manipulation ${
                             adjustType === 'IN' ? 'bg-[var(--theme-status-success-bg)] hover:opacity-95' : 'bg-[var(--theme-status-danger-bg)] hover:opacity-95'
                         }`}
                     >

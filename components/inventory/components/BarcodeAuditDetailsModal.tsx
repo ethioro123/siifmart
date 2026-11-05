@@ -29,6 +29,7 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
             isOpen={isOpen}
             onClose={onClose}
             title="Barcode Mapping Evidence & Details"
+            mobileFullScreen
         >
             <div className="space-y-6">
                 <div className="flex gap-4">
@@ -84,11 +85,11 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                     </p>
                 </div>
 
-                <div className="flex justify-end items-center gap-2.5 pt-3 border-t border-[var(--theme-border)]">
+                <div className="flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2.5 pt-3 border-t border-[var(--theme-border)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                        className="min-h-11 sm:h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Close
                     </button>
@@ -99,7 +100,7 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                                 onDelete(record);
                                 onClose();
                             }}
-                            className="h-9 px-4 rounded-xl bg-[var(--theme-status-danger-bg)]/10 hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 shadow-xs transition-all text-[13px] font-semibold flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                            className="min-h-11 sm:h-9 px-4 rounded-xl bg-[var(--theme-status-danger-bg)]/10 hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 shadow-xs transition-all text-[13px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] touch-manipulation"
                         >
                             <Trash2 size={13} />
                             <span>Remove Mapping</span>

@@ -74,23 +74,6 @@ export const purchaseOrdersService = {
             purchase_requisition_id: po.purchaseRequisitionId || null
         };
 
-        const insertBuilder: any = supabase.from('purchase_orders').insert(dbPO);
-        let { data: insertedPO, error: poError } = typeof insertBuilder?.select === 'function'
-            ? await insertBuilder.select('po_number').single()
-            : await insertBuilder;
-        if (poError && (poError.code === '42703' || poError.message?.includes('country_code'))) {
-            logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, inserting without country_code');
-            const { country_code: _, ...fallbackPO } = dbPO;
-            const retryBuilder: any = supabase.from('purchase_orders').insert(fallbackPO);
-            const retry = typeof retryBuilder?.select === 'function'
-                ? await retryBuilder.select('po_number').single()
-                : await retryBuilder;
-            insertedPO = retry.data;
-            poError = retry.error;
-        }
-        if (poError) throw poError;
-        const poNumber = insertedPO?.po_number || explicitPoNumber;
-
         // Create PO items
         const itemsWithPOId = items.map(item => {
             const rawProdId = item.productId || item.product_id;
@@ -120,20 +103,12 @@ export const purchaseOrdersService = {
             };
         });
 
-        // Try insert with all columns first; retry without new columns if migration not run
-        let { error: itemsError } = await supabase.from('po_items').insert(itemsWithPOId);
-
-        if (itemsError && itemsError.code === 'PGRST204') {
-            logger.warn('PurchaseOrdersService', '⚠️ po_items migration not run yet. Falling back to basic columns.');
-            const basicItems = itemsWithPOId.map(({ pack_quantity, case_size, package_type, description, min_stock, max_stock, custom_attributes, ...rest }: any) => rest);
-            const retry = await supabase.from('po_items').insert(basicItems);
-            itemsError = retry.error;
-        }
-
-        if (itemsError) {
-            logger.error('PurchaseOrdersService', 'PO Items Insert Error', itemsError);
-            throw new Error(`PO Items Insert Failed: ${itemsError.message} (PO ID: ${poId})`);
-        }
+        const { data: saved, error } = await supabase.rpc('save_purchase_order_document', {
+            p_id: poId, p_header: dbPO, p_items: itemsWithPOId, p_create: true
+        });
+        if (error) throw error;
+        if (saved?.id !== poId || !saved?.po_number) throw new Error('Purchase document confirmation is missing');
+        const poNumber: string = saved.po_number;
 
         // Audit log PO creation
         await systemLogsService.create({
@@ -195,14 +170,9 @@ export const purchaseOrdersService = {
         }
 
         // Handle Line Item Updates (Only allowed for Draft/Pending to prevent post-approval price tampering)
+        let replacementItems: Record<string, unknown>[] | null = null;
         const isSettled = currentPO && ['Approved', 'Ordered', 'Received', 'Partially Received'].includes(currentPO.status);
         if (updates.lineItems && updates.lineItems.length > 0 && !isSettled) {
-            const { error: deleteError } = await supabase.from('po_items').delete().eq('po_id', id);
-            if (deleteError) {
-                logger.error('PurchaseOrdersService', 'Failed to delete existing PO items during update', deleteError);
-                throw deleteError;
-            }
-
             const itemsWithPOId = updates.lineItems.map((item: any) => {
                 const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.productId);
                 return {
@@ -230,11 +200,7 @@ export const purchaseOrdersService = {
                 };
             });
 
-            const { error: insertError } = await supabase.from('po_items').insert(itemsWithPOId);
-            if (insertError) {
-                logger.error('PurchaseOrdersService', 'Failed to insert new PO items during update', insertError);
-                throw insertError;
-            }
+            replacementItems = itemsWithPOId;
         } else if (updates.lineItems && updates.lineItems.length > 0 && isSettled) {
             // Zero-Trust: Never mutate commercial price/qty post-approval, but persist physical receipt metrics
             for (const item of updates.lineItems) {
@@ -367,26 +333,10 @@ export const purchaseOrdersService = {
             if (dbUpdates[key] === undefined) delete dbUpdates[key];
         });
 
-        let { error } = await supabase
-            .from('purchase_orders')
-            .update(dbUpdates)
-            .eq('id', id);
-
-        if (error && (error.code === '42703' || error.message?.includes('country_code'))) {
-            logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, updating without country_code');
-            const fallback = { ...dbUpdates };
-            delete fallback.country_code;
-            const retry = await supabase
-                .from('purchase_orders')
-                .update(fallback)
-                .eq('id', id);
-            error = retry.error;
-        }
-
-        if (error) {
-            logger.error('PurchaseOrdersService', 'PO Update Error', error);
-            throw error;
-        }
+        const { error } = replacementItems
+            ? await supabase.rpc('save_purchase_order_document', { p_id: id, p_header: dbUpdates, p_items: replacementItems, p_create: false })
+            : await supabase.from('purchase_orders').update(dbUpdates).eq('id', id);
+        if (error) throw error;
 
         if (updates.status === 'Approved' || effectiveStatus === 'Approved') {
             await systemLogsService.create({
