@@ -1,5 +1,7 @@
 # Buying-to-selling deep audit — 6 November 2026
 
+Implementation follow-up: the nine findings below are historical reproductions. Fixes and staging verification are recorded in [the repair log](product-movement-deep-fixes-20261106.md).
+
 ## Scope and evidence
 
 This second pass reviewed procurement, receipt reconciliation, putaway, assignment, FEFO picking, packing, dispatch/transfer intake, sale posting, supplier invoices/payment runs, customer receivables and returns. It concentrates on handoffs, authority and partial failures. It found nine additional gaps; this audit does not implement their fixes.

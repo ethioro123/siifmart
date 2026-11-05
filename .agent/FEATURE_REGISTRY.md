@@ -495,3 +495,5 @@
 - 2026-11-06: Inventory Mobile Experience: Full responsiveness across Overview, Stock List, Storage Zones, Movements, Barcode Audit, and Stock Reviews on 320px–390px viewports. Dedicated mobile card views, touch targets (`min-h-11`), mobile full-screen modals, and responsive controls.
 
 - 2026-11-06: Merchandising Mobile Responsiveness: Optimized all 8 tabs (`pages/Merchandising.tsx`, `PricingTab`, `ForecastTab`, `MarkdownTab`, `RulesTab`, `PlanogramTab`, `PromosTab`, `ShelfTagsTab`, `MerchandisingReviewsTab`) and all merchandising modals with `mobileFullScreen`, touch-friendly inputs/buttons (`min-h-11`), responsive card grids, and smooth swipe segmented navigation. Merchandising whole-number pricing rule preserved. All 1800 repo files under 500 lines; 0 tsc errors.
+
+- 2026-11-06: Buying-to-selling integrity repairs added trusted invoice matching/dual control, transactional PO/payment/assignment saves, FEFO order release, transfer variance signatures and warehouse putaway handoff, PO-item reconciliation and complete AR totals. See `docs/product-movement-deep-fixes-20261106.md`.
