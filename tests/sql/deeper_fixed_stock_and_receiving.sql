@@ -20,7 +20,7 @@ END $$;
 RESET ROLE;SELECT set_config('request.jwt.claim.sub','e1000000-0000-4000-8000-000000000083',true);SELECT set_config('request.jwt.claims','{"sub":"e1000000-0000-4000-8000-000000000083","role":"authenticated"}',true);SET LOCAL ROLE authenticated;
 DO $$ DECLARE request uuid:=gen_random_uuid(); BEGIN
  INSERT INTO public.inventory_requests(id,product_id,product_name,product_sku,site_id,country_code,change_type,requested_by,requested_by_employee_id,status,proposed_changes,adjustment_qty)
- VALUES(request,gen_random_uuid()::text,'Audit reviewed cooking oil','ET-AUDIT-CATALOG-'||request,'c1111111-1111-4000-8000-000000000110','ET','create','Audit manager',auth.uid(),'pending',jsonb_build_object('name','Audit reviewed cooking oil','sku','ET-AUDIT-CATALOG-'||request,'price',500,'costPrice',100,'category','Food'),2);
+ VALUES(request,gen_random_uuid()::text,'Audit reviewed cooking oil','ET-AUDIT-CATALOG-'||left(request::text,12),'c1111111-1111-4000-8000-000000000110','ET','create','Audit manager',auth.uid(),'pending',jsonb_build_object('name','Audit reviewed cooking oil','sku','ET-AUDIT-CATALOG-'||left(request::text,12),'price',500,'costPrice',100,'category','Food'),2);
  PERFORM set_config('test.stock.catalog',request::text,true);
 END $$;
 RESET ROLE;SELECT set_config('request.jwt.claim.sub','988fb8ef-8053-415b-9032-2aca981058d7',true);SELECT set_config('request.jwt.claims','{"sub":"988fb8ef-8053-415b-9032-2aca981058d7","role":"authenticated"}',true);SET LOCAL ROLE authenticated;

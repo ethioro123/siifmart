@@ -317,7 +317,7 @@ export default function LocationSettings() {
     return (
         <Protected permission="MANAGE_SITES" fallback={
             <div className="max-w-2xl mx-auto py-12">
-                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-8 text-center shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-8 text-center shadow-xs">
                     <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center mx-auto mb-3">
                         <Lock size={20} />
                     </div>
@@ -327,38 +327,38 @@ export default function LocationSettings() {
             </div>
         }>
             <div className="w-full space-y-6 animate-in fade-in">
-                <div className="flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <SectionHeader
                             title="Physical Locations"
                             desc={`Manage Warehouses, Distribution Centers, and Retail Stores across ${countryProfile.name}.`}
                         />
-                        <div className="flex-wrap items-center gap-2 mt-2">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] px-2.5 py-1 rounded-full border-[var(--theme-border-accent)]">
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] px-2.5 py-1 rounded-full border border-[var(--theme-border-accent)]">
                                 <Building size={14} />
                                 <span>{sites.filter((s: Site) => ['Administration', 'Administrative', 'Central Operations', 'HQ'].includes(s.type)).length} Administration</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] px-2.5 py-1 rounded-full border-[var(--theme-status-info-border)]">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] px-2.5 py-1 rounded-full border border-[var(--theme-status-info-border)]">
                                 <Truck size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Distribution Center').length} Distribution</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2.5 py-1 rounded-full border-[var(--theme-accent)]/20">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2.5 py-1 rounded-full border border-[var(--theme-accent)]/20">
                                 <Box size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2.5 py-1 rounded-full border-[var(--theme-status-success-border)]">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2.5 py-1 rounded-full border border-[var(--theme-status-success-border)]">
                                 <Store size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 mt-4 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)] w-fit" role="tablist">
+                        <div className="flex items-center gap-1 mt-4 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-fit" role="tablist">
                             <button
                                 type="button"
                                 role="tab"
                                 aria-selected={locationViewMode === 'category'}
                                 onClick={() => setLocationViewMode('category')}
-                                className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
+                                className={`min-h-11 sm:min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
                                     locationViewMode === 'category'
                                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
@@ -371,7 +371,7 @@ export default function LocationSettings() {
                                 role="tab"
                                 aria-selected={locationViewMode === 'region'}
                                 onClick={() => setLocationViewMode('region')}
-                                className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
+                                className={`min-h-11 sm:min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
                                     locationViewMode === 'region'
                                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
@@ -384,7 +384,7 @@ export default function LocationSettings() {
                                 role="tab"
                                 aria-selected={locationViewMode === 'zone'}
                                 onClick={() => setLocationViewMode('zone')}
-                                className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
+                                className={`min-h-11 sm:min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${
                                     locationViewMode === 'zone'
                                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
@@ -399,14 +399,14 @@ export default function LocationSettings() {
                         <button
                             type="button"
                             onClick={() => setIsZoneManagerOpen(true)}
-                            className="h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] px-4 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+                            className="min-h-11 sm:h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-4 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98] touch-manipulation"
                         >
-                            <Globe size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Manage Zones
+                            <Globe size={15} className="text-[var(--theme-accent)]" /> Manage Zones
                         </button>
                         <button
                             type="button"
                             onClick={handleOpenAddSite}
-                            className="h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
+                            className="min-h-11 sm:h-10 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98] touch-manipulation"
                         >
                             <Plus size={16} /> Add Location
                         </button>
