@@ -1,0 +1,72 @@
+ALTER TABLE public.salary_requests ADD COLUMN requested_by_id uuid REFERENCES public.employees(id),ADD COLUMN approved_by_id uuid REFERENCES public.employees(id);
+REVOKE UPDATE,DELETE ON public.salary_requests FROM authenticated,anon;
+CREATE FUNCTION private.guard_salary_request_identity() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor public.employees%ROWTYPE; e public.employees%ROWTYPE;
+BEGIN
+ IF auth.role()='service_role' THEN RETURN NEW; END IF;
+ SELECT * INTO actor FROM public.employees WHERE id=auth.uid() AND status='Active';SELECT * INTO e FROM public.employees WHERE id=NEW.employee_id FOR SHARE;
+ IF actor.id IS NULL OR e.id IS NULL OR actor.id=e.id OR NOT private.hr_site_scope(e.site_id::text,NEW.country_code) THEN RAISE EXCEPTION 'Independent scoped salary authority required' USING ERRCODE='42501'; END IF;
+ IF TG_OP='INSERT' THEN
+  IF NEW.status<>'pending' OR NEW.proposed_salary<0 OR NEW.proposed_salary::text IN('NaN','Infinity','-Infinity') THEN RAISE EXCEPTION 'Valid pending salary proposal required'; END IF;
+  NEW.requested_by_id:=actor.id;NEW.requested_by:=actor.name;NEW.requested_by_role:=actor.role;NEW.current_salary:=coalesce(e.salary,0);NEW.site_id:=e.site_id::text;NEW.employee_name:=e.name;
+ ELSE
+  IF current_setting('siifmart.salary_review',true) IS DISTINCT FROM NEW.id::text OR OLD.status<>'pending' THEN RAISE EXCEPTION 'Use the pending salary review command'; END IF;
+ END IF;
+ RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION private.guard_salary_request_identity() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER zz_salary_identity BEFORE INSERT OR UPDATE ON public.salary_requests FOR EACH ROW EXECUTE FUNCTION private.guard_salary_request_identity();
+CREATE FUNCTION private.review_salary_request(p_request uuid,p_approve boolean,p_reason text) RETURNS public.salary_requests LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE r public.salary_requests%ROWTYPE; e public.employees%ROWTYPE; actor public.employees%ROWTYPE;
+BEGIN
+ SELECT * INTO actor FROM public.employees WHERE id=auth.uid() AND status='Active';SELECT * INTO r FROM public.salary_requests WHERE id=p_request FOR UPDATE;SELECT * INTO e FROM public.employees WHERE id=r.employee_id FOR UPDATE;
+ IF actor.id IS NULL OR r.id IS NULL OR r.status<>'pending' OR r.requested_by_id IS NULL OR actor.id=e.id OR (actor.id=r.requested_by_id AND actor.role<>'group_ceo')
+ OR actor.role NOT IN('group_ceo','group_cfo','country_managing_director','country_finance_director','regional_finance_manager') OR NOT private.hr_site_scope(e.site_id::text,r.country_code)
+ OR (actor.role<>'group_ceo' AND private.employee_role_rank(actor.role)<=private.employee_role_rank(e.role)) THEN RAISE EXCEPTION 'Independent Finance salary reviewer required' USING ERRCODE='42501'; END IF;
+ IF coalesce(e.salary,0) IS DISTINCT FROM r.current_salary THEN RAISE EXCEPTION 'Salary changed since proposal; submit a fresh request'; END IF;
+ PERFORM set_config('siifmart.salary_review',r.id::text,true);
+ UPDATE public.salary_requests SET status=CASE WHEN p_approve THEN 'approved' ELSE 'rejected' END,approved_by=CASE WHEN p_approve THEN actor.name END,approved_by_role=CASE WHEN p_approve THEN actor.role END,
+ approved_by_id=CASE WHEN p_approve THEN actor.id END,approved_at=CASE WHEN p_approve THEN now() END,rejected_by=CASE WHEN NOT p_approve THEN actor.name END,rejected_at=CASE WHEN NOT p_approve THEN now() END,rejection_reason=CASE WHEN NOT p_approve THEN p_reason END WHERE id=r.id RETURNING * INTO r;
+ RETURN r;
+END $$;
+REVOKE ALL ON FUNCTION private.review_salary_request(uuid,boolean,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION private.review_salary_request(uuid,boolean,text) TO authenticated;
+CREATE FUNCTION public.review_salary_request(p_request uuid,p_approve boolean,p_reason text DEFAULT NULL) RETURNS public.salary_requests LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.review_salary_request(p_request,p_approve,p_reason); $$;
+REVOKE ALL ON FUNCTION public.review_salary_request(uuid,boolean,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.review_salary_request(uuid,boolean,text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION private.guard_employee_authority() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor public.employees%ROWTYPE; home public.sites%ROWTYPE; target public.sites%ROWTYPE; command public.employee_change_requests%ROWTYPE; sensitive boolean;
+BEGIN
+ IF auth.role()='service_role' THEN RETURN NEW; END IF;
+ SELECT * INTO actor FROM public.employees WHERE id=auth.uid() AND lower(status)='active';
+ IF actor.id IS NULL THEN RAISE EXCEPTION 'Active employee required' USING ERRCODE='42501'; END IF;
+ SELECT * INTO home FROM public.sites WHERE id=actor.site_id;
+ SELECT * INTO target FROM public.sites WHERE id=NEW.site_id;
+ IF NEW.role<>'group_ceo' AND target.id IS NULL THEN RAISE EXCEPTION 'Employee workplace required'; END IF;
+ IF actor.role<>'group_ceo' AND (NOT public.is_site_in_my_authorized_scope(NEW.site_id::text,target.country) OR home.country IS DISTINCT FROM target.country) THEN RAISE EXCEPTION 'Employee country and workplace authority required' USING ERRCODE='42501'; END IF;
+ IF TG_OP='INSERT' OR NEW.role IS DISTINCT FROM OLD.role THEN
+  IF private.employee_role_rank(NEW.role)=0 OR (actor.role<>'group_ceo' AND (private.employee_role_rank(actor.role)<=private.employee_role_rank(NEW.role)
+   OR NEW.role LIKE 'group_%' OR (NEW.role LIKE 'country_%' AND actor.role NOT IN('country_managing_director','country_hr_director')))) THEN
+   RAISE EXCEPTION 'Higher authorized employee appointment authority required' USING ERRCODE='42501'; END IF;
+ END IF;
+ IF TG_OP='INSERT' THEN
+  IF actor.role<>'group_ceo' AND NEW.status<>'Pending Approval' THEN RAISE EXCEPTION 'New employees require independent onboarding approval'; END IF;
+ ELSE
+  IF (NEW.attendance_rate,NEW.performance_score) IS DISTINCT FROM (OLD.attendance_rate,OLD.performance_score) AND actor.id=OLD.id THEN
+   RAISE EXCEPTION 'Employee metrics cannot be self-certified' USING ERRCODE='42501'; END IF;
+  sensitive:=(NEW.role,NEW.salary,NEW.site_id,NEW.region_code,NEW.scope_level,NEW.department,NEW.name,NEW.date_of_birth,NEW.national_id_number)
+   IS DISTINCT FROM (OLD.role,OLD.salary,OLD.site_id,OLD.region_code,OLD.scope_level,OLD.department,OLD.name,OLD.date_of_birth,OLD.national_id_number);
+  IF sensitive AND actor.role<>'group_ceo' THEN
+   SELECT * INTO command FROM public.employee_change_requests WHERE id::text=current_setting('siifmart.employee_change',true) AND employee_id=NEW.id AND status='approved';
+   IF command.id IS NULL AND NOT EXISTS(SELECT 1 FROM public.salary_requests sr WHERE sr.id::text=current_setting('siifmart.salary_review',true) AND sr.employee_id=NEW.id AND sr.status='approved' AND sr.approved_by_id=actor.id
+    AND NEW.salary=sr.proposed_salary AND (to_jsonb(NEW)-ARRAY['salary','updated_at'])=(to_jsonb(OLD)-ARRAY['salary','updated_at'])) THEN RAISE EXCEPTION 'Use a reviewed employee change transaction' USING ERRCODE='42501'; END IF;
+  END IF;
+  IF OLD.status='Pending Approval' AND NEW.status='Active' AND actor.role<>'group_ceo' THEN
+   IF actor.role NOT IN('country_hr_director','regional_hr_manager') OR actor.id=NEW.id OR
+    EXISTS(SELECT 1 FROM public.system_logs WHERE action='EMPLOYEE_RECRUITED' AND entity_id=NEW.id::text AND employee_id=actor.id::text) THEN
+    RAISE EXCEPTION 'Independent HR onboarding approval required' USING ERRCODE='42501'; END IF;
+  END IF;
+ END IF;
+ RETURN NEW;
+END $$;

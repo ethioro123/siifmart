@@ -136,7 +136,6 @@ export default function AdjustSalaryModal({
                     role: user?.role || 'group_ceo'
                 });
 
-                updateEmployee({ ...employee, salary: parsedProposed }, user?.name || 'Executive');
                 addNotification('success', `Salary updated to ${currency} ${parsedProposed.toLocaleString()} (Executive Override).`);
             } else {
                 // Standard Dual-Control: Propose to approval queue
