@@ -204,7 +204,7 @@ export default function DataSettings() {
                                 Generate and retrieve fiscal records, procurement summaries, and operational turnover.
                             </p>
                         </div>
-                        <span className="self-start sm:self-auto bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide flex items-center gap-1">
+                        <span className="self-start sm:self-auto bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide flex items-center gap-1">
                             <ShieldCheck size={11} /> Immutable Ledger
                         </span>
                     </div>
@@ -217,7 +217,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedYear}
                                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Fiscal Year"
                                 >
                                     {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map(y => (
@@ -235,7 +235,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedPeriod}
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Period"
                                 >
                                     {['Q1 (Jan-Mar)', 'Q2 (Apr-Jun)', 'Q3 (Jul-Sep)', 'Q4 (Oct-Dec)', 'Full Year'].map(p => (
@@ -253,7 +253,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedReportType}
                                     onChange={(e) => setSelectedReportType(e.target.value as 'Operations' | 'Financials' | 'Procurement')}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Report Type"
                                 >
                                     {['Financials', 'Procurement', 'Operations'].map(t => (
@@ -270,7 +270,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleRetrieveReport}
                                 disabled={isGenerating}
-                                className="w-full h-9 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50"
+                                className="w-full min-h-[42px] bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
                             >
                                 {isGenerating ? (
                                     <RefreshCw className="animate-spin" size={14} />
