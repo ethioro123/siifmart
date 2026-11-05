@@ -73,10 +73,10 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                 <p className="font-medium">{currentQty.toLocaleString()} {orderUnitName.toLowerCase()}{currentQty === 1 ? '' : 's'} × {unitsPerOrderUnit.toLocaleString()} {sellUnit} = {totalUnits.toLocaleString()} {sellUnit}</p>
                 <p className="mt-1 text-xs text-[var(--theme-text-secondary)]">{currencySymbol} {currentCost.toLocaleString(undefined, { maximumFractionDigits: 2 })} per {orderUnitName.toLowerCase()}{costPerSellUnit !== null ? ` · ${currencySymbol} ${costPerSellUnit.toLocaleString(undefined, { maximumFractionDigits: 2 })} per ${sellUnit}` : ''}</p>
             </div>}
-            <div className="rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-5 shadow-sm space-y-4">
-                <div className="grid grid-cols-12 gap-4">
+            <div className="rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-3.5 sm:p-5 shadow-sm space-y-4">
+                <div className="grid grid-cols-12 gap-3 sm:gap-4">
                     {/* Order Qty */}
-                    <div className={`${showRetailInput ? 'col-span-4' : 'col-span-6'} space-y-1`}>
+                    <div className={`${showRetailInput ? 'col-span-6 sm:col-span-4' : 'col-span-6'} space-y-1`}>
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                             Order Qty{' '}
                             {unitSuffix && (
@@ -109,7 +109,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                     </div>
 
                     {/* Manifest Unit Cost */}
-                    <div className={`${showRetailInput ? 'col-span-4' : 'col-span-6'} space-y-1`}>
+                    <div className={`${showRetailInput ? 'col-span-6 sm:col-span-4' : 'col-span-6'} space-y-1`}>
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                             Cost / {orderUnitName} <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
@@ -136,7 +136,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
 
                     {/* Retail Input (Shown for Catalog items) */}
                     {showRetailInput && (
-                        <div className="col-span-4 space-y-1 relative">
+                        <div className="col-span-12 sm:col-span-4 space-y-1 relative">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                                 Retail / {sellUnit} <span className="text-[var(--theme-status-danger-text)]">*</span>
                             </label>

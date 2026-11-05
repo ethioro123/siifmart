@@ -105,7 +105,7 @@ export function SiteModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Facility Country Immutability Notice */}
                 {!!newSite.id && (
-                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-medium">
+                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
                     <Lock size={14} className="shrink-0" />
                     <span>Operating market is permanently locked for existing facilities. Sovereign borders cannot be altered after creation.</span>
                   </div>
@@ -179,7 +179,7 @@ export function SiteModal({
                     {displaySiteCode}
                   </span>
                   {newSite.id && (
-                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1 font-semibold" title="Internal DB ID and Site Code are immutable">
+                    <span className="text-[11px] text-[var(--theme-status-warning-text)] flex items-center gap-1 font-semibold" title="Internal DB ID and Site Code are immutable">
                       <Lock size={11} /> Locked
                     </span>
                   )}

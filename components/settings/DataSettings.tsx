@@ -341,9 +341,9 @@ export default function DataSettings() {
             </div>
 
             {/* DANGER ZONE */}
-            <div className="bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div>
-                    <h3 className="text-sm font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mb-1 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-[var(--theme-status-danger-text)] mb-1 flex items-center gap-2">
                         <AlertTriangle size={16} /> Danger Zone: Factory Reset
                     </h3>
                     <p className="text-xs text-[var(--theme-text-secondary)]">
@@ -359,7 +359,7 @@ export default function DataSettings() {
                     <button
                         type="button"
                         onClick={() => setIsResetModalOpen(true)}
-                        className="h-8 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                        className="min-h-11 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:bg-[var(--theme-status-danger-border)]/20 px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
                     >
                         <Trash2 size={13} /> Reset System
                     </button>
@@ -383,7 +383,7 @@ export default function DataSettings() {
                                     setIsResetModalOpen(false);
                                     setConfirmText('');
                                 }}
-                                className="h-9 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors"
+                                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
                             >
                                 Cancel
                             </button>
@@ -391,7 +391,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleFactoryResetConfirm}
                                 disabled={confirmText !== 'RESET-SIIFMART'}
-                                className="h-9 px-4 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
+                                className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
                             >
                                 Confirm System Reset
                             </button>
@@ -400,9 +400,9 @@ export default function DataSettings() {
                 >
                     <div className="space-y-4">
                         <div className="p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-start gap-3">
-                            <ShieldAlert className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={18} />
-                            <div className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] leading-relaxed">
-                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-[color-mix(in_srgb,var(--theme-bg-card)_60%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] px-1.5 py-0.5 rounded border border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
+                            <ShieldAlert className="text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={18} />
+                            <div className="text-xs text-[var(--theme-status-danger-text)] leading-relaxed">
+                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-[color-mix(in_srgb,var(--theme-bg-card)_60%,transparent)] px-1.5 py-0.5 rounded border border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
                             </div>
                         </div>
 
@@ -413,7 +413,7 @@ export default function DataSettings() {
                                 value={confirmText}
                                 onChange={(e) => setConfirmText(e.target.value)}
                                 placeholder="Type RESET-SIIFMART"
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-semibold outline-none border-[var(--theme-status-danger-border)] transition-colors"
+                                className="w-full min-h-[42px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-semibold outline-none focus:border-[var(--theme-status-danger-border)] transition-colors"
                             />
                         </div>
                     </div>
