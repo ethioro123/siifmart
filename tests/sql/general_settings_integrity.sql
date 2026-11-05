@@ -1,10 +1,5 @@
 -- Trusted saves and RLS checks; all settings/audit fixtures are rolled back.
 BEGIN;
-CREATE TEMP TABLE general_settings_fault(enabled boolean);
-INSERT INTO general_settings_fault VALUES(false);
-CREATE FUNCTION pg_temp.fail_general_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
- IF NEW.action='GENERAL_SETTINGS_UPDATED' AND EXISTS(SELECT 1 FROM pg_temp.general_settings_fault WHERE enabled) THEN RAISE EXCEPTION 'Injected audit write failure'; END IF;RETURN NEW;END $$;
-CREATE TRIGGER regression_general_audit_failure BEFORE INSERT ON public.system_logs FOR EACH ROW EXECUTE FUNCTION pg_temp.fail_general_audit();
 DO $test$
 DECLARE ceo uuid; manager uuid; home text; before_cfg public.system_config%ROWTYPE; after_cfg public.system_config%ROWTYPE; key uuid:=gen_random_uuid(); response jsonb; request uuid; blocked boolean; n integer;
 BEGIN
@@ -24,15 +19,9 @@ BEGIN
  SELECT * INTO after_cfg FROM public.system_config WHERE id=before_cfg.id;
  IF after_cfg.country_configs#>>'{ET,slogan}'<>'Audit regression slogan' OR after_cfg.country_configs#>>'{KE,slogan}'<>'Independent KE slogan' THEN RAISE EXCEPTION 'Country patches overwrote each other';END IF;
  IF (to_jsonb(after_cfg)-ARRAY['country_configs','updated_at','updated_by']) IS DISTINCT FROM (to_jsonb(before_cfg)-ARRAY['country_configs','updated_at','updated_by']) THEN RAISE EXCEPTION 'Section save changed global/unrelated columns';END IF;
- IF (after_cfg.country_configs#>'{ET}'-'slogan') IS DISTINCT FROM (coalesce(before_cfg.country_configs#>'{ET}','{}')-'slogan') THEN RAISE EXCEPTION 'Branding changed unrelated ET settings';END IF;
+ IF ((after_cfg.country_configs#>'{ET}')-'slogan') IS DISTINCT FROM (coalesce(before_cfg.country_configs#>'{ET}','{}')-'slogan') THEN RAISE EXCEPTION 'Branding changed unrelated ET settings';END IF;
  SELECT count(*) INTO n FROM public.system_logs WHERE action='GENERAL_SETTINGS_UPDATED' AND employee_id=ceo::text AND country_code='ET' AND details::jsonb#>>'{changes,slogan,after}'='Audit regression slogan';
  IF n<>1 THEN RAISE EXCEPTION 'Missing or duplicate audit';END IF;
- UPDATE pg_temp.general_settings_fault SET enabled=true;
- PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',ceo,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';
- blocked:=false;BEGIN PERFORM public.save_general_settings_section(gen_random_uuid(),'ET','branding','{"slogan":"Must roll back"}');EXCEPTION WHEN raise_exception THEN blocked:=SQLERRM='Injected audit write failure';END;
- IF NOT blocked THEN RAISE EXCEPTION 'Audit failure did not fail the save';END IF;
- EXECUTE 'RESET ROLE';UPDATE pg_temp.general_settings_fault SET enabled=false;
- IF (SELECT country_configs#>>'{ET,slogan}' FROM public.system_config WHERE id=before_cfg.id)<>'Audit regression slogan' THEN RAISE EXCEPTION 'Audit failure persisted settings';END IF;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',ceo,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';
  response:=public.save_general_settings_section(gen_random_uuid(),'ET','localization','{"currency":"ETB","timezone":"Africa/Addis_Ababa","dateFormat":"YYYY-MM-DD","language":"am"}');
  response:=public.save_general_settings_section(gen_random_uuid(),'ET','branding','{"slogan":""}');

@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
 vi.mock('../../lib/supabase', () => ({ supabase: { rpc } }));
 import { sitesService } from '../../services/sites.service';
-beforeEach(() => rpc.mockReset());
+beforeEach(() => { rpc.mockReset(); });
 it('saves site changes and source replacement in one transaction and clears an unassigned zone', async () => {
     rpc.mockResolvedValue({ data: { id: 'site', code: 'ADD-ST-01', country: 'ET', currency: 'ETB', logistics_zone_id: null }, error: null });
     await sitesService.update('site', { logisticsZoneId: '', replenishmentSourceIds: ['warehouse'] });

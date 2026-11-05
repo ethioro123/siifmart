@@ -38,8 +38,6 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
 
             logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
         } catch (error: any) {
-            // Rollback optimistic state on server failure
-
 
             logger.error('useSiteActions', 'Failed to persist settings to database', error as Error);
             addNotification('alert', `Failed to save settings: ${error?.message || 'Server error'}`);
