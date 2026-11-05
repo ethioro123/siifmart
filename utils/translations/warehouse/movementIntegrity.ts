@@ -1,5 +1,8 @@
 import type { TranslationBlock } from '../types';
 export const movementIntegrity: TranslationBlock = {
+ releaseFailed: { en: 'Order release was not confirmed.', am: 'የትዕዛዝ መልቀቅ አልተረጋገጠም።', or: 'Gadhiifamuun ajajaa hin mirkanoofne.' },
+ transferReceiptSaved: { en: 'Receipt saved. Warehouse arrivals are queued for putaway.', am: 'ደረሰኙ ተቀምጧል። የመጋዘን ገቢዎች ለማስቀመጥ ወረፋ ላይ ናቸው።', or: 'Fudhannaan kuufameera. Meeshaan mana kuusaa gaʼe bakka kaaʼuuf tarreeffameera.' },
+ transferReceiptFailed: { en: 'Receipt was not confirmed. Refresh and check the saved count.', am: 'ደረሰኙ አልተረጋገጠም። ያድሱና የተቀመጠውን ቆጠራ ያረጋግጡ።', or: 'Fudhannaan hin mirkanoofne. Haaromsiitii lakkoofsa kuufame ilaali.' },
  releaseOnline: { en: 'Connect to the internet and select the warehouse before releasing the order.', am: 'ትዕዛዙን ከመልቀቅዎ በፊት ከኢንተርኔት ጋር ይገናኙና መጋዘኑን ይምረጡ።', or: 'Ajaja gadhiisuu dura interneetii qunnamiitii mana kuusaa filadhu.' },
  releaseSaved: { en: 'Order released to the pick queue.', am: 'ትዕዛዙ ወደ ምርጫ ወረፋ ተልኳል።', or: 'Ajajni gara tarree fudhannaatti gadhiifameera.' },
  varianceTitle: { en: 'Transfer variance review', am: 'የዝውውር ልዩነት ግምገማ', or: 'Sakatta’iinsa garaagarummaa dabarsaa' },

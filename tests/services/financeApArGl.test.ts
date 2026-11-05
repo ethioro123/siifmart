@@ -118,6 +118,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
                 return {};
             });
 
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: { invoice: mockInvoiceRow, items: [] }, error: null } as never);
             const created = await accountsPayableService.createInvoice(
                 {
                     invoiceNumber: 'INV-2026-001',
@@ -219,7 +220,9 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
             });
             (supabase.from as any).mockReturnValue({ select: selectMock });
 
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: {current:10000,days31to60:20000,days61to90:30000,days90Plus:40000,totalOutstanding:100000}, error: null } as never);
             const aging = await accountsReceivableService.getAgingReport('ET');
+            expect(supabase.rpc).toHaveBeenCalledWith('ar_aging_totals',{p_country:'ET'});
 
             expect(aging.current).toBe(10000);
             expect(aging.days31to60).toBe(20000);

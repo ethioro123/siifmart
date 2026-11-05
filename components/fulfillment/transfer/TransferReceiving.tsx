@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { ArrowDown, Box, ShieldCheck, MapPin } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getTransferQuantityConfig, toTransferStockQuantity } from './transferQuantity';
+import { useTransferIntake } from '../../../hooks/useTransferIntake';
+import { TransferVariancePanel } from './TransferVariancePanel';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
-import { productsService } from '../../../services/supabase.service';
 import { TransferReceiveItemCard } from './TransferReceiveItemCard';
 import { transferReceiptVerificationService, type TransferReceiptVerification } from '../../../services/transfer-receipt-verification.service';
 import { useTransferReceiptVerification } from '../../../hooks/useTransferReceiptVerification';
@@ -52,6 +52,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     const [receiptVerification, setReceiptVerification] = useState<TransferReceiptVerification | null>(null);
     const [isLoadingVerification, setIsLoadingVerification] = useState(true);
     const verificationMutation = useTransferReceiptVerification();
+    const intake = useTransferIntake();
 
     useEffect(() => {
         let active = true;
@@ -99,257 +100,21 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
     const driverName = (activeTransferJob as any).carrierName || (activeTransferJob as any).carrier || assignedDriver?.name || 'Assigned Driver / Courier';
 
-    const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number }) => {
-        if (!activeTransferJob) return;
-        if (activeTransferJob.transferStatus === 'Received' || activeTransferJob.status === 'Completed') {
-            addNotification('alert', 'This shipment has already been received and completed.');
-            return;
-        }
-        const appliedStockAdjustments: { productId: string; previousStock: number }[] = [];
+    const handleConfirmReceipt = async () => {
+        if (isSubmittingReceipt) return;
+        setIsSubmittingReceipt(true);
         try {
-            setIsSubmittingReceipt(true);
-            const hasDiscrepancy = !!discrepancyDetails?.hasDiscrepancy;
-            const discrepancyCount = discrepancyDetails?.discrepancyCount || 0;
-
-            const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id || activeSite?.id;
-            const timestamp = new Date().toISOString();
-            const receiverName = user?.name || 'Receiver';
-
-            // 1. Process stock intake at destination site BEFORE marking transfer complete
-            for (const item of transferReceiveItems) {
-                // Keep damaged units out of saleable stock. The transfer line
-                // remains recorded so a manager can resolve or dispose of it.
-                if ((item.receivedQty || 0) > 0 && item.condition !== 'Damaged') {
-                    const itemSku = (item as any).sku || '';
-                    const itemName = item.productName || (item as any).name || '';
-                    const itemUnit = (item as any).unit || 'pcs';
-                    const itemSize = (item as any).size || '';
-                    // Find source product to get product details
-                    let sourceProduct: Product | null | undefined = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
-                        || products.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
-
-                    if (!sourceProduct) {
-                        try {
-                            if (item.productId) sourceProduct = await productsService.getById(item.productId);
-                            if (!sourceProduct && itemSku) sourceProduct = await productsService.getBySKU(itemSku);
-                        } catch (e: any) {
-                            logger.warn('TransferReceiving', `Source product lookup notice for SKU ${itemSku}: ${e?.message || String(e)}`);
-                        }
-                    }
-
-                    const transferProduct = {
-                        ...sourceProduct,
-                        unit: item.unit || sourceProduct?.unit,
-                        size: item.size || sourceProduct?.size,
-                        packQuantity: item.packQuantity || sourceProduct?.packQuantity,
-                        packageType: item.packageType || sourceProduct?.packageType,
-                        customAttributes: item.customAttributes || sourceProduct?.customAttributes
-                    };
-                    const unitConfig = getTransferQuantityConfig(transferProduct);
-                    const receivedStockQty = toTransferStockQuantity(
-                        item.receivedQty || 0,
-                        transferProduct,
-                        item.requestedMeasureQty !== undefined || unitConfig.isLooseMeasure
-                    );
-
-                    // Look up existing destination product record
-                    let destProduct: Product | null | undefined = sourceProduct ? (
-                        allProducts.find(p => p.sku === sourceProduct?.sku && (p.siteId === destSiteId || (p as any).site_id === destSiteId))
-                        || products.find(p => p.sku === sourceProduct?.sku && (p.siteId === destSiteId || (p as any).site_id === destSiteId))
-                    ) : undefined;
-
-                    if (!destProduct && (sourceProduct?.sku || itemSku) && destSiteId) {
-                        try {
-                            destProduct = await productsService.getBySKU(sourceProduct?.sku || itemSku, destSiteId);
-                        } catch (e) { }
-                    }
-                    
-                    let targetProductId = destProduct?.id;
-                    
-                    // Auto-create destination product if it doesn't exist
-                    if (!destProduct && addProduct) {
-                        const effectivePrice = sourceProduct?.price ?? (item as any).retailPrice ?? (item as any).price ?? 0;
-                        const effectiveCost = (sourceProduct as any)?.costPrice || (sourceProduct as any)?.cost || (item as any).costPrice || (item as any).cost || 0;
-                        const effectiveCategory = (sourceProduct?.category && sourceProduct.category !== 'Uncategorized')
-                            ? sourceProduct.category
-                            : ((item as any).category && (item as any).category !== 'Uncategorized' ? (item as any).category : 'General');
-
-                        try {
-                            const newProd = await addProduct({
-                                name: sourceProduct?.name || itemName || `Item ${itemSku}`,
-                                sku: sourceProduct?.sku || itemSku,
-                                barcode: sourceProduct?.barcode || item.barcode || '',
-                                price: effectivePrice,
-                                costPrice: effectiveCost,
-                                stock: 0,
-                                unit: sourceProduct?.unit || itemUnit,
-                                siteId: destSiteId,
-                                site_id: destSiteId,
-                                category: effectiveCategory,
-                                brand: sourceProduct?.brand || (item as any).brand || '',
-                                size: sourceProduct?.size || itemSize,
-                                packQuantity: sourceProduct?.packQuantity || item.packQuantity,
-                                packageType: sourceProduct?.packageType || item.packageType,
-                                customAttributes: sourceProduct?.customAttributes || item.customAttributes,
-                                productId: sourceProduct?.productId || sourceProduct?.id || item.productId,
-                                countryCode: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
-                                country_code: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
-                            } as any);
-                            targetProductId = newProd?.id;
-                        } catch (err) {
-                            logger.error('TransferReceiving', 'Failed to auto-create destination product', err as Error);
-                            throw new Error(`Failed to create inventory item ${itemSku} at destination site.`);
-                        }
-                    }
-
-                    if (targetProductId) {
-                        const previousStock = Number(destProduct?.stock || 0);
-                        await adjustStockMutation.mutateAsync({
-                            productId: targetProductId,
-                            productName: destProduct?.name || sourceProduct?.name || item.productName || 'Unknown',
-                            productSku: destProduct?.sku || sourceProduct?.sku || 'N/A',
-                            siteId: destSiteId || activeSite?.id || '',
-                            quantity: receivedStockQty,
-                            type: 'IN',
-                            reason: `Transfer Receipt ${activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id}`,
-                            canApprove: true
-                        });
-                        appliedStockAdjustments.push({ productId: targetProductId, previousStock });
-                    }
-                }
-            }
-
-            // 2. Auto-create PUTAWAY job at destination store (must finish before completing transfer)
-            const putawayItems = transferReceiveItems
-                .filter(i => (i.receivedQty || 0) > 0 && i.condition !== 'Damaged')
-                .map((i: any) => {
-                    const matchingLineItem = (activeTransferJob.lineItems || []).find((li: any) => li.productId === i.productId || li.sku === i.sku);
-                    return {
-                        productId: i.productId,
-                        name: i.name || i.productName || matchingLineItem?.name || 'Received Product',
-                        sku: i.sku || matchingLineItem?.sku || i.productId,
-                        price: (matchingLineItem as any)?.price || (matchingLineItem as any)?.retailPrice || 0,
-                        retailPrice: (matchingLineItem as any)?.retailPrice || (matchingLineItem as any)?.price || 0,
-                        costPrice: (matchingLineItem as any)?.costPrice || (matchingLineItem as any)?.cost || 0,
-                        category: matchingLineItem?.category || 'General',
-                        brand: matchingLineItem?.brand || '',
-                        unit: matchingLineItem?.unit || i.unit || 'pcs',
-                        size: matchingLineItem?.size || i.size || '',
-                        packQuantity: matchingLineItem?.packQuantity || i.packQuantity,
-                        packageType: matchingLineItem?.packageType || i.packageType,
-                        customAttributes: matchingLineItem?.customAttributes || i.customAttributes,
-                        barcode: matchingLineItem?.barcode || i.barcode || '',
-                        expectedQty: toTransferStockQuantity(
-                            i.receivedQty || 0,
-                            {
-                                unit: matchingLineItem?.unit || i.unit,
-                                size: matchingLineItem?.size || i.size,
-                                packQuantity: matchingLineItem?.packQuantity || i.packQuantity,
-                                packageType: matchingLineItem?.packageType || i.packageType,
-                                customAttributes: matchingLineItem?.customAttributes || i.customAttributes
-                            },
-                            i.requestedMeasureQty !== undefined || getTransferQuantityConfig({
-                                unit: matchingLineItem?.unit || i.unit,
-                                size: matchingLineItem?.size || i.size,
-                                customAttributes: matchingLineItem?.customAttributes || i.customAttributes
-                            }).isLooseMeasure
-                        ),
-                        pickedQty: 0,
-                        status: 'Pending' as const
-                    };
-                });
-
-            if (putawayItems.length > 0 && destSiteId) {
-                await wmsJobsService.create({
-                    type: 'PUTAWAY',
-                    status: 'Pending',
-                    siteId: destSiteId,
-                    site_id: destSiteId,
-                    priority: activeTransferJob.priority || 'Normal',
-                    items: Math.ceil(putawayItems.reduce((acc, i) => acc + i.expectedQty, 0)),
-                    lineItems: putawayItems,
-                    location: 'Receiving Dock',
-                    orderRef: activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id,
-                    createdBy: receiverName,
-                    countryCode: activeTransferJob.countryCode || (activeTransferJob as any).country_code,
-                    country_code: activeTransferJob.countryCode || (activeTransferJob as any).country_code
-                } as any);
-            }
-
-            // 3. Preserve verified received quantities and condition statuses
-            const updatedLineItems = (activeTransferJob.lineItems || []).map((li: any, idx: number) => {
-                const recItem = transferReceiveItems.find((ri: any) => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
-                    || transferReceiveItems[idx];
-                return {
-                    ...li,
-                    receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
-                    condition: recItem?.condition || 'Good',
-                    status: recItem && ((recItem.receivedQty || 0) < (li.requestedMeasureQty ?? li.expectedQty ?? li.quantity ?? 0) || recItem.condition === 'Damaged') ? 'Discrepancy' : 'Received'
-                };
-            });
-
-            // 4. Update WMS job status to Completed/Received
-            await wmsJobsService.update(activeTransferJob.id, {
-                transferStatus: 'Received',
-                status: 'Completed',
-                lineItems: updatedLineItems,
-                hasDiscrepancy,
-                discrepancyDetails: hasDiscrepancy
-                    ? `Chain of Custody Discrepancy: ${discrepancyCount} units variance. Certified by ${receiverName}`
-                    : undefined,
-                receivedAt: timestamp,
-                receivedBy: receiverName
-            } as any);
-
-            // The database binds this receipt to the authenticated receiver.
-            // Record any variance in the audit log without requiring a second signer.
-            if (hasDiscrepancy) {
-                if (logSystemEvent) {
-                    try {
-                        await logSystemEvent(
-                            'CHAIN_OF_CUSTODY_DISCREPANCY',
-                            `Transfer ${formatJobId(activeTransferJob)} received with ${discrepancyCount} unit variance. Relinquished by ${driverName}, accepted and attested by ${user?.name || 'Receiver'}.`,
-                            user?.name || 'Receiver',
-                            'WMS_TRANSFERS'
-                        );
-                    } catch (auditErr) {
-                        logger.warn('TransferReceiving', `Failed to log custody discrepancy: ${String(auditErr)}`);
-                    }
-                }
-            } else if (logSystemEvent) {
-                try {
-                    await logSystemEvent(
-                        'CHAIN_OF_CUSTODY_CLEAN_HANDSHAKE',
-                        `Transfer ${formatJobId(activeTransferJob)} clean custody transfer sealed. 100% count match. Relinquished by ${driverName}, accepted by ${user?.name || 'Receiver'}`,
-                        user?.name || 'Receiver',
-                        'WMS_TRANSFERS'
-                    );
-                } catch (auditErr) {
-                    logger.warn('TransferReceiving', `Failed to log clean custody handshake: ${String(auditErr)}`);
-                }
-            }
-
-            addNotification(hasDiscrepancy ? 'warning' : 'success', hasDiscrepancy ? `Custody transfer sealed with ${discrepancyCount} unit discrepancy noted` : 'Clean custody handshake sealed successfully');
+            await intake.mutateAsync(activeTransferJob.id);
+            addNotification('success', t('warehouse.transferReceiptSaved'));
             setIsHandshakeModalOpen(false);
             setTransferReceiveMode(false);
             setActiveTransferJob(null);
             setTransferReceiveItems([]);
-            await refreshData();
-        } catch (err) {
-            if (appliedStockAdjustments.length > 0) {
-                for (const applied of appliedStockAdjustments) {
-                    try {
-                        await productsService.update(applied.productId, { stock: applied.previousStock } as any);
-                    } catch (revErr) {
-                        logger.error('TransferReceiving', `Rollback stock failed for ${applied.productId}`, revErr as Error);
-                    }
-                }
-            }
-            logger.error('TransferReceiving', 'Failed to receive transfer:', err);
-            addNotification('alert', 'Failed to receive items');
-        } finally {
-            setIsSubmittingReceipt(false);
-        }
+            try { await refreshData(); } catch { logger.warn('TransferReceiving', 'Receipt saved; refresh failed'); }
+        } catch (cause) {
+            const details = cause && typeof cause === 'object' && 'details' in cause ? cause.details : undefined;
+            addNotification('alert', t(details === 'TRANSFER_VARIANCE_REVIEW_REQUIRED' ? 'warehouse.varianceHold' : 'warehouse.transferReceiptFailed'));
+        } finally { setIsSubmittingReceipt(false); }
     };
 
     return (
@@ -388,6 +153,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 </div>
             </div>
 
+            {receiptVerification?.hasDiscrepancy && <TransferVariancePanel jobId={activeTransferJob.id} />}
             {/* Receive List */}
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden flex flex-col shadow-xs">
                 <div className="overflow-y-auto space-y-3.5 custom-scrollbar flex-1 pb-4">

@@ -26,5 +26,5 @@ it('propagates server rejection without success cache changes',async()=>{
 });
 it('refuses offline release instead of pretending to complete the order',async()=>{
  Object.defineProperty(navigator,'onLine',{configurable:true,value:false});const {result,setSales}=setup();
- await expect(result.current.releaseOrder('sale')).rejects.toThrow('warehouse.releaseOnline');expect(mock.release).not.toHaveBeenCalled();expect(setSales).not.toHaveBeenCalled();
+ await expect(result.current.releaseOrder('sale')).rejects.toThrow('Connect to the internet');expect(mock.release).not.toHaveBeenCalled();expect(setSales).not.toHaveBeenCalled();
 });

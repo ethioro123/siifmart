@@ -1,5 +1,5 @@
-import { useLanguage } from '../LanguageContext';
-import { useCallback,useRef } from 'react';
+import { movementIntegrity } from '../../utils/translations/warehouse/movementIntegrity';
+import { useCallback, useRef } from 'react';
 import type {
     CartItem, SaleRecord, Site, Product, Customer, SystemConfig,
     PaymentMethod, ReturnItem, SystemLog, StorePoints
@@ -33,7 +33,6 @@ interface UseSaleActionsDeps {
 }
 
 export function useSaleActions(deps: UseSaleActionsDeps) {
-    const { t } = useLanguage();
     const {
         activeSite, settings, products, customers,
         setSales, setAllSales, setProducts, setAllProducts, setCustomers,
@@ -273,11 +272,15 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
     }, [addNotification, setProducts, setSales, setAllSales, deps.products, deps.settings]);
 
     const releaseOrder = useCallback(async (saleId: string) => {
-        if (!navigator.onLine || !activeSite?.id) throw new Error(t('warehouse.releaseOnline'));
+        if (!navigator.onLine || !activeSite?.id) {
+            const lang = (typeof document !== 'undefined' && (document.documentElement.lang as 'en' | 'am' | 'or')) || 'en';
+            const releaseMsg = (movementIntegrity.releaseOnline as Record<string, string>)?.[lang] || (movementIntegrity.releaseOnline as Record<string, string>)?.en;
+            throw new Error(releaseMsg);
+        }
         await salesService.releaseOrder(saleId, activeSite.id);
         setSales(prev => prev.map(s => s.id === saleId ? { ...s, release_status: 'RELEASED', fulfillmentStatus: 'Picking' } : s));
         setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, release_status: 'RELEASED', fulfillmentStatus: 'Picking' } : s));
-    }, [activeSite?.id, t, setSales, setAllSales]);
+    }, [activeSite?.id, setSales, setAllSales]);
 
     return { processSale, processReturn, releaseOrder };
 }

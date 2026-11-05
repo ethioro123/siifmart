@@ -23,13 +23,18 @@ export const RecallOrderModal: React.FC = () => {
              <Modal isOpen={isRecallModalOpen} onClose={() => setIsRecallModalOpen(false)} title={t('pos.recallOrder')}>
                 <div className="space-y-3">
                     {heldOrders.map(order => (
-                        <div key={order.id} className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex justify-between items-center group hover:border-[var(--theme-border-strong)] transition-colors cursor-pointer" onClick={() => handleRecallOrder(order.id)}>
-                            <div>
-                                <p className="text-[var(--theme-text-primary)] font-bold">{order.note}</p>
-                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{order.time} • {order.items.length} {order.items.length === 1 ? t('pos.item') : t('pos.items')}</p>
+                        <button
+                            key={order.id}
+                            type="button"
+                            className="w-full min-h-11 p-3.5 sm:p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex justify-between items-center group hover:border-[var(--theme-border-strong)] transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            onClick={() => handleRecallOrder(order.id)}
+                        >
+                            <div className="text-left">
+                                <p className="text-[var(--theme-text-primary)] font-bold text-sm">{order.note}</p>
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">{order.time} • {order.items.length} {order.items.length === 1 ? t('pos.item') : t('pos.items')}</p>
                             </div>
-                            <ArrowRight size={16} className="text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
-                        </div>
+                            <ArrowRight size={16} className="text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-transform group-hover:translate-x-0.5" />
+                        </button>
                     ))}
                     {heldOrders.length === 0 && (
                         <p className="text-center text-[var(--theme-text-secondary)] font-medium py-8">{t('pos.noHeldOrders')}</p>

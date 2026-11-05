@@ -52,8 +52,9 @@ export const DiscountModal: React.FC = () => {
                             </div>
                         </div>
                         <button
+                            type="button"
                             onClick={handleRemoveDiscount}
-                            className="w-full mt-3 py-2.5 text-[var(--theme-status-danger-text)] text-xs font-semibold border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-xl bg-[var(--theme-status-danger-bg)] transition-all cursor-pointer active:scale-95 tracking-tight"
+                            className="w-full mt-3 min-h-11 py-2.5 text-[var(--theme-status-danger-text)] text-xs font-semibold border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-all cursor-pointer active:scale-95 touch-manipulation tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                         >
                             {t('pos.removeDiscount')}
                         </button>
@@ -100,9 +101,10 @@ export const DiscountModal: React.FC = () => {
                             </div>
 
                             <button
+                                type="button"
                                 onClick={handleValidateDiscountCode}
                                 disabled={!discountCodeInput.trim() || isValidatingCode}
-                                className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] py-3.5 rounded-2xl font-semibold flex items-center justify-center gap-2 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs text-xs tracking-tight uppercase"
+                                className="w-full min-h-11 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] py-3 rounded-2xl font-semibold flex items-center justify-center gap-2 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs text-xs tracking-tight uppercase touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 {isValidatingCode ? (
                                     <>

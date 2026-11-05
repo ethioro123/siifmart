@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import { supabase } from '../../lib/supabase';
 
+vi.mock('../../services/system-logs.service',()=>({systemLogsService:{create:vi.fn().mockResolvedValue({})}}));
+
 vi.mock('../../lib/supabase', () => {
     const mockFrom = vi.fn();
     const mockRpc = vi.fn();
@@ -17,6 +19,7 @@ vi.mock('../../lib/supabase', () => {
 describe('purchaseOrdersService', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(supabase.rpc).mockImplementation((async (_name: string, args: Record<string, unknown>) => ({ data: { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
     });
 
     describe('create()', () => {
@@ -84,8 +87,8 @@ describe('purchaseOrdersService', () => {
 
             await purchaseOrdersService.create(poData as any, []);
 
-            expect(mockInsert).toHaveBeenCalledTimes(1);
-            const insertedPayload = mockInsert.mock.calls[0][0];
+            expect(supabase.rpc).toHaveBeenCalledWith('save_purchase_order_document', expect.objectContaining({p_create:true}));
+            const insertedPayload = (vi.mocked(supabase.rpc).mock.calls[0][1] as unknown as {p_header: Record<string, unknown>}).p_header;
             expect(insertedPayload.country_code).toBe('KE');
             expect(insertedPayload.currency).toBe('KSh');
             expect(insertedPayload.site_id).toBe('site-nairobi-1');
@@ -153,8 +156,8 @@ describe('purchaseOrdersService', () => {
 
             await purchaseOrdersService.create(poData as any, []);
 
-            expect(mockInsert).toHaveBeenCalledTimes(1);
-            const insertedPayload = mockInsert.mock.calls[0][0];
+            expect(supabase.rpc).toHaveBeenCalledWith('save_purchase_order_document', expect.objectContaining({p_create:true}));
+            const insertedPayload = (vi.mocked(supabase.rpc).mock.calls[0][1] as unknown as {p_header: Record<string, unknown>}).p_header;
             expect(insertedPayload.country_code).toBe('ET');
             expect(insertedPayload.currency).toBe('ETB');
         });
@@ -263,7 +266,7 @@ describe('purchaseOrdersService', () => {
             };
 
             await purchaseOrdersService.create(poData as any, []);
-            expect(mockInsert).toHaveBeenCalledTimes(1);
+            expect(supabase.rpc).toHaveBeenCalledWith('save_purchase_order_document', expect.objectContaining({p_create:true}));
         });
     });
 
@@ -322,6 +325,7 @@ describe('purchaseOrdersService', () => {
 describe('purchase order delivery preflight', () => {
     it('rejects conflicting requirements before creating a header or writing items', async () => {
         vi.clearAllMocks();
+        vi.mocked(supabase.rpc).mockImplementation((async (_name: string, args: Record<string, unknown>) => ({ data: { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
         const po = { tempReq: 'Ambient', shelfLife: '7' } as Parameters<typeof purchaseOrdersService.create>[0];
         await expect(purchaseOrdersService.create(po, [{ customAttributes: { storage: { type: 'Chilled', isPerishable: true, shelfLifeDays: '14' } } }])).rejects.toThrow('Chilled');
         expect(supabase.from).not.toHaveBeenCalled();

@@ -84,7 +84,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
             showToast(t('warehouse.releaseSaved'), 'success');
         } catch (error) {
             logger.error('WMSSettings', 'caught error', error as Error);
-            showToast('Failed to release order', 'error');
+            showToast(t('warehouse.releaseFailed'), 'error');
         } finally {
             setIsSaving(null);
         }

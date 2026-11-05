@@ -49,16 +49,16 @@ export const CustomerSelectionModal: React.FC = () => {
                                 setIsCustomerModalOpen(false);
                                 addNotification('info', 'Customer set to Walk-in');
                             }}
-                            className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${!selectedCustomer
+                            className={`w-full min-h-11 text-left p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${!selectedCustomer
                                 ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-strong)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-border-strong)]'
                                 : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-panel-hover)]'
                             }`}
                         >
                             <div>
-                                <p className="font-bold text-[var(--theme-text-primary)]">{t('pos.walkInCustomer')}</p>
-                                <p className="text-xs text-[var(--theme-text-muted)]">{t('pos.defaultGuestAccount')}</p>
+                                <p className="font-bold text-[var(--theme-text-primary)] text-sm">{t('pos.walkInCustomer')}</p>
+                                <p className="text-xs text-[var(--theme-text-muted)] mt-0.5">{t('pos.defaultGuestAccount')}</p>
                             </div>
-                            {!selectedCustomer && <CheckCircle size={16} className="text-[var(--theme-status-success-text)]" />}
+                            {!selectedCustomer && <CheckCircle size={16} className="text-[var(--theme-status-success-text)] shrink-0" />}
                         </button>
 
                         {filteredCustomers.map(customer => {
@@ -69,21 +69,21 @@ export const CustomerSelectionModal: React.FC = () => {
                                     key={customer.id}
                                     type="button"
                                     onClick={() => handleSelectCustomer(customer)}
-                                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer active:scale-[0.98] ${isSelected
+                                    className={`w-full min-h-11 text-left p-3 rounded-xl border transition-all cursor-pointer active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isSelected
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-strong)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-border-strong)]'
                                         : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-panel-hover)]'
                                     }`}
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <p className="font-bold text-[var(--theme-text-primary)]">{customer.name}</p>
-                                            <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{maskPhoneNumber(customer.phone)} • {customer.email}</p>
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-[var(--theme-text-primary)] text-sm truncate">{customer.name}</p>
+                                            <p className="text-xs text-[var(--theme-text-secondary)] font-mono truncate">{maskPhoneNumber(customer.phone)} • {customer.email}</p>
                                             <div className="flex gap-3 mt-1 text-xs font-medium">
-                                                <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">{stats.totalVisits} {t('pos.visits')}</span>
+                                                <span className="text-[var(--theme-status-success-text)] font-semibold">{stats.totalVisits} {t('pos.visits')}</span>
                                                 <span className="text-[var(--theme-text-secondary)]">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} {t('pos.spent')}</span>
                                             </div>
                                         </div>
-                                        {isSelected && <CheckCircle size={16} className="text-[var(--theme-status-success-text)]" />}
+                                        {isSelected && <CheckCircle size={16} className="text-[var(--theme-status-success-text)] shrink-0 mt-0.5" />}
                                     </div>
                                 </button>
                             );
@@ -113,7 +113,7 @@ export const CustomerSelectionModal: React.FC = () => {
                                     </div>
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-lg">
                                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('pos.storeSpent')}</p>
-                                        <p className="text-xl font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
+                                        <p className="text-xl font-bold text-[var(--theme-status-success-text)] font-mono">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
                                     </div>
                                 </div>
 

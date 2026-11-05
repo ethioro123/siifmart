@@ -89,6 +89,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             onClose={onClose}
             title={t('posCommand.safeLedgerTitle')}
             size="lg"
+            mobileFullScreen={true}
         >
             <div className="space-y-4">
                 {/* Header Action & Site Indicator */}

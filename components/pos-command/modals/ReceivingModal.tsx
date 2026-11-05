@@ -37,15 +37,15 @@ export const ReceivingModal: React.FC = () => {
     }, [receivingSummary]);
 
     return (
-        <Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title={t('posCommand.receivingModalTitle')} size="xl">
+        <Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title={t('posCommand.receivingModalTitle')} size="xl" mobileFullScreen={true}>
             <div className="space-y-4 p-1 bg-transparent">
                 {/* Tabs */}
                 {!receivingSummary && !selectedTransferForReceiving && (
-                    <div className="flex p-1 bg-[var(--theme-bg-subtle)] rounded-2xl mb-4 border border-[var(--theme-border)]">
+                    <div className="flex p-1 bg-[var(--theme-bg-subtle)] rounded-2xl mb-4 border border-[var(--theme-border)] touch-manipulation">
                         <button
                             type="button"
                             onClick={() => setActiveTab2('pending')}
-                            className={`flex-1 min-h-9 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                            className={`flex-1 min-h-11 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 activeTab === 'pending'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
@@ -56,7 +56,7 @@ export const ReceivingModal: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setActiveTab2('history')}
-                            className={`flex-1 min-h-9 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                            className={`flex-1 min-h-11 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 activeTab === 'history'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'

@@ -99,11 +99,11 @@ export const StockListModal: React.FC = () => {
     const hasActiveFilters = activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || Boolean(stockSearch);
 
     return (
-        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} — ${activeSite?.name || t('posCommand.currentLocation')}`} size="3xl">
+        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} — ${activeSite?.name || t('posCommand.currentLocation')}`} size="3xl" mobileFullScreen={true}>
             <div className="space-y-4">
                 {/* Primary Search & Control Toolbar */}
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex-1 min-w-[260px] min-h-11 flex items-center gap-2.5 bg-[var(--theme-input-bg)] px-4 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <div className="w-full sm:flex-1 sm:min-w-[240px] min-h-11 flex items-center gap-2.5 bg-[var(--theme-input-bg)] px-4 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
                         <Search className="w-4 h-4 text-[var(--theme-text-muted)] shrink-0" />
                         <input
                             type="text"
@@ -119,7 +119,7 @@ export const StockListModal: React.FC = () => {
                                 onClick={() => setStockSearch('')}
                                 title={t('posCommand.resetFilters')}
                                 aria-label={t('posCommand.resetFilters')}
-                                className="w-7 h-7 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-7 h-7 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
                             >
                                 <X size={14} />
                             </button>
@@ -130,7 +130,7 @@ export const StockListModal: React.FC = () => {
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="min-h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-3.5 text-sm font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] transition-colors"
+                            className="w-full sm:w-auto min-h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-3.5 text-sm font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] transition-colors touch-manipulation"
                             title={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
                             aria-label={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
                         >
@@ -144,7 +144,7 @@ export const StockListModal: React.FC = () => {
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         title={t('posCommand.printLabels')}
                         aria-label={t('posCommand.printLabels')}
-                        className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-sm font-medium rounded-xl transition-colors flex items-center gap-2 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full sm:w-auto min-h-11 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2 shrink-0 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Printer size={15} className="text-[var(--theme-text-secondary)]" />
                         <span>{t('posCommand.printLabels')}</span>
@@ -153,7 +153,7 @@ export const StockListModal: React.FC = () => {
 
                 {/* Streamlined Filter Strip & Inline Unseen Actions */}
                 <div className="flex items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
-                    <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
                         {filterTabs.map(tab => {
                             const isActive = activeFilter === tab.id;
                             const isZero = tab.count === 0 && !isActive;
@@ -165,7 +165,7 @@ export const StockListModal: React.FC = () => {
                                     title={tab.label}
                                     aria-label={`${tab.label} (${tab.count})`}
                                     aria-pressed={isActive}
-                                    className={`min-h-10 px-3.5 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-2 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                    className={`min-h-10 px-3.5 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-2 shrink-0 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                         isActive
                                             ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
                                             : `bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${isZero ? 'opacity-50' : ''}`
@@ -188,7 +188,7 @@ export const StockListModal: React.FC = () => {
                                 onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }}
                                 title={t('posCommand.resetFilters')}
                                 aria-label={t('posCommand.resetFilters')}
-                                className="min-h-10 px-3 rounded-xl text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                className="min-h-10 px-3 rounded-xl text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1.5 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 <X size={14} />
                                 <span>{t('posCommand.resetFilters')}</span>
@@ -197,8 +197,79 @@ export const StockListModal: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Product Table */}
-                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
+                {/* Mobile Product Cards View */}
+                <div className="block sm:hidden space-y-2.5">
+                    {paginatedProducts.map(product => {
+                        const stock = product.stock || 0;
+                        const minimum = product.minStock && product.minStock > 0 ? product.minStock : 10;
+                        const stockLabel = stock <= 0 ? t('posCommand.filterOutOfStock') : stock < minimum ? t('posCommand.filterLowStock') : '';
+                        const isPendingApproval = ((product.approvalStatus || (product as any).approval_status) || 'approved').toLowerCase() === 'pending';
+                        return (
+                            <div key={product.id} className="p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl space-y-2 shadow-2xs">
+                                <div className="flex items-start justify-between gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedProduct(product)}
+                                        className="text-left flex-1 min-w-0"
+                                    >
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className="font-semibold text-xs text-[var(--theme-text-primary)] line-clamp-2 leading-snug">
+                                                {formatProductDisplayName(product) || product.name}
+                                            </span>
+                                            {isPendingApproval && (
+                                                <span className="px-1.5 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[10px] font-medium shrink-0">
+                                                    {t('posCommand.pendingApproval')}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="block mt-0.5 text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                            {product.sku}{product.category ? ` · ${product.category}` : ''}
+                                        </span>
+                                    </button>
+                                    <span className="font-mono tabular-nums text-xs font-bold text-[var(--theme-text-primary)] shrink-0">
+                                        {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between pt-1 border-t border-[var(--theme-border-subtle)] text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                                            {formatStockDisplay(stock, product)}
+                                        </span>
+                                        {stockLabel && (
+                                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+                                                stock <= 0
+                                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                                    : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                                            }`}>
+                                                {stockLabel}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedProduct(product)}
+                                            className="min-h-9 px-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs font-semibold text-[var(--theme-text-primary)] touch-manipulation"
+                                        >
+                                            {t('posCommand.productDetails')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }}
+                                            aria-label={`${t('posCommand.printLabels')}: ${product.name}`}
+                                            className="min-h-9 min-w-9 flex items-center justify-center rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] touch-manipulation"
+                                        >
+                                            <Printer size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Desktop Product Table */}
+                <div className="hidden sm:block overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-sm">
                         <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>

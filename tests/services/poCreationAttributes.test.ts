@@ -4,14 +4,17 @@ import { buildPurchaseOrders } from '../../components/procurement/createPOHelper
 import { supabase } from '../../lib/supabase';
 import type { PurchaseOrder, POItem } from '../../types';
 
+vi.mock('../../services/system-logs.service',()=>({systemLogsService:{create:vi.fn().mockResolvedValue({})}}));
+
 vi.mock('../../lib/supabase', () => ({
-    supabase: { from: vi.fn() },
+    supabase: { from: vi.fn(), rpc: vi.fn() },
     isSupabaseConfigured: () => true
 }));
 
 describe('Purchase Order Creation Attributes Suite', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(supabase.rpc).mockImplementation((async (_name: string, args: Record<string, unknown>) => ({ data: { id: args.p_id, po_number: 'AAAA0099' }, error: null })) as unknown as typeof supabase.rpc);
     });
 
     describe('PO Header Attributes Insertion', () => {
@@ -78,8 +81,8 @@ describe('Purchase Order Creation Attributes Suite', () => {
 
             await purchaseOrdersService.create(fullPO, []);
 
-            expect(mockInsert).toHaveBeenCalledTimes(1);
-            const payload = mockInsert.mock.calls[0][0];
+            expect(supabase.rpc).toHaveBeenCalledWith('save_purchase_order_document', expect.objectContaining({p_create:true}));
+            const payload = (vi.mocked(supabase.rpc).mock.calls[0][1] as unknown as {p_header: Record<string, unknown>}).p_header;
 
             expect(payload.id).toBe('po-full-attr-01');
             expect(payload.po_number).toBe('AAAA0042');
@@ -154,8 +157,8 @@ describe('Purchase Order Creation Attributes Suite', () => {
 
             await purchaseOrdersService.create(minimalPO, []);
 
-            expect(mockInsert).toHaveBeenCalledTimes(1);
-            const payload = mockInsert.mock.calls[0][0];
+            expect(supabase.rpc).toHaveBeenCalledWith('save_purchase_order_document', expect.objectContaining({p_create:true}));
+            const payload = (vi.mocked(supabase.rpc).mock.calls[0][1] as unknown as {p_header: Record<string, unknown>}).p_header;
 
             expect(payload.supplier_id).toBeNull();
             expect(payload.destination).toBe('Nairobi DC');
@@ -286,8 +289,8 @@ describe('Purchase Order Creation Attributes Suite', () => {
                 lineItems
             } as any, lineItems);
 
-            expect(mockItemInsert).toHaveBeenCalledTimes(1);
-            const insertedItems = mockItemInsert.mock.calls[0][0];
+            expect(supabase.rpc).toHaveBeenCalledTimes(1);
+            const insertedItems = (vi.mocked(supabase.rpc).mock.calls[0][1] as unknown as {p_items: Record<string, unknown>[]}).p_items;
             expect(insertedItems).toHaveLength(2);
 
             // Item 1: Known catalog item
@@ -310,9 +313,9 @@ describe('Purchase Order Creation Attributes Suite', () => {
             expect(item1.package_type).toBe('Carton');
             expect(item1.min_stock).toBe(25);
             expect(item1.max_stock).toBe(500);
-            expect(item1.custom_attributes.identity.variant).toBe('Dark Roast');
-            expect(item1.custom_attributes.storage.type).toBe('Ambient');
-            expect(item1.custom_attributes.categorySpecific.roastLevel).toBe('French Roast');
+            expect((item1.custom_attributes as any)?.identity?.variant).toBe('Dark Roast');
+            expect((item1.custom_attributes as any)?.storage?.type).toBe('Ambient');
+            expect((item1.custom_attributes as any)?.categorySpecific?.roastLevel).toBe('French Roast');
 
             // Item 2: Ad-hoc item with non-UUID mapped to null
             const item2 = insertedItems[1];

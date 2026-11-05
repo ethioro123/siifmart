@@ -39,7 +39,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
     return (
         <>
             <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-            <div className="absolute bottom-full mb-2 right-0 w-60 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-lg p-1.5 z-20 space-y-0.5 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="absolute bottom-full mb-2 right-0 w-64 max-w-[calc(100vw-32px)] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-lg p-1.5 z-20 space-y-0.5 animate-in slide-in-from-bottom-2 duration-200">
                 <Protected permission="ADD_PRODUCT">
                     <button
                         type="button"
@@ -48,7 +48,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                             setShowActions(false);
                             native.haptic();
                         }}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                        className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                             <ShoppingBag size={14} />
@@ -64,7 +64,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         setShowActions(false);
                     }}
                     disabled={heldOrdersCount === 0}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight disabled:opacity-30 cursor-pointer transition-colors active:scale-[0.98]"
+                    className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight disabled:opacity-30 cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <PlayCircle size={14} />
@@ -81,7 +81,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                             onOpenReturn();
                             setShowActions(false);
                         }}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                        className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                             <RotateCcw size={14} />
@@ -96,7 +96,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onOpenCashDrop();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                    className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                         <ArrowDownCircle size={14} />
@@ -110,7 +110,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onOpenNoSaleKick();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                    className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <Box size={14} />
@@ -126,7 +126,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onReprintLast();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                    className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Printer size={14} />
@@ -140,7 +140,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onCloseShift();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
+                    className="w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Lock size={14} />
