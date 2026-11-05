@@ -100,9 +100,16 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
 
                     {/* Content Area */}
                     <div className="h-[420px] overflow-y-auto custom-scrollbar bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-6">
-                        {/* TAB 1: RECEIPT VIEW */}
+                        {/* TAB 1: RECEIPT VIEW — locked to physical thermal receipt paper */}
                         {detailTab === 'receipt' && (
-                            <div className={`max-w-sm mx-auto bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] p-6 rounded-2xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-lg relative ${settings?.posReceiptFont === 'monospace' ? 'font-mono' : 'font-sans'}`}>
+                            <div
+                                style={{
+                                    colorScheme: 'light',
+                                    backgroundColor: 'var(--theme-print-canvas)',
+                                    color: 'var(--theme-print-text)'
+                                }}
+                                className={`max-w-sm mx-auto bg-[var(--theme-print-canvas)] text-[var(--theme-print-text)] p-6 rounded-2xl border border-[color-mix(in_srgb,var(--theme-print-text)_16%,transparent)] shadow-lg relative ${settings?.posReceiptFont === 'monospace' ? 'font-mono' : 'font-sans'}`}
+                            >
                                 {/* Logo */}
                                 {settings?.posReceiptShowLogo && (settings?.posReceiptLogo || settings?.logoUrl) && (
                                     <div className="flex justify-center mb-4">
@@ -111,50 +118,50 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 )}
 
                                 {/* Receipt Header */}
-                                <div className="text-center border-b border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] pb-4 border-dashed mb-4">
-                                    <h2 className="text-lg font-bold uppercase tracking-tight leading-none mb-1">
+                                <div className="text-center border-b border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] pb-4 border-dashed mb-4">
+                                    <h2 className="text-lg font-bold uppercase tracking-tight leading-none mb-1 text-[var(--theme-print-text)]">
                                         {settings?.storeName || sites.find(s => s.id === selectedSale.siteId)?.name || 'SIIFMART'}
                                     </h2>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--theme-text-primary)_70%,transparent)]">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--theme-print-text)_75%,transparent)]">
                                         {settings?.posReceiptHeader || 'SIIFMART Retail'}
                                     </p>
                                     {settings?.slogan && settings.slogan !== (settings?.posReceiptHeader || 'SIIFMART Retail') && (
-                                        <p className="text-[11px] italic text-[color-mix(in_srgb,var(--theme-text-primary)_60%,transparent)] mt-0.5">
+                                        <p className="text-[11px] italic text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)] mt-0.5">
                                             {settings.slogan}
                                         </p>
                                     )}
                                 </div>
 
-                                <div className="text-[11px] text-center space-y-0.5 mb-4 border-b border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] pb-4 border-dashed text-[color-mix(in_srgb,var(--theme-text-primary)_75%,transparent)]">
+                                <div className="text-[11px] text-center space-y-0.5 mb-4 border-b border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] pb-4 border-dashed text-[color-mix(in_srgb,var(--theme-print-text)_75%,transparent)]">
                                     {settings?.posReceiptAddress && <p>{settings.posReceiptAddress}</p>}
                                     <div className="flex justify-center gap-2">
                                         {settings?.posReceiptPhone && <p>Tel: {settings.posReceiptPhone}</p>}
                                         {settings?.posReceiptEmail && <p>Email: {settings.posReceiptEmail}</p>}
                                     </div>
-                                    {settings?.posReceiptTaxId && <p className="font-semibold text-[var(--theme-text-primary)]">TIN: {settings.posReceiptTaxId}</p>}
+                                    {settings?.posReceiptTaxId && <p className="font-semibold text-[var(--theme-print-text)]">TIN: {settings.posReceiptTaxId}</p>}
                                 </div>
 
                                 <div className="text-[11px] space-y-1 mb-4">
                                     <div className="flex justify-between">
-                                        <span className="text-[color-mix(in_srgb,var(--theme-text-primary)_60%,transparent)]">DATE:</span>
-                                        <span className="font-medium">{formatDateTime(selectedSale.date, { showTime: true })}</span>
+                                        <span className="text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)]">DATE:</span>
+                                        <span className="font-medium text-[var(--theme-print-text)]">{formatDateTime(selectedSale.date, { showTime: true })}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-[color-mix(in_srgb,var(--theme-text-primary)_60%,transparent)]">RECEIPT #:</span>
-                                        <span className="font-mono font-semibold">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).toUpperCase()}`}</span>
+                                        <span className="text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)]">RECEIPT #:</span>
+                                        <span className="font-mono font-semibold text-[var(--theme-print-text)]">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).toUpperCase()}`}</span>
                                     </div>
                                 </div>
 
-                                <div className="border-y border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] py-3 mb-4 space-y-2.5">
+                                <div className="border-y border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] py-3 mb-4 space-y-2.5">
                                     {selectedSale.items.map((item, i) => (
                                         <div key={i} className="flex justify-between text-xs">
                                             <div>
-                                                <div className="font-semibold text-[var(--theme-text-primary)]">{item.name}</div>
-                                                <div className="text-[11px] text-[color-mix(in_srgb,var(--theme-text-primary)_60%,transparent)] font-mono tabular-nums">
+                                                <div className="font-semibold text-[var(--theme-print-text)]">{item.name}</div>
+                                                <div className="text-[11px] text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)] font-mono tabular-nums">
                                                     {item.quantity} × {currencySymbol} {formatPriceValue(item.price)}
                                                 </div>
                                             </div>
-                                            <div className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                                            <div className="font-mono tabular-nums font-semibold text-[var(--theme-print-text)]">
                                                 {formatPriceValue(item.price * item.quantity)}
                                             </div>
                                         </div>
@@ -162,41 +169,41 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 </div>
 
                                 <div className="space-y-1 text-right mb-4">
-                                    <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-text-primary)_70%,transparent)]">
+                                    <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-print-text)_70%,transparent)]">
                                         <span>Subtotal</span>
                                         <span className="font-mono tabular-nums">{selectedSale.subtotal.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-text-primary)_70%,transparent)]">
+                                    <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-print-text)_70%,transparent)]">
                                         <span>Tax ({settings?.taxRate || 0}%)</span>
                                         <span className="font-mono tabular-nums">{selectedSale.tax.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between font-bold text-sm border-t border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] pt-2 mt-2 text-[var(--theme-text-primary)]">
+                                    <div className="flex justify-between font-bold text-sm border-t border-[color-mix(in_srgb,var(--theme-print-text)_30%,transparent)] pt-2 mt-2 text-[var(--theme-print-text)]">
                                         <span>TOTAL</span>
                                         <span className="font-mono tabular-nums">{currencySymbol} {selectedSale.total.toLocaleString()}</span>
                                     </div>
                                 </div>
 
-                                <div className="text-[11px] border-t border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] border-dashed pt-3 mb-4 space-y-1">
-                                    <div className="flex justify-between font-semibold text-[var(--theme-text-primary)]">
+                                <div className="text-[11px] border-t border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] border-dashed pt-3 mb-4 space-y-1">
+                                    <div className="flex justify-between font-semibold text-[var(--theme-print-text)]">
                                         <span>PAID ({selectedSale.mobilePaymentChannel ? selectedSale.mobilePaymentChannel.replace(/_/g, ' ') : selectedSale.method.toUpperCase()})</span>
                                         <span className="font-mono tabular-nums">{currencySymbol} {selectedSale.total.toLocaleString()}</span>
                                     </div>
                                     {selectedSale.mobileTransactionRef && (
-                                        <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-text-primary)_70%,transparent)] font-mono">
+                                        <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-print-text)_70%,transparent)] font-mono">
                                             <span>TX REF:</span>
-                                            <span className="font-semibold">{selectedSale.mobileTransactionRef}</span>
+                                            <span className="font-semibold text-[var(--theme-print-text)]">{selectedSale.mobileTransactionRef}</span>
                                         </div>
                                     )}
                                     {selectedSale.customerPhone && (
-                                        <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-text-primary)_70%,transparent)] font-mono">
+                                        <div className="flex justify-between text-[11px] text-[color-mix(in_srgb,var(--theme-print-text)_70%,transparent)] font-mono">
                                             <span>PHONE:</span>
-                                            <span>{canViewFullCustomerPII ? selectedSale.customerPhone : maskPhoneNumber(selectedSale.customerPhone)}</span>
+                                            <span className="text-[var(--theme-print-text)]">{canViewFullCustomerPII ? selectedSale.customerPhone : maskPhoneNumber(selectedSale.customerPhone)}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="text-center pt-3 border-t border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] border-dashed">
-                                    <p className="text-xs font-semibold text-[color-mix(in_srgb,var(--theme-text-primary)_80%,transparent)]">{settings?.posReceiptFooter || 'Thank you for shopping with us!'}</p>
+                                <div className="text-center pt-3 border-t border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] border-dashed">
+                                    <p className="text-xs font-semibold text-[color-mix(in_srgb,var(--theme-print-text)_85%,transparent)]">{settings?.posReceiptFooter || 'Thank you for shopping with us!'}</p>
                                 </div>
                             </div>
                         )}

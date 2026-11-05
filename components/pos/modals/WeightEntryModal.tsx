@@ -39,8 +39,8 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                             </p>
                         </div>
                     </div>
-                    <button onClick={onCancel} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer" title="Close">
-                        <X size={16} />
+                    <button type="button" onClick={onCancel} className="min-w-11 min-h-11 flex items-center justify-center hover:bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer touch-manipulation" title="Close">
+                        <X size={18} />
                     </button>
                 </div>
 
@@ -74,7 +74,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
+                                    className="min-h-11 py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer touch-manipulation flex items-center justify-center"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -88,7 +88,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
+                                    className="min-h-11 py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer touch-manipulation flex items-center justify-center"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -110,15 +110,17 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                 {/* Footer */}
                 <div className="p-4 border-t border-[var(--theme-border)] flex gap-2">
                     <button
+                        type="button"
                         onClick={onCancel}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl font-bold text-xs transition-colors border border-[var(--theme-border)] cursor-pointer shadow-xs"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl font-bold text-xs transition-colors border border-[var(--theme-border)] cursor-pointer shadow-xs touch-manipulation flex items-center justify-center"
                     >
                         {t('common.cancel')}
                     </button>
                     <button
+                        type="button"
                         onClick={() => numericValue > 0 && onConfirm(numericValue)}
                         disabled={numericValue <= 0}
-                        className="flex-1 py-3 bg-[var(--theme-primary)] disabled:opacity-30 text-[var(--theme-primary-text)] border border-transparent disabled:cursor-not-allowed rounded-xl font-bold text-xs transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-primary)] disabled:opacity-30 text-[var(--theme-primary-text)] border border-transparent disabled:cursor-not-allowed rounded-xl font-bold text-xs transition-colors uppercase tracking-wider cursor-pointer shadow-xs touch-manipulation flex items-center justify-center"
                     >
                         {t('pos.addToCart')}
                     </button>

@@ -264,12 +264,19 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         </div>
                                     </div>
 
-                                    {/* Preview of Label Layout */}
-                                    <div className="bg-[var(--theme-bg-card)] p-2.5 rounded-xl w-52 shrink-0 text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-sans shadow-xs">
-                                        <div className="bg-[var(--theme-bg-subtle)] p-1 border-b border-dashed border-[var(--theme-border)] text-[11px] font-bold uppercase tracking-wider truncate text-center text-[var(--theme-text-primary)] rounded-t-sm">
+                                    {/* Preview of Label Layout — locked to physical white label paper */}
+                                    <div
+                                        style={{
+                                            colorScheme: 'light',
+                                            backgroundColor: 'var(--theme-print-canvas)',
+                                            color: 'var(--theme-print-text)'
+                                        }}
+                                        className="bg-[var(--theme-print-canvas)] p-2.5 rounded-xl w-52 shrink-0 text-[var(--theme-print-text)] border border-[color-mix(in_srgb,var(--theme-print-text)_18%,transparent)] font-sans shadow-xs"
+                                    >
+                                        <div className="bg-[color-mix(in_srgb,var(--theme-print-text)_6%,var(--theme-print-canvas))] p-1 border-b border-dashed border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] text-[11px] font-bold uppercase tracking-wider truncate text-center text-[var(--theme-print-text)] rounded-t-sm">
                                             {labelData.product.name}
                                         </div>
-                                        <div className="py-2 flex flex-col items-center justify-center">
+                                        <div className="py-2 flex flex-col items-center justify-center bg-[var(--theme-print-canvas)]">
                                             {labelData.product.sku ? (
                                                 <Barcode
                                                     value={labelData.product.sku}
@@ -278,20 +285,22 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     height={22}
                                                     width={1.2}
                                                     margin={0}
+                                                    background="#FFFFFF"
+                                                    lineColor="#202020"
                                                 />
                                             ) : <span className="text-[var(--theme-status-danger-text)] font-bold text-[11px]">NO DATA</span>}
-                                            <div className="font-mono font-bold text-[11px] mt-1 text-[var(--theme-text-primary)] tracking-wider">
+                                            <div className="font-mono font-bold text-[11px] mt-1 text-[var(--theme-print-text)] tracking-wider">
                                                 {labelData.product.sku}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-1 border-t border-dashed border-[var(--theme-border)] pt-1.5 text-[11px]">
-                                            <div className="text-center bg-[var(--theme-bg-subtle)] p-1 rounded border border-[var(--theme-border-subtle)]">
-                                                <span className="block font-bold text-[var(--theme-text-secondary)] text-[11px] uppercase tracking-wider">PRICE</span>
-                                                <span className="block font-extrabold text-[var(--theme-text-primary)] text-xs">{activeCurrency} {labelData.product.price}</span>
+                                        <div className="grid grid-cols-2 gap-1 border-t border-dashed border-[color-mix(in_srgb,var(--theme-print-text)_20%,transparent)] pt-1.5 text-[11px]">
+                                            <div className="text-center bg-[color-mix(in_srgb,var(--theme-print-text)_5%,var(--theme-print-canvas))] p-1 rounded border border-[color-mix(in_srgb,var(--theme-print-text)_12%,transparent)]">
+                                                <span className="block font-bold text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)] text-[11px] uppercase tracking-wider">PRICE</span>
+                                                <span className="block font-extrabold text-[var(--theme-print-text)] text-xs">{activeCurrency} {labelData.product.price}</span>
                                             </div>
-                                            <div className="text-center bg-[var(--theme-bg-subtle)] p-1 rounded border border-[var(--theme-border-subtle)]">
-                                                <span className="block font-bold text-[var(--theme-text-secondary)] text-[11px] uppercase tracking-wider">CAT</span>
-                                                <span className="block font-extrabold text-[var(--theme-text-primary)] text-xs truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
+                                            <div className="text-center bg-[color-mix(in_srgb,var(--theme-print-text)_5%,var(--theme-print-canvas))] p-1 rounded border border-[color-mix(in_srgb,var(--theme-print-text)_12%,transparent)]">
+                                                <span className="block font-bold text-[color-mix(in_srgb,var(--theme-print-text)_65%,transparent)] text-[11px] uppercase tracking-wider">CAT</span>
+                                                <span className="block font-extrabold text-[var(--theme-print-text)] text-xs truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
                                             </div>
                                         </div>
                                     </div>

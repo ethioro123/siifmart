@@ -330,8 +330,13 @@ export const printHtmlContent = async (htmlContent: string): Promise<{ success: 
  */
 export const sanitizePreviewHTML = (rawHtml: string): string => {
     if (!rawHtml) return '';
-    return rawHtml
+    const cleaned = rawHtml
         .replace(/<div\b[^>]*class=["'][^"']*no-print[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
         .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    const lightPaperStyle = '<style>:root,html,body{color-scheme:light !important;background:#ffffff !important;color:#000000 !important;}</style>';
+    if (/<\/head>/i.test(cleaned)) {
+        return cleaned.replace(/<\/head>/i, `${lightPaperStyle}</head>`);
+    }
+    return `${lightPaperStyle}${cleaned}`;
 };

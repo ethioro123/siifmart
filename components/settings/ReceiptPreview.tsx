@@ -73,6 +73,7 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
         * { box-sizing: border-box; }
         @page { size: ${paperWidth} auto; margin: 0; }
         html, body {
+          color-scheme: light;
           margin: 0;
           padding: 0;
           background: #fff;
@@ -215,11 +216,22 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
   `;
 
   return (
-    <div className={`bg-white shadow-md rounded-xl overflow-hidden border-[var(--theme-border)] flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}>
+    <div
+      style={{
+        colorScheme: 'light',
+        backgroundColor: 'var(--theme-print-canvas)',
+        color: 'var(--theme-print-text)'
+      }}
+      className={`bg-[var(--theme-print-canvas)] text-[var(--theme-print-text)] shadow-md rounded-xl overflow-hidden border border-[color-mix(in_srgb,var(--theme-print-text)_16%,transparent)] flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}
+    >
       <iframe
         srcDoc={sanitizePreviewHTML(html)}
         title="Receipt Preview"
-        className="w-full h-full border-none"
+        style={{
+          colorScheme: 'light',
+          backgroundColor: 'var(--theme-print-canvas)'
+        }}
+        className="w-full h-full border-none bg-[var(--theme-print-canvas)]"
       />
     </div>
   );

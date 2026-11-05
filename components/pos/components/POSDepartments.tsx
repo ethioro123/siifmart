@@ -63,7 +63,7 @@ export const POSDepartments: React.FC = () => {
                         <Layers size={10} />
                     </span>
                     <span>{t('pos.deptLabel')} <strong className="font-semibold">{selectedDepartment}</strong></span>
-                    <button type="button" onClick={() => setSelectedDepartment('All')} title={`${t('common.remove')} ${t('pos.deptLabel')}`} aria-label={`${t('common.remove')} ${t('pos.deptLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setSelectedDepartment('All')} title={`${t('common.remove')} ${t('pos.deptLabel')}`} aria-label={`${t('common.remove')} ${t('pos.deptLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -73,7 +73,7 @@ export const POSDepartments: React.FC = () => {
                         <Folder size={10} />
                     </span>
                     <span>{t('pos.catLabel')} <strong className="font-semibold">{selectedCategory}</strong></span>
-                    <button type="button" onClick={() => setSelectedCategory('All')} title={`${t('common.remove')} ${t('pos.catLabel')}`} aria-label={`${t('common.remove')} ${t('pos.catLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setSelectedCategory('All')} title={`${t('common.remove')} ${t('pos.catLabel')}`} aria-label={`${t('common.remove')} ${t('pos.catLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -83,7 +83,7 @@ export const POSDepartments: React.FC = () => {
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.minPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {minPriceFilter}</strong></span>
-                    <button type="button" onClick={() => setMinPriceFilter('')} title={`${t('common.remove')} ${t('pos.minPrice')}`} aria-label={`${t('common.remove')} ${t('pos.minPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setMinPriceFilter('')} title={`${t('common.remove')} ${t('pos.minPrice')}`} aria-label={`${t('common.remove')} ${t('pos.minPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -93,7 +93,7 @@ export const POSDepartments: React.FC = () => {
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.maxPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {maxPriceFilter}</strong></span>
-                    <button type="button" onClick={() => setMaxPriceFilter('')} title={`${t('common.remove')} ${t('pos.maxPrice')}`} aria-label={`${t('common.remove')} ${t('pos.maxPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setMaxPriceFilter('')} title={`${t('common.remove')} ${t('pos.maxPrice')}`} aria-label={`${t('common.remove')} ${t('pos.maxPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -103,7 +103,7 @@ export const POSDepartments: React.FC = () => {
                         <Sparkles size={10} />
                     </span>
                     <span>{t('pos.brandLabel')} <strong className="font-semibold">{brand}</strong></span>
-                    <button type="button" onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`${t('common.remove')} ${brand}`} aria-label={`${t('common.remove')} ${brand}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`${t('common.remove')} ${brand}`} aria-label={`${t('common.remove')} ${brand}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             ))}
 
@@ -113,7 +113,7 @@ export const POSDepartments: React.FC = () => {
                         <Zap size={10} />
                     </span>
                     <span>{t('pos.velocityLabel')} <strong className="font-semibold">{vel}</strong></span>
-                    <button type="button" onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`${t('common.remove')} ${vel}`} aria-label={`${t('common.remove')} ${vel}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`${t('common.remove')} ${vel}`} aria-label={`${t('common.remove')} ${vel}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             ))}
 
@@ -123,7 +123,7 @@ export const POSDepartments: React.FC = () => {
                         <Package size={10} />
                     </span>
                     <span>{t('pos.stockLabel')} <strong className="font-semibold">{stockStatusFilter === 'in_stock' ? t('pos.inStockOnly') : stockStatusFilter === 'low_stock' ? t('pos.lowStockAlertsOnly') : t('pos.outOfStockOnly')}</strong></span>
-                    <button type="button" onClick={() => setStockStatusFilter('all')} title={`${t('common.remove')} ${t('pos.stockLabel')}`} aria-label={`${t('common.remove')} ${t('pos.stockLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setStockStatusFilter('all')} title={`${t('common.remove')} ${t('pos.stockLabel')}`} aria-label={`${t('common.remove')} ${t('pos.stockLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -133,7 +133,7 @@ export const POSDepartments: React.FC = () => {
                         <Tag size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.onSale')}</strong>
-                    <button type="button" onClick={() => setOnSaleOnly(false)} title={`${t('common.remove')} ${t('pos.onSale')}`} aria-label={`${t('common.remove')} ${t('pos.onSale')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setOnSaleOnly(false)} title={`${t('common.remove')} ${t('pos.onSale')}`} aria-label={`${t('common.remove')} ${t('pos.onSale')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -143,7 +143,7 @@ export const POSDepartments: React.FC = () => {
                         <Scale size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.compPrice')}</strong>
-                    <button type="button" onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--theme-accent-muted)] hover:text-[var(--theme-accent)] text-[var(--theme-accent)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
@@ -153,13 +153,14 @@ export const POSDepartments: React.FC = () => {
                         <SlidersHorizontal size={10} />
                     </span>
                     <span>{t('pos.sortLabel')} <strong className="font-semibold">{sortBy === 'price-asc' ? t('pos.sortPriceAsc') : sortBy === 'price-desc' ? t('pos.sortPriceDesc') : sortBy === 'name-asc' ? t('pos.sortNameAsc') : sortBy}</strong></span>
-                    <button type="button" onClick={() => setSortBy('default')} title={`${t('common.remove')} ${t('pos.sortLabel')}`} aria-label={`${t('common.remove')} ${t('pos.sortLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setSortBy('default')} title={`${t('common.remove')} ${t('pos.sortLabel')}`} aria-label={`${t('common.remove')} ${t('pos.sortLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] hover:opacity-80 transition-colors cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             <button
+                type="button"
                 onClick={resetAllFilters}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] active:scale-95 border border-[var(--theme-status-danger-border)] transition-all ml-auto cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] active:scale-95 border border-[var(--theme-status-danger-border)] transition-all ml-auto cursor-pointer touch-manipulation"
             >
                 <RotateCcw size={11} />
                 <span>{t('pos.resetAll')}</span>

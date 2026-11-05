@@ -274,11 +274,11 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                 </div>
 
                 {/* Footer Controls */}
-                <div className="p-4 border-t border-[var(--theme-border-subtle)] flex items-center gap-3 bg-[var(--theme-bg-card)]">
+                <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-[var(--theme-border-subtle)] flex items-center gap-3 bg-[var(--theme-bg-card)]">
                     <button
                         type="button"
                         onClick={resetAllFilters}
-                        className="flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs rounded-2xl transition-all border border-[var(--theme-border)] flex items-center justify-center gap-2 active:scale-95 cursor-pointer tracking-tight shadow-xs"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs rounded-2xl transition-all border border-[var(--theme-border)] flex items-center justify-center gap-2 active:scale-95 cursor-pointer tracking-tight shadow-xs touch-manipulation"
                     >
                         <RotateCcw size={14} />
                         <span>{t('pos.resetAll')}</span>
@@ -286,7 +286,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 min-h-11 py-3 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-semibold text-xs rounded-2xl transition-all shadow-xs active:scale-95 cursor-pointer tracking-tight flex items-center justify-center"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-semibold text-xs rounded-2xl transition-all shadow-xs active:scale-95 cursor-pointer tracking-tight flex items-center justify-center touch-manipulation"
                     >
                         {t('pos.applyFilters')}
                     </button>

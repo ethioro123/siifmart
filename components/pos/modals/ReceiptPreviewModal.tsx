@@ -24,26 +24,37 @@ export const ReceiptPreviewModal: React.FC = () => {
         >
             <div className="space-y-4">
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-3 sm:p-5 rounded-2xl flex flex-col items-center justify-center">
-                    {/* Realistic Thermal Paper Roll Container */}
-                    <div className="w-full max-w-[320px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col transition-all">
+                    {/* Realistic Thermal Paper Roll Container — locked to physical white paper */}
+                    <div
+                        style={{
+                            colorScheme: 'light',
+                            backgroundColor: 'var(--theme-print-canvas)',
+                            color: 'var(--theme-print-text)'
+                        }}
+                        className="w-full max-w-[320px] bg-[var(--theme-print-canvas)] text-[var(--theme-print-text)] rounded-xl shadow-lg border border-[color-mix(in_srgb,var(--theme-print-text)_16%,transparent)] overflow-hidden flex flex-col transition-all"
+                    >
                         {/* Thermal Paper Top Tear Edge */}
-                        <div className="h-2 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 border-b border-dashed border-gray-300 shrink-0" />
+                        <div className="h-2 bg-[color-mix(in_srgb,var(--theme-print-text)_6%,var(--theme-print-canvas))] border-b border-dashed border-[color-mix(in_srgb,var(--theme-print-text)_22%,transparent)] shrink-0" />
                         
                         {receiptPreviewHTML ? (
                             <iframe
                                 srcDoc={sanitizePreviewHTML(receiptPreviewHTML)}
                                 title={t('pos.receiptPreview')}
-                                className="w-full h-[400px] sm:h-[460px] border-none bg-white block"
+                                style={{
+                                    colorScheme: 'light',
+                                    backgroundColor: 'var(--theme-print-canvas)'
+                                }}
+                                className="w-full h-[400px] sm:h-[460px] border-none bg-[var(--theme-print-canvas)] block"
                             />
                         ) : (
-                            <div className="w-full h-[300px] sm:h-[360px] flex flex-col items-center justify-center text-gray-400 gap-2 p-6 text-center">
+                            <div className="w-full h-[300px] sm:h-[360px] flex flex-col items-center justify-center text-[color-mix(in_srgb,var(--theme-print-text)_45%,transparent)] gap-2 p-6 text-center">
                                 <Receipt size={32} className="opacity-40" />
-                                <p className="text-xs font-semibold text-gray-600">No receipt data generated</p>
+                                <p className="text-xs font-semibold text-[color-mix(in_srgb,var(--theme-print-text)_70%,transparent)]">No receipt data generated</p>
                             </div>
                         )}
 
                         {/* Thermal Paper Bottom Cut Edge */}
-                        <div className="h-2 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 border-t border-dashed border-gray-300 shrink-0" />
+                        <div className="h-2 bg-[color-mix(in_srgb,var(--theme-print-text)_6%,var(--theme-print-canvas))] border-t border-dashed border-[color-mix(in_srgb,var(--theme-print-text)_22%,transparent)] shrink-0" />
                     </div>
                 </div>
 

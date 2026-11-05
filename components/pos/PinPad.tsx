@@ -50,33 +50,37 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                     <button
                         key={num}
+                        type="button"
                         onClick={() => handleKeyPress(num.toString())}
-                        className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xl font-mono font-bold transition-all border border-[var(--theme-border)] active:scale-95 shadow-xs cursor-pointer select-none"
+                        className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xl font-mono font-bold transition-all border border-[var(--theme-border)] active:scale-95 shadow-xs cursor-pointer select-none touch-manipulation flex items-center justify-center"
                     >
                         {num}
                     </button>
                 ))}
 
                 <button
+                    type="button"
                     onClick={() => handleKeyPress('clear')}
-                    className="h-14 rounded-2xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-xs font-semibold uppercase transition-all border border-[var(--theme-status-danger-border)] active:scale-95 flex items-center justify-center tracking-wider cursor-pointer select-none"
+                    className="h-14 rounded-2xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-xs font-semibold uppercase transition-all border border-[var(--theme-status-danger-border)] active:scale-95 flex items-center justify-center tracking-wider cursor-pointer select-none touch-manipulation"
                 >
                     {t('common.clear')}
                 </button>
 
                 <button
                     key={0}
+                    type="button"
                     onClick={() => handleKeyPress('0')}
-                    className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xl font-mono font-bold transition-all border border-[var(--theme-border)] active:scale-95 shadow-xs cursor-pointer select-none"
+                    className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xl font-mono font-bold transition-all border border-[var(--theme-border)] active:scale-95 shadow-xs cursor-pointer select-none touch-manipulation flex items-center justify-center"
                 >
                     0
                 </button>
 
                 <button
+                    type="button"
                     title={t('common.delete') || "Delete"}
                     aria-label={t('common.delete') || "Delete"}
                     onClick={() => handleKeyPress('delete')}
-                    className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] active:scale-95 flex items-center justify-center shadow-xs cursor-pointer select-none"
+                    className="h-14 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] active:scale-95 flex items-center justify-center shadow-xs cursor-pointer select-none touch-manipulation"
                 >
                     <Delete size={20} />
                 </button>
@@ -85,17 +89,19 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
             <div className="flex gap-2.5 mt-6">
                 {onCancel && (
                     <button
+                        type="button"
                         onClick={onCancel}
-                        className="flex-1 py-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs rounded-2xl transition-all border border-[var(--theme-border)] flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-xs tracking-tight"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs rounded-2xl transition-all border border-[var(--theme-border)] flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-xs tracking-tight touch-manipulation"
                     >
                         <ArrowLeft size={15} />
                         <span>{t('common.cancel')}</span>
                     </button>
                 )}
                 <button
+                    type="button"
                     onClick={() => handleKeyPress('enter')}
                     disabled={pin.length < 4}
-                    className="flex-1 py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed font-semibold text-xs rounded-2xl transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer tracking-tight"
+                    className="flex-1 min-h-11 py-3 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed font-semibold text-xs rounded-2xl transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer tracking-tight touch-manipulation"
                 >
                     <KeyRound size={15} />
                     <span>{t('common.enter')}</span>
