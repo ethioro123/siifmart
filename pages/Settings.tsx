@@ -64,7 +64,7 @@ export default function SettingsPage() {
                             <p className="text-base font-semibold text-[var(--theme-text-primary)]">Settings</p>
                             <p className="mt-0.5 text-xs text-[var(--theme-text-secondary)]">Configuration for your authorized scope</p>
                         </div>
-                        <button type="button" onClick={() => setIsNavOpen(false)} aria-label="Close settings navigation" className="p-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] cursor-pointer lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
+                        <button type="button" onClick={() => setIsNavOpen(false)} aria-label="Close settings navigation" className="min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] cursor-pointer lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] touch-manipulation">
                             <X size={18} />
                         </button>
                     </div>
@@ -88,7 +88,7 @@ export default function SettingsPage() {
                             title="Open Settings sections"
                             aria-label="Open settings navigation"
                             aria-expanded={isNavOpen}
-                            className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors lg:hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors lg:hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] touch-manipulation"
                         >
                             <List size={18} />
                         </button>

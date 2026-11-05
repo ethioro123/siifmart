@@ -80,14 +80,8 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 success = true;
             }
             else if (change.changeType === 'stock_adjustment') {
-                await productsService.adjustStock(
-                    change.productId,
-                    change.adjustmentQty || 0,
-                    change.adjustmentType || 'IN',
-                    change.adjustmentReason || 'Approved Adjustment',
-                    user?.name || 'System'
-                );
-                success = true;
+                await inventoryRequestsService.applyStockRequest(change.id);
+                return { success: true, change };
             }
 
             // 2. Update status to 'approved' to preserve tamper-proof audit trail

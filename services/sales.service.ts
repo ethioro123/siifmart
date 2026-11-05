@@ -175,30 +175,8 @@ export const salesService = {
     },
 
     async update(id: string, updates: Partial<SaleRecord>) {
-        const dbUpdates: any = { ...updates };
-        if (updates.fulfillmentStatus !== undefined) {
-            dbUpdates.fulfillment_status = updates.fulfillmentStatus;
-            delete dbUpdates.fulfillmentStatus;
-        }
-
-        const { data, error } = await supabase
-            .from('sales')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            date: data.sale_date,
-            method: data.payment_method,
-            amountTendered: data.amount_tendered,
-            cashierName: data.cashier_name,
-            customerId: data.customer_id,
-            fulfillmentStatus: data.fulfillment_status
-        };
+        if (Object.keys(updates).length) throw new Error('Use the verified sale or warehouse command for changes');
+        return this.getById(id);
     },
 
     async getTodaySales(siteId?: string) {

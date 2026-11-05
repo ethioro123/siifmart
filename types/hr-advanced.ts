@@ -30,6 +30,10 @@ export type DisciplinarySeverity = 'Low' | 'Medium' | 'High' | 'Critical';
 export type AppealStatus = 'None' | 'Pending Appeal' | 'Upheld' | 'Overturned';
 
 export interface DisciplinaryRecord {
+    issued_by_id?: string;
+    reviewed_by_id?: string;
+    appeal_notes?: string;
+    decision_reason?: string;
     id: string;
     country_code: string;
     site_id?: string;
@@ -73,6 +77,11 @@ export interface JobRequisition {
 export type CandidateStage = 'applied' | 'screening' | 'interview' | 'offered' | 'hired' | 'rejected';
 
 export interface JobCandidate {
+    created_by_id?: string;
+    hr_approved_by_id?: string;
+    finance_approved_by_id?: string;
+    hiring_manager_approved_by_id?: string;
+    cmd_approved_by_id?: string;
     id: string;
     requisition_id?: string;
     country_code: string;

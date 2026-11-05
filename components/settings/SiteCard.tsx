@@ -39,7 +39,7 @@ export function SiteCard({
     <div
       onClick={() => setExpandedSiteId(isExpanded ? null : site.id)}
       className={`bg-[var(--theme-bg-card)] border transition-all duration-200 rounded-2xl p-3.5 cursor-pointer shadow-xs ${
-        isExpanded ? 'border-[var(--theme-accent)] dark:border-[var(--theme-accent)]' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-hover)]'
+        isExpanded ? 'border-[var(--theme-accent)]' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-hover)]'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -54,13 +54,13 @@ export function SiteCard({
             </h6>
 
             {/* Sovereign Country ID Badge */}
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20 flex items-center gap-1">
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center gap-1">
               <Globe size={11} />
               <span>{countryId}</span>
             </span>
 
             {/* Human-Readable Site ID */}
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
               <Hash size={11} className="opacity-60" />
               <span>{humanReadableSiteId}</span>
             </span>
@@ -168,15 +168,15 @@ export function SiteCard({
           <div className="flex gap-2 justify-end pt-2.5 border-t border-[var(--theme-border)]">
             <button
               onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
-              className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+              className="min-h-11 sm:h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] touch-manipulation"
               title="Edit Location"
             >
-              <Edit2 size={12} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+              <Edit2 size={12} className="text-[var(--theme-accent)]" />
               <span>Edit</span>
             </button>
             {isAdmin ? (
               <span
-                className="h-8 px-3 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
+                className="min-h-11 sm:h-8 px-3 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed select-none"
                 title="Administration HQ is protected and cannot be deleted"
               >
                 <Lock size={12} />
@@ -185,7 +185,7 @@ export function SiteCard({
             ) : (
               <button
                 onClick={() => handleDeleteSite(site.id)}
-                className="h-8 px-3 bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                className="min-h-11 sm:h-8 px-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] touch-manipulation"
                 title="Request facility closure"
                 disabled={isDeleting}
               >

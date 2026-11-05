@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase';
 import type { JobRequisition, JobCandidate, CandidateStage } from '../types/hr-advanced';
 import { systemLogsService } from './system-logs.service';
+import { employeesService } from './employees.service';
+import { candidateCommandService } from './candidate-command.service';
 import { SYSTEM_ROLES } from '../utils/roles';
 import { logger } from '../utils/logger';
 import {
@@ -131,7 +133,7 @@ export const recruitmentService = {
     },
 
     async fetchCandidates(countryCode = 'ET', requisitionId?: string, page = 1, siteId?: string): Promise<JobCandidate[]> {
-        let query = supabase.from('job_candidates').select('id,requisition_id,country_code,site_id,role,name,email,phone,stage,interview_score,technical_score,culture_fit_score,interviewer_notes,offered_salary,resume_url,hr_approved_by,hr_approved_at,hr_notes,finance_approved_by,finance_approved_at,finance_notes,hiring_manager_approved_by,hiring_manager_approved_at,hiring_manager_notes,is_salary_exception,is_quota_exception,cmd_approved_by,cmd_approved_at,cmd_notes,group_approved_by,group_approved_at,group_notes,hired_employee_id,created_at,updated_at').eq('country_code', countryCode.toUpperCase()).order('created_at', { ascending: false }).order('id').range((page - 1) * 25, page * 25 - 1);
+        let query = supabase.from('job_candidates').select('id,requisition_id,country_code,site_id,role,name,email,phone,stage,interview_score,technical_score,culture_fit_score,interviewer_notes,offered_salary,resume_url,hr_approved_by,hr_approved_at,hr_notes,finance_approved_by,finance_approved_at,finance_notes,hiring_manager_approved_by,hiring_manager_approved_at,hiring_manager_notes,cmd_approved_by,cmd_approved_at,hired_employee_id,created_by_id,hr_approved_by_id,finance_approved_by_id,hiring_manager_approved_by_id,cmd_approved_by_id,created_at,updated_at').eq('country_code', countryCode.toUpperCase()).order('created_at', { ascending: false }).order('id').range((page - 1) * 25, page * 25 - 1);
         if (requisitionId) query = query.eq('requisition_id', requisitionId);
         if (siteId) query = query.eq('site_id', siteId);
         const { data, error } = await query;
@@ -217,223 +219,17 @@ export const recruitmentService = {
 
     evaluateCandidateRoute: evaluateCandidateHiringRoute,
 
-    async approveCandidateHR(
-        candidateId: string,
-        approver: { id: string; name: string; role: string },
-        notes?: string
-    ): Promise<boolean> {
-        if (!isHRLead(approver.role)) {
-            throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
-        }
-
-        const candidate = getLocalCands().find(c => c.id === candidateId);
-        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
-            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot approve your own HR candidate clearance.');
-        }
-
-        const now = new Date().toISOString();
-        const updatePayload = {
-            hr_approved_by: approver.name,
-            hr_approved_at: now,
-            hr_notes: notes || 'Identity, credentials & compensation band cleared.',
-            updated_at: now
-        };
-
-        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        if (error) throw new Error(`Failed to record HR candidate approval: ${error.message}`);
-
-        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
-        saveLocalCands(cands);
-
-        await systemLogsService.create({
-            user_name: approver.name,
-            action: 'CANDIDATE_HR_VETTING_APPROVED',
-            module: 'Human Resources',
-            details: JSON.stringify({ candidateId, approverRole: approver.role, notes })
-        });
-
-        return true;
+    async approveCandidateHR(candidateId: string, _approver: { id: string; name: string; role: string }, notes?: string): Promise<boolean> {
+        await candidateCommandService.decide(candidateId, 'hr', undefined, notes || 'Identity and credentials reviewed'); return true;
     },
-
-    async approveCandidateSalaryFinance(
-        candidateId: string,
-        approver: { id: string; name: string; role: string },
-        offeredSalary: number,
-        notes?: string
-    ): Promise<boolean> {
-        if (!isFinanceLead(approver.role)) {
-            throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
-        }
-
-        if (!offeredSalary || offeredSalary <= 0) {
-            throw new Error('Offered salary must be greater than zero.');
-        }
-
-        const candidate = getLocalCands().find(c => c.id === candidateId);
-        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
-            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot approve your own Finance salary clearance.');
-        }
-
-        const now = new Date().toISOString();
-        const updatePayload = {
-            finance_approved_by: approver.name,
-            finance_approved_at: now,
-            finance_notes: notes || 'Salary verified against site departmental budget and statutory laws.',
-            offered_salary: offeredSalary,
-            updated_at: now
-        };
-
-        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        if (error) throw new Error(`Failed to record Finance candidate approval: ${error.message}`);
-
-        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
-        saveLocalCands(cands);
-
-        await systemLogsService.create({
-            user_name: approver.name,
-            action: 'CANDIDATE_SALARY_FINANCE_APPROVED',
-            module: 'Finance',
-            details: JSON.stringify({ candidateId, approverRole: approver.role, offeredSalary, notes })
-        });
-
-        return true;
+    async approveCandidateSalaryFinance(candidateId: string, _approver: { id: string; name: string; role: string }, salary: number, notes?: string): Promise<boolean> {
+        await candidateCommandService.decide(candidateId, 'finance', salary, notes || 'Salary and budget exception reviewed'); return true;
     },
-
-    async confirmCandidateHiringManager(
-        candidateId: string,
-        approver: { id: string; name: string; role: string },
-        notes?: string
-    ): Promise<boolean> {
-        if (!isAuthorizedHiringManager(approver.role)) {
-            throw new Error('Delegation Violation: Only Authorized Hiring Managers or Operations Leads can confirm hiring offers.');
-        }
-
-        const candidate = getLocalCands().find(c => c.id === candidateId);
-        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
-            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot confirm your own hiring offer.');
-        }
-
-        if (!candidate?.hr_approved_at) {
-            throw new Error('Gating Violation: HR credentials and compensation band clearance is required before confirming offer.');
-        }
-
-        const now = new Date().toISOString();
-        const updatePayload = {
-            hiring_manager_approved_by: approver.name,
-            hiring_manager_approved_at: now,
-            hiring_manager_notes: notes || 'Hiring offer confirmed within approved site headcount quota.',
-            stage: 'offered' as CandidateStage,
-            updated_at: now
-        };
-
-        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        if (error) throw new Error(`Failed to record Hiring Manager confirmation: ${error.message}`);
-
-        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
-        saveLocalCands(cands);
-
-        await systemLogsService.create({
-            user_name: approver.name,
-            action: 'CANDIDATE_OFFER_CONFIRMED_BY_MANAGER',
-            module: 'Human Resources',
-            details: JSON.stringify({ candidateId, approverRole: approver.role, notes })
-        });
-
-        return true;
+    async confirmCandidateHiringManager(candidateId: string, _approver: { id: string; name: string; role: string }, notes?: string): Promise<boolean> {
+        await candidateCommandService.decide(candidateId, 'manager', undefined, notes || 'Hiring offer and operational need reviewed'); return true;
     },
-
-    async finalizeAndActivateHire(
-        candidateId: string,
-        actor: { id: string; name: string; role: string },
-        siteId?: string,
-        role?: string,
-        department?: string
-    ): Promise<any> {
-        const candidate = getLocalCands().find(c => c.id === candidateId);
-        if (!candidate) throw new Error('Candidate not found.');
-
-        const isCEO = actor.role === 'group_ceo' || actor.role === 'group_chro';
-        if (!isCEO) {
-            if (!candidate.hr_approved_at) {
-                throw new Error('Zero-Trust Guard: Mandatory HR identity verification required before hire activation.');
-            }
-
-            const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception);
-            if (isException) {
-                if (!candidate.finance_approved_at) {
-                    throw new Error('Zero-Trust Guard: Unbudgeted headcount or salary exceptions require Finance clearance.');
-                }
-                const hasExecutiveSignoff = Boolean(candidate.cmd_approved_at || candidate.group_approved_at) ||
-                    ['country_managing_director', 'group_ceo', 'group_chro'].includes(actor.role);
-                if (!hasExecutiveSignoff) {
-                    throw new Error('Zero-Trust Guard: Unbudgeted exceptions require Country MD or Group Executive approval.');
-                }
-            } else {
-                const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_at) || isAuthorizedHiringManager(actor.role);
-                if (!hasManagerConfirm) {
-                    throw new Error('Delegation Guard: Authorized Hiring Manager confirmation is required before hire activation.');
-                }
-            }
-        }
-
-        let targetSiteId = siteId || candidate.site_id;
-        let targetRole = role || candidate.role;
-        let targetDept = department;
-
-        if (candidate.requisition_id) {
-            const req = getLocalReqs().find(r => r.id === candidate.requisition_id);
-            if (req) {
-                targetSiteId = targetSiteId || req.site_id;
-                targetRole = targetRole || req.role;
-                targetDept = targetDept || req.department;
-            }
-        }
-
-        if (!targetSiteId) throw new Error('Operating site location is mandatory for hire activation.');
-
-        const finalRole = (targetRole || 'stock_clerk') as any;
-        const finalDept = targetDept || 'Operations';
-        const finalSalary = candidate.offered_salary || 0;
-        const now = new Date().toISOString();
-
-        const newEmployee = await provisionActivatedEmployee(
-            candidate,
-            targetSiteId,
-            finalRole,
-            finalDept,
-            finalSalary
-        );
-
-        const updatePayload = {
-            stage: 'hired' as const,
-            hired_employee_id: newEmployee.id,
-            site_id: targetSiteId,
-            role: finalRole,
-            updated_at: now
-        };
-
-        try {
-            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        } catch { /* fallback */ }
-
-        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
-        saveLocalCands(cands);
-
-        await systemLogsService.create({
-            user_name: actor.name,
-            action: 'EMPLOYEE_SYNAPTIC_HIRED',
-            module: 'Human Resources',
-            details: JSON.stringify({
-                candidateId,
-                newEmployeeId: newEmployee.id,
-                newEmployeeCode: newEmployee.code,
-                name: newEmployee.name,
-                role: finalRole,
-                siteId: targetSiteId,
-                salary: finalSalary
-            })
-        });
-
-        return newEmployee;
+    async finalizeAndActivateHire(candidateId: string, _actor: { id: string; name: string; role: string }, _siteId?: string, _role?: string, department = 'Operations') {
+        const id = await candidateCommandService.activate(candidateId, department);
+        return employeesService.getById(id);
     }
 };

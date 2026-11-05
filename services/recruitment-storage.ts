@@ -78,6 +78,7 @@ export const mapDBToReq = (row: any): JobRequisition => ({
 });
 
 export const mapDBToCand = (row: any): JobCandidate => ({
+    created_by_id: row.created_by_id || undefined, hr_approved_by_id: row.hr_approved_by_id || undefined, finance_approved_by_id: row.finance_approved_by_id || undefined, hiring_manager_approved_by_id: row.hiring_manager_approved_by_id || undefined, cmd_approved_by_id: row.cmd_approved_by_id || undefined,
     id: row.id,
     requisition_id: row.requisition_id || undefined,
     country_code: (row.country_code || 'ET').toUpperCase(),

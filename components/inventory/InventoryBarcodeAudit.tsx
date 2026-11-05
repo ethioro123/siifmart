@@ -195,7 +195,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                 setBarcodeSearch(e.target.value);
                                 setCurrentBarcodePage(1);
                             }}
-                            className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-10 pr-4 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
+                            className="w-full min-h-11 sm:h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-10 pr-4 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs transition-all"
                         />
                     </div>
 
@@ -400,7 +400,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                         type="button"
                                         onClick={() => setCurrentBarcodePage(prev => Math.max(1, prev - 1))}
                                         disabled={currentBarcodePage === 1}
-                                        className="h-8 px-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] rounded-lg text-[12px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] transition-all shadow-xs"
+                                        className="min-h-11 sm:h-8 px-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] rounded-lg text-[12px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] transition-all shadow-xs flex items-center justify-center touch-manipulation"
                                     >
                                         <ChevronLeft size={13} className="inline mr-0.5" /> Prev
                                     </button>
@@ -417,7 +417,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => setCurrentBarcodePage(p)}
-                                                        className={`w-7 h-7 rounded-lg text-[12px] font-semibold font-mono tabular-nums transition-all cursor-pointer active:scale-[0.98] ${
+                                                        className={`min-h-11 min-w-11 sm:min-h-7 sm:min-w-7 sm:w-7 sm:h-7 rounded-lg text-[12px] font-semibold font-mono tabular-nums transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center touch-manipulation ${
                                                             currentBarcodePage === p
                                                                 ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
@@ -433,7 +433,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                         type="button"
                                         onClick={() => setCurrentBarcodePage(prev => Math.min(totalPages, prev + 1))}
                                         disabled={currentBarcodePage >= totalPages}
-                                        className="h-8 px-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] rounded-lg text-[12px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] transition-all shadow-xs"
+                                        className="min-h-11 sm:h-8 px-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] rounded-lg text-[12px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] transition-all shadow-xs flex items-center justify-center touch-manipulation"
                                     >
                                         Next <ChevronRight size={13} className="inline ml-0.5" />
                                     </button>

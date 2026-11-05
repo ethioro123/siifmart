@@ -12,8 +12,8 @@ export function DeleteSiteModal({ isOpen, onClose, siteToDelete }: DeleteSiteMod
   const [reason, setReason] = useState('');
   const request = useSiteClosureRequest();
   useEffect(() => { if (isOpen) { setReason(''); request.reset(); } }, [isOpen, siteToDelete?.id]);
-  const control = 'min-h-11 px-4 rounded-xl border border-[var(--theme-border)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]';
-  return <Modal isOpen={isOpen} onClose={() => { if (!request.isPending) onClose(); }} title="Request facility closure">
+  const control = 'min-h-11 px-4 rounded-xl border border-[var(--theme-border)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] touch-manipulation';
+  return <Modal isOpen={isOpen} onClose={() => { if (!request.isPending) onClose(); }} title="Request facility closure" mobileFullScreen>
     <div className="space-y-4 text-[var(--theme-text-primary)]">
       <p className="text-sm">Request closure of {siteToDelete?.name}. The facility remains open until the required independent reviews are completed. Its records are retained.</p>
       {request.isSuccess ? <div role="status" className="space-y-3"><p>Closure request submitted for review.</p><Link className={control} to="/approvals" onClick={onClose}>View requests in Approvals</Link></div> : <>

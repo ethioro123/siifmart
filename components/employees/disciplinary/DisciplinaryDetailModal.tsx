@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     X, AlertTriangle, Scale, Clock, CheckCircle2,
     XCircle, Calendar, Shield, User, FileText, Lock
@@ -9,7 +9,7 @@ interface DisciplinaryDetailModalProps {
     isOpen: boolean;
     onClose: () => void;
     record: DisciplinaryRecord | null;
-    onResolveAppeal: (recordId: string, resolution: 'Upheld' | 'Overturned') => void;
+    onResolveAppeal: (recordId: string, resolution: 'Upheld' | 'Overturned', reason: string) => Promise<void>;
     canAdjudicate: boolean;
     isIssuer: boolean;
     onOpenFileAppeal: (record: DisciplinaryRecord) => void;
@@ -24,6 +24,8 @@ export function DisciplinaryDetailModal({
     isIssuer,
     onOpenFileAppeal
 }: DisciplinaryDetailModalProps) {
+    const [decisionReason, setDecisionReason] = useState('');
+    useEffect(() => { setDecisionReason(''); }, [record?.id]);
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) onClose();
@@ -205,7 +207,7 @@ export function DisciplinaryDetailModal({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         {record.appeal_status === 'Pending Appeal' && canAdjudicate && (
                             <>
                                 {isIssuer ? (
@@ -214,22 +216,17 @@ export function DisciplinaryDetailModal({
                                     </span>
                                 ) : (
                                     <>
+                                        <label className="w-full text-sm">Decision reason (at least 10 characters)<textarea className="block w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3" value={decisionReason} onChange={e => setDecisionReason(e.target.value)} minLength={10} maxLength={5000} /></label>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                onResolveAppeal(record.id, 'Overturned');
-                                                onClose();
-                                            }}
+                                            disabled={decisionReason.trim().length < 10} onClick={async () => { await onResolveAppeal(record.id, 'Overturned', decisionReason.trim()); }}
                                             className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                         >
                                             Overturn Sanction
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                onResolveAppeal(record.id, 'Upheld');
-                                                onClose();
-                                            }}
+                                            disabled={decisionReason.trim().length < 10} onClick={async () => { await onResolveAppeal(record.id, 'Upheld', decisionReason.trim()); }}
                                             className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                         >
                                             Uphold Sanction

@@ -56,7 +56,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 }) => {
     const { user } = useStore();
     const { settings, effectiveCountry } = useData();
-    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind || splitReceivingItem?.quantityHidden === true;
 
     const [step, setStep] = useState<ReceiveStep>('INTAKE');
     const [barcodeInput, setBarcodeInput] = useState<{ [variantId: string]: string }>({});

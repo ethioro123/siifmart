@@ -26,6 +26,10 @@ export interface GetMerchandisingOptions {
 }
 
 export const inventoryRequestsService = {
+    async applyStockRequest(id: string) {
+        const {data,error}=await supabase.rpc('apply_inventory_stock_request',{p_request:id});
+        if(error)throw error;if(data?.saved!==true||data?.requestId!==id)throw new Error('Stock adjustment was not confirmed');
+    },
     async rejectProductEdit(requestId: string, reason: string): Promise<void> {
         const trimmed = (reason || '').trim();
         if (!trimmed) {

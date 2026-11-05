@@ -83,8 +83,8 @@ export const evaluateCandidateHiringRoute = async (params: {
             .maybeSingle();
 
         if (quotaRecord) {
-            approvedQuota = Number(quotaRecord.approved_quota) || 10;
-            if (quotaRecord.max_monthly_salary) {
+            approvedQuota = Number(quotaRecord.approved_quota);
+            if (quotaRecord.max_monthly_salary !== null) {
                 maxSalary = Number(quotaRecord.max_monthly_salary);
             }
         }
@@ -111,7 +111,7 @@ export const evaluateCandidateHiringRoute = async (params: {
         logger.warn('recruitmentDelegation', 'Failed to evaluate live limits, using defaults', { error: String(e) });
     }
 
-    const isQuotaFull = currentActive >= approvedQuota;
+    const isQuotaFull = currentActive >= approvedQuota || maxSalary === undefined;
     const isSalaryExcess = Boolean(maxSalary && proposedSalary > maxSalary);
     const isException = isQuotaFull || isSalaryExcess;
     const openSlots = Math.max(0, approvedQuota - currentActive);
@@ -151,35 +151,8 @@ export const evaluateCandidateHiringRoute = async (params: {
     };
 };
 
-export const provisionActivatedEmployee = async (
-    candidate: JobCandidate,
-    targetSiteId: string,
-    finalRole: any,
-    finalDept: string,
-    finalSalary: number
-) => {
-    const now = new Date().toISOString();
-    const joinDate = now.split('T')[0];
-    const assignedCode = await employeesService.getNextCode(candidate.country_code);
-    const employeeId = crypto.randomUUID();
-    // Approved employee creation and login handover are separate confirmed outcomes.
-    return employeesService.create({
-        id: employeeId,
-        code: assignedCode,
-        name: candidate.name,
-        email: candidate.email.toLowerCase(),
-        phone: candidate.phone,
-        role: finalRole,
-        siteId: targetSiteId,
-        department: finalDept,
-        salary: finalSalary,
-        status: 'Active',
-        joinDate,
-        avatar: '',
-        performanceScore: 100,
-        specialization: 'Floor Operations',
-        attendanceRate: 100,
-        badges: ['New Hire']
-    });
+export const provisionActivatedEmployee = async (candidate: JobCandidate, _site: string, _role: string, department: string, _salary: number) => {
+    const { candidateCommandService } = await import('./candidate-command.service');
+    const id = await candidateCommandService.activate(candidate.id, department);
+    return employeesService.getById(id);
 };
-

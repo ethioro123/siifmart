@@ -1,49 +1,23 @@
 // @vitest-environment jsdom
-// Audit reproductions: passing tests document gaps, not desired production behavior.
-import { beforeEach, expect, it, vi } from 'vitest';
-const mock = vi.hoisted(() => ({ from: vi.fn(), create: vi.fn(), nextCode: vi.fn(), logs: vi.fn() }));
-vi.mock('../../lib/supabase', () => ({ supabase: { from: mock.from } }));
-vi.mock('../../services/employees.service', () => ({ employeesService: { create: mock.create, getNextCode: mock.nextCode } }));
-vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: mock.logs } }));
-vi.mock('../../utils/logger', () => ({ logger: { warn: vi.fn(), error: vi.fn() } }));
-const row = {
- id: 'notice', country_code: 'ET', site_id: 'warehouse', employee_id: 'worker', employee_name: 'Audit worker',
- record_type: 'Written Warning' as const, severity: 'High' as const, title: 'Audit notice', description: 'Audit details',
- action_taken: 'Review', appeal_status: 'Pending Appeal' as const, issued_by: 'issuer', issued_by_role: 'regional_hr_manager',
- issued_at: '2026-11-06T00:00:00Z', created_at: '2026-11-06T00:00:00Z', confidential_notes: 'Restricted personnel evidence'
-};
-beforeEach(() => { vi.resetModules(); vi.clearAllMocks(); localStorage.clear(); mock.logs.mockResolvedValue({ id: 'log' }); });
-function failedMutation() {
- const response = { data: null, error: { code: '42501', message: 'Permission denied' } };
- mock.from.mockReturnValue({ insert: () => ({ select: () => ({ single: async () => response }) }), update: () => ({ eq: async () => response }) });
-}
-it('reports an issued disciplinary notice even when persistence is denied', async () => {
- failedMutation(); const { disciplinaryService } = await import('../../services/disciplinary.service');
- const saved = await disciplinaryService.issueDisciplinaryNotice(row);
- expect(saved.id).toBeTruthy(); expect(localStorage.getItem('siifmart_disciplinary_backup')).toContain('Restricted personnel evidence');
- expect(mock.logs).toHaveBeenCalledWith(expect.objectContaining({ action: 'DISCIPLINARY_NOTICE_ISSUED' }));
+import {beforeEach,expect,it,vi} from 'vitest';
+const mock=vi.hoisted(()=>({rpc:vi.fn(),from:vi.fn(),employee:vi.fn()}));
+vi.mock('../../lib/supabase',()=>({supabase:{rpc:mock.rpc,from:mock.from}}));
+vi.mock('../../services/employees.service',()=>({employeesService:{getById:mock.employee}}));
+const id='11111111-1111-4111-8111-111111111111';
+beforeEach(()=>{vi.resetModules();vi.clearAllMocks();localStorage.clear();mock.rpc.mockResolvedValue({data:null,error:new Error('Permission denied')});});
+it('propagates denied notice persistence without fabricating success',async()=>{
+ const {disciplinaryService}=await import('../../services/disciplinary.service');
+ await expect(disciplinaryService.issueDisciplinaryNotice({country_code:'ET',employee_id:id,employee_name:'Audit employee',record_type:'Written Warning',severity:'High',title:'Audit notice',description:'Recorded personnel evidence',action_taken:'Review',issued_by:'Untrusted name',issued_by_role:'group_ceo'},id)).rejects.toThrow('Permission denied');
+ expect(mock.from).not.toHaveBeenCalled();expect(localStorage.getItem('siifmart_disciplinary_backup')).toBeNull();
 });
-it('returns a previous user personnel cache after the current read is denied', async () => {
- localStorage.setItem('siifmart_disciplinary_backup', JSON.stringify([row]));
- mock.from.mockReturnValue({ select: () => ({ eq: () => ({ order: async () => ({ data: null, error: { message: 'Permission denied for current user' } }) }) }) });
- const { disciplinaryService } = await import('../../services/disciplinary.service');
- const records = await disciplinaryService.fetchDisciplinaryRecords('ET');
- expect(records[0].confidential_notes).toBe('Restricted personnel evidence');
+it('clears old personnel backup and fails closed on a denied read',async()=>{
+ localStorage.setItem('siifmart_disciplinary_backup','[{"confidential_notes":"Private"}]');const {disciplinaryService}=await import('../../services/disciplinary.service');
+ await expect(disciplinaryService.fetchDisciplinaryRecords('ET')).rejects.toThrow('Permission denied');expect(localStorage.getItem('siifmart_disciplinary_backup')).toBeNull();
 });
-it('acknowledges an appeal that the server refused', async () => {
- failedMutation(); const { disciplinaryService } = await import('../../services/disciplinary.service');
- expect(await disciplinaryService.fileAppeal('notice', 'worker', 'Review this evidence')).toBe(true);
-});
-it('acknowledges an adjudication that the server refused', async () => {
- failedMutation(); const { disciplinaryService } = await import('../../services/disciplinary.service');
- expect(await disciplinaryService.resolveAppeal('notice', 'Upheld', { id: 'reviewer', name: 'Reviewer', role: 'regional_hr_manager' })).toBe(true);
-});
-it('the approved recruitment path still sends an Active insert that the live onboarding guard rejects', async () => {
- mock.nextCode.mockResolvedValue('ET-SIIF9999');
- mock.create.mockRejectedValue(new Error('New employees require independent onboarding approval'));
- const { saveLocalCands } = await import('../../services/recruitment-storage');
- saveLocalCands([{ id: 'candidate', country_code: 'ET', site_id: 'warehouse', role: 'picker', name: 'Audit hire', email: 'audit@example.invalid', phone: '', stage: 'offered', interview_score: 90, technical_score: 90, culture_fit_score: 90, offered_salary: 100, hr_approved_at: '2026-11-06', hr_approved_by: 'hr', hiring_manager_approved_at: '2026-11-06', hiring_manager_approved_by: 'manager', created_at: '2026-11-06', updated_at: '2026-11-06' }]);
- const { recruitmentService } = await import('../../services/recruitment.service');
- await expect(recruitmentService.finalizeAndActivateHire('candidate', { id: 'reviewer', name: 'HR reviewer', role: 'country_hr_director' })).rejects.toThrow('New employees require independent onboarding approval');
- expect(mock.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'Active' }));
+it('propagates a refused appeal',async()=>{const {disciplinaryService}=await import('../../services/disciplinary.service');await expect(disciplinaryService.fileAppeal(id,id,'Review this evidence')).rejects.toThrow('Permission denied');});
+it('propagates a refused adjudication and requires a reason',async()=>{const {disciplinaryService}=await import('../../services/disciplinary.service');await expect(disciplinaryService.resolveAppeal(id,'Upheld',{id,name:'HR',role:'regional_hr_manager'},'Evidence examined')).rejects.toThrow('Permission denied');});
+it('recruitment uses one trusted activation and never inserts Active employees from the client',async()=>{
+ mock.rpc.mockResolvedValue({data:id,error:null});mock.employee.mockResolvedValue({id,status:'Active'});const {recruitmentService}=await import('../../services/recruitment.service');
+ expect(await recruitmentService.finalizeAndActivateHire(id,{id:'actor',name:'HR',role:'country_hr_director'},'site','picker','Operations')).toEqual({id,status:'Active'});
+ expect(mock.rpc).toHaveBeenCalledWith('activate_candidate',{p_candidate:id,p_department:'Operations'});expect(mock.from).not.toHaveBeenCalled();
 });

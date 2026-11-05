@@ -49,6 +49,7 @@ export interface SaleRecord {
   receiptNumber?: string; // Friendly ID (e.g., REC-0001)
   offlineReceiptNumber?: string;
   offline_receipt_number?: string;
+  manualPaymentVerified?: boolean;
   mobilePaymentChannel?: string;
   mobileTransactionRef?: string;
   customerPhone?: string;

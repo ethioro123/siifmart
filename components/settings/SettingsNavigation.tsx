@@ -49,7 +49,7 @@ export function SettingsNavigation({ activeTab, regional, enterprise, onSelect }
                     placeholder="Search settings..."
                     value={search}
                     onChange={event => setSearch(event.target.value)}
-                    className="w-full min-h-11 pl-10 pr-3 rounded-xl border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] transition-all shadow-2xs"
+                    className="w-full min-h-11 pl-10 pr-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] transition-all shadow-2xs"
                 />
             </label>
             {groups.map(group => (
@@ -64,7 +64,7 @@ export function SettingsNavigation({ activeTab, regional, enterprise, onSelect }
                                 type="button"
                                 aria-current={isActive ? 'page' : undefined}
                                 onClick={() => onSelect(section.id)}
-                                className={`w-full min-h-11 text-left px-3 py-2 rounded-xl text-xs font-medium cursor-pointer flex items-center gap-2.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                className={`w-full min-h-11 text-left px-3 py-2 rounded-xl text-xs font-medium cursor-pointer flex items-center gap-2.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] border touch-manipulation ${
                                     isActive
                                         ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] font-semibold border-[var(--theme-accent)]/20 shadow-2xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border-transparent'

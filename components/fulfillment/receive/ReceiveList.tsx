@@ -231,8 +231,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                         isComplete ? 'text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'
                                                                     }`}>
                                                                         {receivedQty}
-                                                                        {isBlindReceiving && !isComplete ? (
-                                                                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
+                                                                        {(isBlindReceiving || item.quantityHidden) ? (
+                                                                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
                                                                         ) : (
                                                                             <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                         )}
@@ -246,8 +246,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     isComplete ? 'text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'
                                                                 }`}>
                                                                     {receivedQty}
-                                                                    {isBlindReceiving && !isComplete ? (
-                                                                        <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
+                                                                    {(isBlindReceiving || item.quantityHidden) ? (
+                                                                        <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.receiptCountRecorded')}</span>
                                                                     ) : (
                                                                         <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                     )}
@@ -257,7 +257,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                     </div>
                                                 </div>
 
-                                                {!isBlindReceiving && (
+                                                {!isBlindReceiving && !item.quantityHidden && (
                                                     <div className="hidden sm:block space-y-1.5">
                                                         <div className="flex justify-between items-center text-[11px] font-medium text-[var(--theme-text-secondary)]">
                                                             <span>{t('warehouse.inboundVelocity')}</span>

@@ -155,7 +155,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title={`Configure region: ${region.name} (${region.code})`} size="lg" closeOnEscape={!isSubmitting} closeOnClickOutside={!isSubmitting}>
+        <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title={`Configure region: ${region.name} (${region.code})`} size="lg" mobileFullScreen closeOnEscape={!isSubmitting} closeOnClickOutside={!isSubmitting}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Basic Info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -168,7 +168,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             />
                         </div>
                         <div>
@@ -178,7 +178,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value as 'active' | 'suspended' | 'planning')}
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             >
                                 <option value="active">Active</option>
                                 <option value="suspended">Suspended (Frozen)</option>
@@ -197,7 +197,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                 aria-label="Administrative hub site"
                                 value={adminHubSiteId}
                                 onChange={(e) => setAdminHubSiteId(e.target.value)}
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             >
                                 <option value="">No Hub Designated</option>
                                 {administrationSites.map(s => (
@@ -215,7 +215,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                 aria-label="Regional Operations Manager"
                                 value={regionalManagerId}
                                 onChange={(e) => setRegionalManagerId(e.target.value)}
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             >
                                 <option value="">Unassigned</option>
                                 {countryEmployees.map(e => (
@@ -239,14 +239,14 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             maxLength={500}
                             rows={2}
                             placeholder="Record why these settings are changing"
-                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         />
                     </div>
 
                     {/* Dynamic Central HQ Budget & Autonomous Spending Limit */}
-                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3">
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                         <div className="flex items-center gap-2">
-                            <DollarSign size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                            <DollarSign size={15} className="text-[var(--theme-accent)]" />
                             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">
                                 Dynamic Budget Thresholds (Central HQ Governance)
                             </h4>
@@ -263,7 +263,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     step="10000"
                                     value={monthlyBudget}
                                     onChange={(e) => setMonthlyBudget(e.target.value)}
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>
                             <div>
@@ -277,7 +277,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     aria-label="Autonomous PO limit"
                                     value={autonomousLimit}
                                     onChange={(e) => setAutonomousLimit(e.target.value)}
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>
                         </div>
@@ -293,7 +293,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     step="5000"
                                     value={monthlyExpenseBudget}
                                     onChange={(e) => setMonthlyExpenseBudget(e.target.value)}
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>
                             <div>
@@ -307,13 +307,13 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     aria-label="Autonomous expense limit"
                                     value={autonomousExpenseLimit}
                                     onChange={(e) => setAutonomousExpenseLimit(e.target.value)}
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>
                         </div>
 
                         <div className="flex items-start gap-1.5 text-[11px] text-[var(--theme-text-secondary)]">
-                            <ShieldAlert size={13} className="shrink-0 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-0.5" />
+                            <ShieldAlert size={13} className="shrink-0 text-[var(--theme-accent)] mt-0.5" />
                             <span>
                                 A zero autonomous limit requires escalation to the authorized country or group approver. Raising limits expands decentralized autonomy.
                             </span>
@@ -332,7 +332,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </span>
                         </div>
 
-                        <div className="max-h-40 overflow-y-auto custom-scrollbar border-[var(--theme-border)] rounded-xl p-2 bg-[var(--theme-bg-subtle)] space-y-1">
+                        <div className="max-h-40 overflow-y-auto custom-scrollbar border border-[var(--theme-border)] rounded-xl p-2 bg-[var(--theme-bg-subtle)] space-y-1">
                             {countrySites.length === 0 ? (
                                 <p className="text-xs text-[var(--theme-text-secondary)] py-2 text-center">
                                     No sites found in this sovereign country.
@@ -352,14 +352,14 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                         >
                                             <div className="flex items-center gap-2">
                                                 {isSelected ? (
-                                                    <CheckSquare size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                                                    <CheckSquare size={16} className="text-[var(--theme-accent)]" />
                                                 ) : (
                                                     <Square size={16} className="text-[var(--theme-text-secondary)]" />
                                                 )}
                                                 <span className="text-xs font-medium text-[var(--theme-text-primary)]">
                                                     {site.name}
                                                 </span>
-                                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
+                                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                                     {site.code}
                                                 </span>
                                             </div>
@@ -380,14 +380,14 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="px-4 py-2 rounded-xl text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
+                            className="min-h-11 sm:h-9 px-4 py-2 rounded-xl text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer flex items-center justify-center touch-manipulation"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                            className="min-h-11 sm:h-9 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs touch-manipulation"
                         >
                             <Check size={14} />
                             <span>{isSubmitting ? 'Saving...' : 'Save Configuration'}</span>

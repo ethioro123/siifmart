@@ -38,6 +38,7 @@ export const FinanceModals: React.FC<FinanceModalsProps> = ({
                 isOpen={isAddingZone}
                 onClose={() => setIsAddingZone(false)}
                 title="Add New Jurisdiction"
+                mobileFullScreen
                 footer={(
                     <div className="flex gap-3 justify-end">
                         <Button variant="ghost" onClick={() => setIsAddingZone(false)}>Cancel</Button>
@@ -71,6 +72,7 @@ export const FinanceModals: React.FC<FinanceModalsProps> = ({
                 isOpen={activeZoneId !== null}
                 onClose={() => setActiveZoneId(null)}
                 title="Add Tax Rule"
+                mobileFullScreen
                 footer={(
                     <div className="flex gap-3 justify-end">
                         <Button variant="ghost" onClick={() => setActiveZoneId(null)}>Cancel</Button>

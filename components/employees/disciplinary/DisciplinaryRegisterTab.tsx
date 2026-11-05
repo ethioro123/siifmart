@@ -3,6 +3,7 @@ import {
     Scale, AlertTriangle, Plus, Search, Filter, Clock,
     CheckCircle2, XCircle, Eye, ShieldAlert, FileText, ArrowRight
 } from 'lucide-react';
+import { useDisciplinaryCommand } from '../../../hooks/useDisciplinaryCommand';
 import { disciplinaryService } from '../../../services/disciplinary.service';
 import type { DisciplinaryRecord, DisciplinaryType, DisciplinarySeverity } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
@@ -18,6 +19,7 @@ export default function DisciplinaryRegisterTab() {
     const { user, showToast } = useStore();
     const { effectiveCountry, employees, activeSite } = useData();
     const country = effectiveCountry || 'ET';
+    const command = useDisciplinaryCommand();
 
     const [records, setRecords] = useState<DisciplinaryRecord[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -35,12 +37,14 @@ export default function DisciplinaryRegisterTab() {
     const [selectedRecord, setSelectedRecord] = useState<DisciplinaryRecord | null>(null);
 
     const loadRecords = async () => {
+        setRecords([]);
         setIsLoading(true);
         try {
-            const data = await disciplinaryService.fetchDisciplinaryRecords(country);
+            const data = await disciplinaryService.fetchDisciplinaryRecords(country, undefined, activeSite?.id);
             setRecords(data);
         } catch {
-            // Handled safely
+            setRecords([]);
+            showToast('Personnel records could not be loaded', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -48,24 +52,17 @@ export default function DisciplinaryRegisterTab() {
 
     useEffect(() => {
         loadRecords();
-    }, [country]);
+    }, [country, activeSite?.id, user?.id]);
 
     const canAdjudicate = useMemo(() => {
         return ADJUDICATION_ROLES.includes(user?.role || '');
     }, [user?.role]);
 
-    const handleResolveAppeal = async (recordId: string, resolution: 'Upheld' | 'Overturned') => {
+    const handleResolveAppeal = async (recordId: string, resolution: 'Upheld' | 'Overturned', reason: string) => {
         try {
-            await disciplinaryService.resolveAppeal(
-                recordId,
-                resolution,
-                {
-                    id: user?.id || 'hr_dir',
-                    name: user?.name || 'HR Officer',
-                    role: user?.role || 'country_hr_director'
-                }
-            );
+            await command.mutateAsync({ action: resolution, id: recordId, notes: reason });
             showToast(`Appeal has been ${resolution.toLowerCase()} successfully`, 'info');
+            setIsDetailModalOpen(false);
             loadRecords();
         } catch (err: any) {
             showToast(err.message || 'Adjudication rejected under Maker-Checker rule', 'error');
@@ -375,14 +372,14 @@ export default function DisciplinaryRegisterTab() {
                                                     <>
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleResolveAppeal(rec.id, 'Overturned')}
+                                                            onClick={() => handleOpenDetail(rec)}
                                                             className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                                         >
                                                             Overturn Warning
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleResolveAppeal(rec.id, 'Upheld')}
+                                                            onClick={() => handleOpenDetail(rec)}
                                                             className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                                         >
                                                             Uphold Sanction

@@ -108,7 +108,7 @@ export function resolvePOLineItemProgress(
         effectiveReceived,
         expectedSellable,
         remaining,
-        isComplete: remaining <= 0,
+        isComplete: item.quantityHidden ? item.receiptComplete === true : remaining <= 0,
         resolvedSku: maps.jobSkuMap[item.productId || ''] || maps.jobSkuMap[prodId || ''] || product?.sku || item.sku || '',
         resolvedProductId: prodId,
         product

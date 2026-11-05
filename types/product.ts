@@ -292,6 +292,8 @@ export interface Supplier {
 export type PurchaseOrderItem = POItem; // Alias for clarity
 
 export interface POItem {
+  quantityHidden?: boolean;
+  receiptComplete?: boolean;
   id?: string | number; // PO Item ID
   productId?: string; // Optional - null for manual/ad-hoc items
   productName: string;

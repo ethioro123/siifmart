@@ -23,6 +23,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title="Add Connected Peripheral"
+            mobileFullScreen
             footer={(
                 <div className="flex gap-3 justify-end">
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
@@ -46,11 +47,11 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                         value={newDevice.name}
                         onChange={(e) => setNewDevice(prev => ({ ...prev, name: e.target.value }))}
                         placeholder="e.g. Counter 2 Receipt Printer"
-                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                     />
                 </div>
 
-                <div className="grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
                             Model
@@ -60,7 +61,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                             value={newDevice.model}
                             onChange={(e) => setNewDevice(prev => ({ ...prev, model: e.target.value }))}
                             placeholder="e.g. Epson TM-T88VI"
-                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                         />
                     </div>
                     <div>
@@ -70,7 +71,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                         <select
                             value={newDevice.type}
                             onChange={(e) => setNewDevice(prev => ({ ...prev, type: e.target.value as Device['type'] }))}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 transition-all"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 transition-all cursor-pointer"
                         >
                             <option value="printer">Thermal Printer</option>
                             <option value="scale">Electronic Scale</option>
@@ -79,7 +80,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                     </div>
                 </div>
 
-                <div className="grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
                             Connection
@@ -87,7 +88,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                         <select
                             value={newDevice.connection}
                             onChange={(e) => setNewDevice(prev => ({ ...prev, connection: e.target.value as Device['connection'] }))}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 transition-all"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 transition-all cursor-pointer"
                         >
                             <option value="network">Network (Ethernet/WiFi)</option>
                             <option value="usb">USB Port</option>
@@ -103,7 +104,7 @@ export const AddDeviceModal: React.FC<AddDeviceModalProps> = ({
                             value={newDevice.address}
                             onChange={(e) => setNewDevice(prev => ({ ...prev, address: e.target.value }))}
                             placeholder={newDevice.connection === 'network' ? '192.168.1.200' : newDevice.connection === 'usb' ? 'COM3' : 'BT-MAC-001'}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                         />
                     </div>
                 </div>
@@ -138,6 +139,7 @@ export const ConfigDeviceModal: React.FC<ConfigDeviceModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title={`Configure ${device.name}`}
+            mobileFullScreen
             footer={(
                 <div className="flex gap-3 justify-end">
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
@@ -155,7 +157,7 @@ export const ConfigDeviceModal: React.FC<ConfigDeviceModalProps> = ({
             )}
         >
             <div className="space-y-4">
-                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)]">
+                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                     <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{device.name}</p>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Model: {device.model} ({device.type.toUpperCase()})</p>
                 </div>
@@ -168,7 +170,7 @@ export const ConfigDeviceModal: React.FC<ConfigDeviceModalProps> = ({
                         type="text"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                     />
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">
                         {device.connection === 'network' ? 'Standard ESC/POS port 9100 will be used for network communication.' : 'Specify the OS serial port identifier.'}

@@ -27,7 +27,7 @@ BEGIN
  VALUES(source.id,source.id,dest.id,source.country,'PICK','Pending','High',jsonb_array_length(lines),lines,sale.id::text,upper(left(replace(gen_random_uuid()::text,'-',''),8)),'') RETURNING * INTO j;
  UPDATE public.sales SET release_status='RELEASED',fulfillment_status='Picking' WHERE id=sale.id;
  RETURN jsonb_build_object('saved',true,'jobId',j.id,'saleId',sale.id);
-END $function$
+END $function$;
 
 CREATE OR REPLACE FUNCTION private.complete_pick_job(p_job_id uuid)
  RETURNS jsonb
@@ -101,7 +101,7 @@ BEGIN
  INSERT INTO public.system_logs(action,module,employee_id,site_id,country_code,entity_type,entity_id,details)
  VALUES('PICK_COMPLETED','Fulfillment',public.get_my_employee_id(),j.site_id::text,j.country_code,'wms_job',j.id::text,jsonb_build_object('packJobId',pack.id,'noStockPicked',pack.id IS NULL)::text);
  RETURN jsonb_build_object('job',to_jsonb(j),'pack',CASE WHEN pack.id IS NOT NULL THEN to_jsonb(pack) ELSE NULL END);
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION private.sync_shipment_workflow()
  RETURNS trigger

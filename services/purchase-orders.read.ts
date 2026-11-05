@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../lib/supabase';
+import { attachSafePOItems } from './purchase-order-items.service';
 import { logger } from '../utils/logger';
 import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 
@@ -107,6 +108,7 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
     }
     if (error) throw error;
 
+    if (filters?.includeItems || filters?.forecast) await attachSafePOItems(data || []);
     const mappedData = (data || []).map((p: any) => {
         // Resolve approval info from DB columns or notes tag [APPROVED_BY:name:date]
         let approvedBy = p.approved_by
@@ -177,7 +179,8 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
 
                 return {
                     ...i,
-                    productId: i.product_id,
+                    quantity: Number(i.quantity || 0), quantityHidden: i.quantity_hidden === true, receiptComplete: i.receipt_complete === true,
+                productId: i.product_id,
                     sku: i.sku || i.products?.sku || '',
                     productName: i.product_name || '',
                     unitCost: i.unit_cost,
@@ -244,6 +247,7 @@ export async function getById(id: string) {
     }
 
     if (!data) return null;
+    await attachSafePOItems([data]);
 
     // Resolve approval info from DB columns or notes tag [APPROVED_BY:name:date]
     let approvedBy = data.approved_by
@@ -316,6 +320,7 @@ export async function getById(id: string) {
 
             return {
                 ...i,
+                quantity: Number(i.quantity || 0), quantityHidden: i.quantity_hidden === true, receiptComplete: i.receipt_complete === true,
                 productId: i.product_id,
                 sku: i.sku || i.products?.sku || '',
                 productName: i.product_name || '',

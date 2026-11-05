@@ -58,11 +58,11 @@ export function SiteModal({
       });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={newSite.id ? "Edit Location" : "Add New Location"} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={newSite.id ? "Edit Location" : "Add New Location"} size="lg" mobileFullScreen>
       <div className="space-y-6">
         <div>
           <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-3 block">Select Location Type</label>
-          <div className="grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               { type: 'Administration', label: 'Administration', desc: 'Central Operations', icon: Building },
               { type: 'Warehouse', label: 'Warehouse', desc: 'Storage & Fulfillment', icon: Box },
@@ -76,14 +76,14 @@ export function SiteModal({
                   type="button"
                   onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager, areaManagerId: type === 'Store' ? newSite.areaManagerId : null, warehouseManagerId: ['Warehouse', 'Distribution Center'].includes(type) ? newSite.warehouseManagerId : null })}
                   disabled={!!newSite.id}
-                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer touch-manipulation ${
                     isSelected
-                      ? 'border-[var(--theme-accent)] dark:border-[var(--theme-accent)] bg-[var(--theme-accent)]/10 shadow-xs'
+                      ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10 shadow-xs'
                       : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:border-[var(--theme-border-hover)]'
                   } ${!!newSite.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-2.5 ${
-                    isSelected ? 'bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)]'
+                    isSelected ? 'bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)]'
                   }`}>
                     <Icon size={16} />
                   </div>
@@ -96,13 +96,13 @@ export function SiteModal({
         </div>
 
         <div className="border-t border-[var(--theme-border)] pt-5">
-          <div className="grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Operating Market & Localization */}
             <div className="md:col-span-2">
               <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2.5 flex items-center gap-1.5">
-                <Globe size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Operating Market & Localization *
+                <Globe size={14} className="text-[var(--theme-accent)]" /> Operating Market & Localization *
               </label>
-              <div className="grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Facility Country Immutability Notice */}
                 {!!newSite.id && (
                   <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
@@ -402,7 +402,7 @@ export function SiteModal({
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
+        <div className="p-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
           <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed flex items-center gap-2">
             {newSite.type === 'Administration' ? (
               <>
@@ -423,11 +423,11 @@ export function SiteModal({
           </p>
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 min-h-11 h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center touch-manipulation"
           >
             Cancel
           </button>
@@ -435,7 +435,7 @@ export function SiteModal({
             type="button"
             onClick={handleSaveSite}
             disabled={isSavingSite || !newSite.name || !newSite.type}
-            className="flex-1 h-11 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-95 shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            className="flex-1 min-h-11 h-11 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-95 shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] touch-manipulation"
           >
             {isSavingSite ? (
               <>

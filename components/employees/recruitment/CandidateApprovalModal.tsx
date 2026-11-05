@@ -3,6 +3,7 @@ import {
     X, ShieldCheck, CheckCircle2, Clock, AlertCircle,
     Banknote, Sparkles, Building2, User, UserCheck, Flame
 } from 'lucide-react';
+import { useCandidateCommand } from '../../../hooks/useCandidateCommand';
 import { recruitmentService } from '../../../services/recruitment.service';
 import type { JobCandidate, JobRequisition } from '../../../types/hr-advanced';
 import type { CandidateHiringRoute } from '../../../services/recruitment-delegation';
@@ -28,6 +29,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 }) => {
     const { user, showToast } = useStore();
     const { sites, refreshData } = useData();
+    const command = useCandidateCommand();
 
     const [hrNotes, setHrNotes] = useState('');
     const [managerNotes, setManagerNotes] = useState('');
@@ -70,25 +72,17 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     );
 
     const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception || route?.isException);
-    const hasHRApproval = Boolean(candidate.hr_approved_at);
-    const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_at);
-    const hasFinanceApproval = Boolean(candidate.finance_approved_at);
-    const hasCMDApproval = Boolean(candidate.cmd_approved_at || candidate.group_approved_at);
+    const hasHRApproval = Boolean(candidate.hr_approved_by_id);
+    const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_by_id);
+    const hasFinanceApproval = Boolean(candidate.finance_approved_by_id);
+    const hasCMDApproval = Boolean(candidate.cmd_approved_by_id);
 
-    const canActivateHire = isCEO || (
-        isException
-            ? (hasHRApproval && hasFinanceApproval && (hasCMDApproval || ['country_managing_director'].includes(userRole)))
-            : (hasHRApproval && (hasManagerConfirm || isHiringManager))
-    );
+    const canActivateHire = isHR && hasHRApproval && hasManagerConfirm && !!candidate.offered_salary && (!isException || (hasFinanceApproval && hasCMDApproval));
 
     const handleApproveHR = async () => {
         setIsProcessing(true);
         try {
-            await recruitmentService.approveCandidateHR(
-                candidate.id,
-                { id: user?.id || 'hr', name: user?.name || 'HR Lead', role: userRole },
-                hrNotes.trim()
-            );
+            await command.mutateAsync({ id: candidate.id, action: 'hr', notes: hrNotes.trim() || 'Identity and credentials reviewed' });
             showToast('Candidate passed HR credential & compensation band vetting', 'success');
             onSuccess();
         } catch (err: any) {
@@ -101,11 +95,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     const handleConfirmManager = async () => {
         setIsProcessing(true);
         try {
-            await recruitmentService.confirmCandidateHiringManager(
-                candidate.id,
-                { id: user?.id || 'mgr', name: user?.name || 'Hiring Manager', role: userRole },
-                managerNotes.trim()
-            );
+            await command.mutateAsync({ id: candidate.id, action: 'manager', notes: managerNotes.trim() || 'Hiring offer reviewed' });
             showToast('Hiring offer confirmed by Authorized Hiring Manager', 'success');
             onSuccess();
         } catch (err: any) {
@@ -118,12 +108,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     const handleApproveFinance = async () => {
         setIsProcessing(true);
         try {
-            await recruitmentService.approveCandidateSalaryFinance(
-                candidate.id,
-                { id: user?.id || 'fin', name: user?.name || 'Finance Director', role: userRole },
-                Number(financeSalary),
-                financeNotes.trim()
-            );
+            await command.mutateAsync({ id: candidate.id, action: 'finance', notes: financeNotes.trim() || 'Salary exception reviewed', salary: financeSalary });
             showToast('Salary exception authorized by Finance', 'success');
             onSuccess();
         } catch (err: any) {
@@ -136,14 +121,8 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     const handleFinalizeActivation = async () => {
         setIsProcessing(true);
         try {
-            const newEmp = await recruitmentService.finalizeAndActivateHire(
-                candidate.id,
-                { id: user?.id || 'actor', name: user?.name || 'Director', role: userRole },
-                targetSiteId,
-                targetRole,
-                requisition?.department || 'Operations'
-            );
-            showToast(`Synaptic Activation Complete: ${newEmp.name} enrolled as ${newEmp.code}!`, 'success');
+            const newEmp = await command.mutateAsync({ action: 'activate', id: candidate.id, department: requisition?.department || 'Operations' });
+            showToast(`Synaptic Activation Complete: ${newEmp?.name} enrolled as ${newEmp?.code}!`, 'success');
             if (refreshData) refreshData(['employees']);
             onSuccess();
             onClose();
@@ -292,6 +271,8 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     </div>
 
                     {/* Step 2 for Routine Hiring: Authorized Hiring Manager Confirmation */}
+                    {['group_ceo', 'country_managing_director'].includes(userRole) && !hasCMDApproval && <button type="button" disabled={command.isPending} className="min-h-11 rounded-lg border border-[var(--theme-border)] px-4" onClick={async () => { try { await command.mutateAsync({action:'executive',id:candidate.id,notes:'Hiring quota and compensation exception reviewed'}); showToast('Executive exception clearance saved','success'); onSuccess(); } catch (error) { showToast(error instanceof Error ? error.message : 'Clearance was not saved','error'); } }}>Record executive exception clearance</button>}
+                    {isException && !hasManagerConfirm && isHiringManager && <button type="button" disabled={isProcessing} onClick={handleConfirmManager} className="min-h-11 rounded-lg border border-[var(--theme-border)] px-4">Confirm hiring need after HR clearance</button>}
                     {!isException ? (
                         <div className={`p-4 rounded-2xl border transition-all ${
                             hasManagerConfirm ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'

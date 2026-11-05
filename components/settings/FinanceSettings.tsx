@@ -244,8 +244,8 @@ export default function FinanceSettings() {
             )}
 
             {/* HEADER BANNER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
+            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
                     <Landmark size={18} />
                 </div>
                 <div>
@@ -271,10 +271,10 @@ export default function FinanceSettings() {
                 showToast={showToast}
             />
 
-            <div className="grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* COLUMN 1: FISCAL & GLOBAL TAX */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
                         <div className="mb-5 border-b border-[var(--theme-border)] pb-3.5 flex justify-between items-center">
                             <div>
                                 <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function FinanceSettings() {
                                 type="button"
                                 onClick={() => handleSaveSection('policy')}
                                 disabled={savingSection === 'policy' || !isAuthorized}
-                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                className="min-h-11 sm:h-8 px-3.5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40 touch-manipulation"
                             >
                                 {savingSection === 'policy' ? (
                                     <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
@@ -298,7 +298,7 @@ export default function FinanceSettings() {
                             </button>
                         </div>
 
-                        <div className="grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="space-y-4">
                                 <InputGroup
                                     label="Fiscal Year Start"
@@ -325,12 +325,12 @@ export default function FinanceSettings() {
                             </div>
 
                             <div className="space-y-4">
-                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3.5">
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3.5">
                                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
-                                        <Calculator size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Tax Configuration
+                                        <Calculator size={14} className="text-[var(--theme-accent)]" /> Tax Configuration
                                     </label>
 
-                                    <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-3 rounded-xl border-[var(--theme-border)]">
+                                    <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)]">
                                         <div className="flex-1">
                                             <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Base Tax Rate</p>
                                             <div className="flex items-center gap-2">
@@ -343,12 +343,12 @@ export default function FinanceSettings() {
                                                     disabled={!isAuthorized}
                                                     title="Base Tax Rate"
                                                     onChange={(e) => setPolicy(prev => ({ ...prev, taxRate: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) }))}
-                                                    className="w-20 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-lg px-2.5 py-1 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono font-bold text-sm focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 outline-none disabled:opacity-50"
+                                                    className="w-20 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1 text-[var(--theme-accent)] font-mono font-bold text-sm focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 outline-none disabled:opacity-50"
                                                 />
                                                 <span className="text-xs font-semibold text-[var(--theme-text-primary)]">%</span>
                                             </div>
                                         </div>
-                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
+                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                                             <Percent size={16} />
                                         </div>
                                     </div>
@@ -393,7 +393,7 @@ export default function FinanceSettings() {
                     </div>
 
                     {/* TAX JURISDICTIONS (TAX MATRIX) */}
-                    <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
                         <div className="mb-5 border-b border-[var(--theme-border)] pb-3.5 flex justify-between items-center">
                             <div>
                                 <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Tax Jurisdictions</h3>
@@ -403,7 +403,7 @@ export default function FinanceSettings() {
                                 type="button"
                                 onClick={() => handleSaveSection('jurisdictions')}
                                 disabled={savingSection === 'jurisdictions' || !isAuthorized}
-                                className="h-8 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 border-[var(--theme-border)] cursor-pointer transition-all disabled:opacity-40"
+                                className="min-h-11 sm:h-8 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 border border-[var(--theme-border)] cursor-pointer transition-all disabled:opacity-40 touch-manipulation"
                             >
                                 {savingSection === 'jurisdictions' ? (
                                     <span className="w-3.5 h-3.5 border-2 border-[var(--theme-text-secondary)] border-t-[var(--theme-text-primary)] rounded-full animate-spin" />
@@ -414,9 +414,9 @@ export default function FinanceSettings() {
                             </button>
                         </div>
 
-                        <div className="grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {taxZones.length === 0 && (
-                                <div className="sm:col-span-2 text-center py-10 bg-[var(--theme-bg-subtle)] rounded-xl border-dashed border-[var(--theme-border)]">
+                                <div className="sm:col-span-2 text-center py-10 bg-[var(--theme-bg-subtle)] rounded-xl border border-dashed border-[var(--theme-border)]">
                                     <Globe size={32} className="mx-auto text-[var(--theme-text-secondary)] mb-2 opacity-50" />
                                     <h4 className="text-[var(--theme-text-primary)] font-semibold text-xs">No Tax Jurisdictions</h4>
                                     <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Create your first jurisdiction to apply location-specific tax rules.</p>
@@ -444,9 +444,9 @@ export default function FinanceSettings() {
                                     type="button"
                                     onClick={() => setIsAddingZone(true)}
                                     title="Add New Jurisdiction"
-                                    className="bg-[var(--theme-bg-subtle)] border-2 border-dashed border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 rounded-2xl p-4.5 flex-col items-center justify-center gap-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all group min-h-[130px] cursor-pointer"
+                                    className="bg-[var(--theme-bg-subtle)] border-2 border-dashed border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 rounded-2xl p-4.5 flex flex-col items-center justify-center gap-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all group min-h-[130px] cursor-pointer touch-manipulation"
                                 >
-                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 group-hover:scale-105 transition-transform">
+                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 group-hover:scale-105 transition-transform">
                                         <Plus size={18} />
                                     </div>
                                     <span className="text-xs font-semibold uppercase tracking-wider">Add Jurisdiction</span>

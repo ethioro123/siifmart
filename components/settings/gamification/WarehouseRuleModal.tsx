@@ -17,6 +17,7 @@ export const WarehouseRuleModal: React.FC = () => {
             isOpen={isWarehouseRuleModalOpen}
             onClose={() => setIsWarehouseRuleModalOpen(false)}
             title={editingWarehouseRule ? 'Edit Warehouse Point Rule' : 'Add New Warehouse Rule'}
+            mobileFullScreen
         >
             <div className="space-y-4 pr-1">
                 <div className="space-y-1.5">
@@ -24,14 +25,14 @@ export const WarehouseRuleModal: React.FC = () => {
                         Action
                     </label>
                     {editingWarehouseRule ? (
-                        <div className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium">
+                        <div className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium">
                             {editedWarehouseRule.action}
                         </div>
                     ) : (
                         <select
                             value={editedWarehouseRule.action || 'PICK'}
                             onChange={(e) => setEditedWarehouseRule({ ...editedWarehouseRule, action: e.target.value as any })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                             aria-label="Select warehouse action"
                         >
                             <option value="PICK">PICK</option>
@@ -63,7 +64,7 @@ export const WarehouseRuleModal: React.FC = () => {
                         aria-label="Points"
                         value={editedWarehouseRule.points || 0}
                         onChange={(e) => setEditedWarehouseRule({ ...editedWarehouseRule, points: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] transition-colors"
                     />
                 </div>
 
@@ -74,7 +75,7 @@ export const WarehouseRuleModal: React.FC = () => {
                     <textarea
                         value={editedWarehouseRule.description || ''}
                         onChange={(e) => setEditedWarehouseRule({ ...editedWarehouseRule, description: e.target.value })}
-                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors h-24"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] transition-colors h-24"
                         placeholder="Describe how these points are earned..."
                     />
                 </div>
@@ -83,14 +84,14 @@ export const WarehouseRuleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsWarehouseRuleModalOpen(false)}
-                        className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border-[var(--theme-border)] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                        className="min-h-11 sm:h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center touch-manipulation"
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         onClick={handleSaveWarehouseRule}
-                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                        className="min-h-11 sm:h-9 px-4 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center justify-center touch-manipulation"
                     >
                         Save Changes
                     </button>

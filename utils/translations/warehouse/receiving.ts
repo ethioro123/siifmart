@@ -112,6 +112,7 @@ export const receiving: TranslationBlock = {
     },
     loadingItems: { en: 'Loading items…', am: 'ዕቃዎች እየጫኑ ነው…', or: 'Meeshaaleen fe\'amaa jiru…' },
     loadItemsToReceive: { en: 'Load items to receive', am: 'ለመቀበል ዕቃዎችን ጫን', or: 'Meeshaalee fudhataman fe\'i' },
+    receiptCountRecorded: { en: 'count recorded', am: 'ቆጠራው ተመዝግቧል', or: 'lakkoofsi galmaa’eera' },
     blindCountBadge: { en: 'received · blind count', am: 'ተቀብሏል · የዕውር ቆጠራ', or: 'fudhatameera · lakkoofsa ija-cufaa' },
     blindAudit: { en: 'Blind Audit', am: 'የዕውር ኦዲት', or: 'To\'annoo Ija-Cufaa' },
     blindModeActiveTitle: { en: 'Zero-Trust Blind Receiving Mode Active', am: 'የዜሮ-እምነት ዕውር ቅበላ ሁኔታ ነቅቷል', or: 'Haalli Lakkoofsa Ija-Cufaa Hojiirra Jira' },

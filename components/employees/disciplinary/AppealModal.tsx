@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Scale, X, Send, AlertCircle } from 'lucide-react';
-import { disciplinaryService } from '../../../services/disciplinary.service';
+import { useDisciplinaryCommand } from '../../../hooks/useDisciplinaryCommand';
 import type { DisciplinaryRecord } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
 
@@ -18,6 +18,7 @@ export function AppealModal({
     record
 }: AppealModalProps) {
     const { user, showToast } = useStore();
+    const command = useDisciplinaryCommand();
     const [appealNotes, setAppealNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,11 +42,7 @@ export function AppealModal({
         setIsSubmitting(true);
         try {
             // Under 4-Eyes rules, the appeal is logged for this employee record
-            await disciplinaryService.fileAppeal(
-                record.id,
-                record.employee_id,
-                appealNotes.trim()
-            );
+            await command.mutateAsync({ action: 'appeal', id: record.id, notes: appealNotes.trim() });
 
             showToast('Formal appeal logged. Forwarded for independent 4-Eyes adjudication.', 'success');
             onSuccess();

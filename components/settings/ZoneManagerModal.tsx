@@ -44,12 +44,12 @@ export function ZoneManagerModal({
   handleDeleteZone
 }: ZoneManagerModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Manage Logistics Zones" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Manage Logistics Zones" size="lg" mobileFullScreen>
       <div className="space-y-6">
-        <div className="flex items-start justify-between p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border-[var(--theme-border)]">
+        <div className="flex items-start justify-between p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
           <div className="space-y-1 pr-4">
             <p className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-              <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={16} /> Enforce Regional Replenishment
+              <Shield className="text-[var(--theme-accent)]" size={16} /> Enforce Regional Replenishment
             </p>
             <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
               Restrict stock transfer requests to stores and warehouses within the same Logistics Zone. Bypass authorization is reserved for the CEO.
@@ -69,8 +69,8 @@ export function ZoneManagerModal({
                 addNotification('alert', 'Failed to update regional zoning enforcement');
               }
             }}
-            className={`w-11 h-6 rounded-full p-0.5 cursor-pointer transition-colors relative shrink-0 ${
-              settings.enforceRegionalZoning ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
+            className={`w-11 h-6 rounded-full p-0.5 cursor-pointer transition-colors relative shrink-0 touch-manipulation ${
+              settings.enforceRegionalZoning ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
             }`}
           >
             <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform ${
@@ -79,16 +79,16 @@ export function ZoneManagerModal({
           </button>
         </div>
 
-        <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4.5 space-y-4 shadow-xs">
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 space-y-4 shadow-xs">
           <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-            {editingZone ? <Edit2 size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> : <Plus size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />}
+            {editingZone ? <Edit2 size={13} className="text-[var(--theme-accent)]" /> : <Plus size={13} className="text-[var(--theme-accent)]" />}
             <span>{editingZone ? 'Edit Logistics Zone' : 'Create New Logistics Zone'}</span>
           </h4>
-          <div className="grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Zone Name *</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. South Hub Zone"
                 value={zoneNameInput}
                 onChange={(e) => setZoneNameInput(e.target.value)}
@@ -98,7 +98,7 @@ export function ZoneManagerModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Description</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. Southern region stores and Warehouses"
                 value={zoneDescInput}
                 onChange={(e) => setZoneDescInput(e.target.value)}
@@ -115,7 +115,7 @@ export function ZoneManagerModal({
                   setZoneNameInput('');
                   setZoneDescInput('');
                 }}
-                className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                className="min-h-11 sm:h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center touch-manipulation"
               >
                 Cancel Edit
               </button>
@@ -124,7 +124,7 @@ export function ZoneManagerModal({
               type="button"
               onClick={handleSaveZone}
               disabled={isZoneSaving || !zoneNameInput.trim()}
-              className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              className="min-h-11 sm:h-9 px-5 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98] touch-manipulation"
             >
               {isZoneSaving ? <Loader2 size={13} className="animate-spin" /> : editingZone ? <Save size={13} /> : <Plus size={13} />}
               <span>{editingZone ? 'Update Zone' : 'Create Zone'}</span>
@@ -143,7 +143,7 @@ export function ZoneManagerModal({
           ) : logisticsZones.length === 0 ? (
             <p className="text-xs text-[var(--theme-text-muted)] italic py-4 text-center">No zones configured yet. Create one above.</p>
           ) : (
-            <div className="border-[var(--theme-border)] rounded-2xl overflow-hidden divide-y divide-[var(--theme-border)] max-h-80 overflow-y-auto custom-scrollbar">
+            <div className="border border-[var(--theme-border)] rounded-2xl overflow-hidden divide-y divide-[var(--theme-border)] max-h-80 overflow-y-auto custom-scrollbar">
               {logisticsZones.map(zone => (
                 <div key={zone.id} className="p-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center justify-between gap-4">
                   <div className="min-w-0 flex-1">
@@ -163,16 +163,16 @@ export function ZoneManagerModal({
                         setZoneNameInput(zone.name);
                         setZoneDescInput(zone.description || '');
                       }}
-                      className="h-8 px-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
+                      className="min-h-11 sm:h-8 px-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] touch-manipulation"
                       title="Edit Zone"
                     >
-                      <Edit2 size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                      <Edit2 size={11} className="text-[var(--theme-accent)]" />
                       <span>Edit</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteZone(zone.id)}
-                      className="h-8 px-2.5 bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
+                      className="min-h-11 sm:h-8 px-2.5 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] touch-manipulation"
                       title="Delete Zone"
                     >
                       <Trash2 size={11} />

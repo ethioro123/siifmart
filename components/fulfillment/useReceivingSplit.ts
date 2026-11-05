@@ -76,7 +76,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
             const newSplitTotal = variants.reduce((sum, v) => sum + v.quantity, 0);
             const allowed = maxReceivable(expectedSellable, policy.overReceiveTolerancePct);
 
-            if (totalAlreadyReceived + newSplitTotal > allowed) {
+            if (!item.quantityHidden && totalAlreadyReceived + newSplitTotal > allowed) {
                 throw new Error(buildOverReceiveMessage(policy.blind, {
                     received: totalAlreadyReceived, expected: expectedSellable, attempted: newSplitTotal, allowed
                 }));

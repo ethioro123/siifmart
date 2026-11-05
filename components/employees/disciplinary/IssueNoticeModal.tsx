@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, X, ShieldAlert, Calendar, Lock } from 'lucide-react';
-import { disciplinaryService } from '../../../services/disciplinary.service';
+import { useDisciplinaryCommand } from '../../../hooks/useDisciplinaryCommand';
 import type { DisciplinaryType, DisciplinarySeverity } from '../../../types/hr-advanced';
 import type { Employee } from '../../../types';
 import { useStore } from '../../../contexts/CentralStore';
@@ -25,6 +25,7 @@ export function IssueNoticeModal({
 
     const [targetEmpId, setTargetEmpId] = useState('');
     const [recordType, setRecordType] = useState<DisciplinaryType>('Written Warning');
+    const command = useDisciplinaryCommand();
     const [severity, setSeverity] = useState<DisciplinarySeverity>('Medium');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -62,7 +63,7 @@ export function IssueNoticeModal({
 
         setIsSubmitting(true);
         try {
-            await disciplinaryService.issueDisciplinaryNotice({
+            await command.mutateAsync({ action: 'issue', input: {
                 country_code: country,
                 site_id: emp.siteId || user?.siteId,
                 employee_id: emp.id,
@@ -76,7 +77,7 @@ export function IssueNoticeModal({
                 issued_by_role: user?.role || 'store_manager',
                 expires_at: computeExpiryDate(),
                 confidential_notes: confidentialNotes.trim() || undefined
-            });
+            } });
 
             showToast(`Formal notice issued to ${emp.name}`, 'success');
             onSuccess();

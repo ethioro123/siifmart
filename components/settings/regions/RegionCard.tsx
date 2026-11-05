@@ -48,12 +48,12 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     const isNearCap = budgetStatus?.isNearCap ?? (monthlyBudget > 0 && percentUsed >= 85);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[var(--theme-accent)]/40 transition-all flex flex-col justify-between">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[var(--theme-accent)]/40 transition-all flex flex-col justify-between">
             <div>
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
                             <Building2 size={20} />
                         </div>
                         <div>
@@ -61,7 +61,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                                 <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                     {region.name}
                                 </h4>
-                                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
+                                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                     {region.code}
                                 </span>
                             </div>
@@ -75,19 +75,19 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     {/* Status Badge */}
                     <div className="flex items-center gap-2">
                         {region.status === 'active' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
                                 <CheckCircle2 size={12} />
                                 Active
                             </span>
                         )}
                         {region.status === 'suspended' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20">
                                 <ShieldAlert size={12} />
                                 Suspended
                             </span>
                         )}
                         {region.status === 'planning' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                 Planning
                             </span>
                         )}
@@ -105,7 +105,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <div>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] block">Regional Operations Manager</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <UserCheck size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                            <UserCheck size={13} className="text-[var(--theme-accent)]" />
                             <span className="font-medium text-[var(--theme-text-primary)] truncate">
                                 {regionalManager ? regionalManager.name : 'Unassigned'}
                             </span>
@@ -114,14 +114,14 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                 </div>
 
                 {/* Live Procurement Budget & Threshold Controls */}
-                <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-3.5 border-[var(--theme-border)] mb-4">
+                <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-3.5 border border-[var(--theme-border)] mb-4">
                     {budgetError || (!isLoadingBudget && !budgetStatus) ? (
                         <div>
                             <div className="flex items-center justify-between text-xs mb-1.5">
                                 <span className="font-semibold text-[var(--theme-text-primary)]">
                                     Monthly Procurement Budget
                                 </span>
-                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]/10 px-2 py-0.5 rounded border-[var(--theme-status-warning-border)]/20">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]/10 px-2 py-0.5 rounded border border-[var(--theme-status-warning-border)]/20">
                                     <AlertTriangle size={12} />
                                     Spend Unverified
                                 </span>
@@ -211,7 +211,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <button
                         type="button"
                         onClick={() => onEdit(region)}
-                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer border-[var(--theme-border)]"
+                        className="flex items-center justify-center gap-2 px-3.5 py-1.5 min-h-11 sm:h-8 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer border border-[var(--theme-border)] touch-manipulation"
                     >
                         <Sliders size={14} />
                         <span>Governance & Limits</span>

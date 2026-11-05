@@ -89,7 +89,7 @@ BEGIN
  INSERT INTO public.system_logs(action,module,employee_id,site_id,country_code,entity_type,entity_id,details)
  VALUES('PICK_COMPLETED','Fulfillment',public.get_my_employee_id(),j.site_id::text,j.country_code,'wms_job',j.id::text,jsonb_build_object('packJobId',pack.id,'noStockPicked',pack.id IS NULL)::text);
  RETURN jsonb_build_object('job',to_jsonb(j),'pack',CASE WHEN pack.id IS NOT NULL THEN to_jsonb(pack) ELSE NULL END);
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION private.place_putaway_stock(p_job_id uuid, p_item_index integer, p_quantity numeric, p_location text)
  RETURNS jsonb
@@ -319,7 +319,7 @@ BEGIN
  VALUES('VERIFIED_TRANSFER_INTAKE','Fulfillment',actor.name,actor.id::text,job.dest_site_id::text,job.country_code,'wms_job',job.id::text,result::text);
  PERFORM set_config('siifmart.transfer_intake_job','',true);
  RETURN result;
-END $function$
+END $function$;
 
 CREATE OR REPLACE FUNCTION public.merge_duplicate_product_sku(p_country text, p_surviving_sku text, p_deprecated_sku text)
  RETURNS jsonb
