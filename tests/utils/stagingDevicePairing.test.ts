@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { createStagingDevicePairing, PAIRING_CODE_TTL_MS } from '../../dev/stagingDevicePairing';
+import { createStagingDevicePairing, PAIRED_DEVICE_TTL_MS, PAIRING_CODE_TTL_MS } from '../../dev/stagingDevicePairing';
 import { isPrivateNetworkHost } from '../../utils/privateNetworkHost';
 
 const request = (local = false, body?: unknown, overrides: Record<string, unknown> = {}) => Object.assign(Readable.from(body ? [JSON.stringify(body)] : []), {
@@ -42,12 +42,16 @@ it('rejects public hosts, remote code generation and replay of a used code', asy
     expect(replay.status).toBe(403);
     expect(service.authorized(request(false, undefined, { host: 'public.example', origin: 'http://public.example' }))).toBe(false);
 });
-it('expires paired access after two hours and clears it on restart', async () => {
-    const { service, cookie } = await pair(); clock += 7_200_001;
+it('expires paired access after five hours and clears it on restart', async () => {
+    const { service, cookie, mobile } = await pair();
+    expect(mobile.headers.get('Set-Cookie')).toContain('Max-Age=18000');
+    clock += PAIRED_DEVICE_TTL_MS - 1;
+    expect(service.authorized(request(false, undefined, { cookie }))).toBe(true);
+    clock += 1;
     expect(service.authorized(request(false, undefined, { cookie }))).toBe(false);
     expect(createStagingDevicePairing().authorized(request(false, undefined, { cookie }))).toBe(false);
 });
-it('expires codes after five hours and limits guesses', async () => {
+it('expires codes after five minutes and limits guesses', async () => {
     const service = createStagingDevicePairing(() => clock); const code = response();
     await service.handle(request(true, {}), code.raw, '/pair-code');
     for (let n = 0; n < 8; n++) await service.handle(request(false, { code: 'invalid' }), response().raw, '/pair-device');

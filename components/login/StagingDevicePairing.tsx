@@ -12,11 +12,11 @@ export function StagingDevicePairing() {
     return <section className="my-4 rounded-2xl border border-[var(--theme-border)] p-4 space-y-3" aria-label="Mobile staging quick login">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--theme-text-primary)]"><Smartphone size={16} />Mobile staging quick login</h3>
         {local ? <>
-            <p className="text-xs text-[var(--theme-text-secondary)]">Generate a one-time code, then enter it on your phone’s staging login page within five hours.</p>
+            <p className="text-xs text-[var(--theme-text-secondary)]">Generate a one-time code and enter it on your phone within five minutes. The phone stays paired for five hours.</p>
             <button type="button" className={button} disabled={code.isPending} onClick={() => code.mutate()}>Generate pairing code</button>
             {code.data && <output aria-live="polite" className="block font-mono text-2xl tracking-[.2em] text-[var(--theme-text-primary)]">{code.data.code}</output>}
         </> : status.data?.paired ? <p role="status" className="text-sm text-[var(--theme-text-primary)]">Phone paired. Open Quick Login below to choose a test account.</p> : <>
-            <p className="text-xs text-[var(--theme-text-secondary)]">On your Mac, open localhost:3000 and generate a pairing code. Enter it here to unlock staging test accounts on this phone for two hours.</p>
+            <p className="text-xs text-[var(--theme-text-secondary)]">On your Mac, open localhost:3000 and generate a code. It expires after five minutes. Once paired, this phone can use staging test accounts for five hours.</p>
             <label htmlFor="staging-device-code" className="block text-sm text-[var(--theme-text-primary)]">Pairing code</label>
             <input id="staging-device-code" inputMode="numeric" autoComplete="off" maxLength={8} value={enteredCode}
                 onChange={e => setEnteredCode(e.target.value.replace(/\D/g, ''))}

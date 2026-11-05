@@ -3,7 +3,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { isLocalQuickLoginRequest } from './stagingQuickLoginPolicy';
 import { isPrivateNetworkHost } from '../utils/privateNetworkHost';
 
-export const PAIRING_CODE_TTL_MS = 5 * 60 * 60 * 1000;
+export const PAIRING_CODE_TTL_MS = 5 * 60 * 1000;
+export const PAIRED_DEVICE_TTL_MS = 5 * 60 * 60 * 1000;
 
 type Request = Pick<IncomingMessage, 'headers' | 'socket' | 'method'>;
 function privateRequest(request: Request): boolean {
@@ -62,8 +63,8 @@ export function createStagingDevicePairing(now = Date.now) {
             if (devices.size >= 8) { reply(response, 429, { error: 'Device limit reached; restart staging to clear paired devices' }); return true; }
             code = undefined;
             const token = randomBytes(32).toString('hex');
-            devices.set(token, { peer: request.socket.remoteAddress || '', host: request.headers.host || '', expires: now() + 7_200_000 });
-            response.setHeader('Set-Cookie', `siifmart_staging_device=${token}; HttpOnly; SameSite=Strict; Path=/__staging; Max-Age=7200`);
+            devices.set(token, { peer: request.socket.remoteAddress || '', host: request.headers.host || '', expires: now() + PAIRED_DEVICE_TTL_MS });
+            response.setHeader('Set-Cookie', `siifmart_staging_device=${token}; HttpOnly; SameSite=Strict; Path=/__staging; Max-Age=${PAIRED_DEVICE_TTL_MS / 1000}`);
             reply(response, 200, { paired: true }); return true;
         }
     };
