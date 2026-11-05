@@ -57,7 +57,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
    };
 
    return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Propose Promotional Campaign">
+      <Modal isOpen={isOpen} onClose={onClose} title="Propose Promotional Campaign" mobileFullScreen>
          <form onSubmit={onSubmit} className="space-y-4">
             {/* Promo Code */}
             <div className="space-y-1">
@@ -199,7 +199,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity disabled:opacity-40"
+                  className="w-full min-h-11 py-2.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

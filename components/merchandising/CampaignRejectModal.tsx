@@ -33,7 +33,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
    if (!proposal) return null;
 
    return (
-      <Modal isOpen={isOpen} onClose={onClose} title={`Reject Proposal: ${proposal.code}`}>
+      <Modal isOpen={isOpen} onClose={onClose} title={`Reject Proposal: ${proposal.code}`} mobileFullScreen>
          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3.5 text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-start gap-2.5">
                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
@@ -65,19 +65,19 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
                </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)]">
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)]">
                <button
                   type="button"
                   onClick={onClose}
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] transition-colors"
+                  className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] sm:border-transparent flex items-center justify-center transition-colors"
                >
                   Cancel
                </button>
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40"
+                  className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

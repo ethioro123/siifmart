@@ -24,7 +24,7 @@ export function PlanogramRevisionReview({ request, country, submitting, approval
   const rows = query.data?.data || [];
   const ready = rows.length > 0 && !query.data?.hasMore && rows.every(row => row.status === 'pending');
   const confirm = async () => { if (approvalBlock || submitting || !ready || query.isFetching || query.error) return; setError(''); try { await onApprove(); } catch(error) { setError(error instanceof Error ? error.message : 'Approval could not be recorded. Please retry.'); } };
-  return <Modal isOpen title="Review the complete shelf revision" onClose={onClose} size="xl" closeOnEscape={!submitting} closeOnClickOutside={!submitting}>
+  return <Modal isOpen title="Review the complete shelf revision" onClose={onClose} size="xl" mobileFullScreen closeOnEscape={!submitting} closeOnClickOutside={!submitting}>
     <p className="mt-2 text-sm">Your departmental vote covers every product below. All moves apply together after Operations, Supply Chain and Merchandising approve.</p>
     {query.isLoading && <p role="status" className="mt-4">Loading all moves…</p>}
     {query.error && <div role="alert" className="mt-4">Could not load the complete revision. <button type="button" onClick={() => query.refetch()} className="underline">Retry</button></div>}
@@ -35,9 +35,9 @@ export function PlanogramRevisionReview({ request, country, submitting, approval
     {query.data && !ready && <p role="alert">This revision is incomplete or no longer fully pending. Refresh the review queue.</p>}
     {approvalBlock && <p role="status" className="mt-4 text-sm">{approvalBlock}</p>}
     {error && <p role="alert" className="mt-4 text-sm text-[var(--theme-status-danger-text)]">{error}</p>}
-    <div className="mt-4 flex justify-end gap-3">
-      <button type="button" disabled={submitting} onClick={onClose} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4">Cancel</button>
-      <button type="button" disabled={Boolean(approvalBlock) || submitting || query.isFetching || !ready || Boolean(query.error)} onClick={() => void confirm()} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-text-primary)] disabled:opacity-50">{submitting ? 'Recording approval…' : 'Approve complete revision'}</button>
+    <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+      <button type="button" disabled={submitting} onClick={onClose} className="w-full sm:w-auto min-h-11 rounded-xl border border-[var(--theme-border)] px-4">Cancel</button>
+      <button type="button" disabled={Boolean(approvalBlock) || submitting || query.isFetching || !ready || Boolean(query.error)} onClick={() => void confirm()} className="w-full sm:w-auto min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-text-primary)] disabled:opacity-50">{submitting ? 'Recording approval…' : 'Approve complete revision'}</button>
     </div>
   </Modal>;
 }

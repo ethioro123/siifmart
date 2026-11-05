@@ -88,3 +88,7 @@ These were identified in code, not reproduced as live business failures during t
 - Two authenticated staging SQL reproductions succeeded; all test transactions rolled back.
 - TypeScript checked with `npx tsc --noEmit`.
 - No browser walkthrough, physical barcode/label test, driver co-sign test, performance load test or full refund settlement test was performed. These remain outside the evidence above.
+
+## Remediation follow-up
+
+The four confirmed gaps above were addressed after this audit. See `docs/product-movement-fixes-20261106.md` for the saved/applied migrations, changed transaction boundaries and regression evidence. The original unsafe-behavior characterizations were replaced with tests of the corrected boundaries; the additional code findings remain separate follow-up work.

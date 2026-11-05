@@ -56,8 +56,9 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
       onClose={onClose}
       title="Reject Merchandising Proposal"
       size="md"
+      mobileFullScreen
     >
-      <form onSubmit={handleSubmit} className="p-5 space-y-4 text-left">
+      <form onSubmit={handleSubmit} className="p-3.5 sm:p-5 space-y-4 text-left">
         <div className="flex items-start gap-3 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
           <AlertCircle className="mt-0.5 shrink-0" size={18} />
           <div className="text-xs">
@@ -104,19 +105,19 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)]">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)]">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-xl border border-[var(--theme-border)] px-4 py-2 text-xs font-medium text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto min-h-11 rounded-xl border border-[var(--theme-border)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] flex items-center justify-center transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting || !reason.trim()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] transition-colors disabled:opacity-50 shadow-sm"
+            className="w-full sm:w-auto min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] transition-colors disabled:opacity-50 shadow-sm"
           >
             <XCircle size={14} />
             <span>{isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}</span>

@@ -38,7 +38,7 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
    const isHalal = isProductHalal(previewItem);
 
    return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Shelf Tag Print Preview">
+      <Modal isOpen={isOpen} onClose={onClose} title="Shelf Tag Print Preview" mobileFullScreen>
          <div className="space-y-4">
             {/* Media Size Selector Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3">
@@ -148,15 +148,15 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
             </div>
 
             {/* Print Confirmation Bar */}
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--theme-border)]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--theme-border)]">
                <span className="text-xs text-[var(--theme-text-secondary)]">
                   Queued for dispatch: <strong>{items.length} tags</strong>
                </span>
-               <div className="flex items-center gap-2">
+               <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                      type="button"
                      onClick={onClose}
-                     className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)]"
+                     className="flex-1 sm:flex-initial min-h-11 px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] sm:border-transparent flex items-center justify-center"
                   >
                      Cancel
                   </button>
@@ -164,7 +164,7 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
                      type="button"
                      onClick={onConfirmPrint}
                      disabled={isPrinting}
-                     className="px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-2 shadow-sm disabled:opacity-50"
+                     className="flex-1 sm:flex-initial min-h-11 px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                   >
                      <Printer size={15} />
                      <span>Print {items.length} Tags</span>

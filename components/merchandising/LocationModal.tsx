@@ -28,10 +28,11 @@ export const LocationModal: React.FC<LocationModalProps> = ({
          onClose={onClose}
          title="Network Stock Matrix"
          size="lg"
+         mobileFullScreen
       >
          {selectedLocationProduct && (
-            <div className="space-y-5">
-               <div className="flex items-center gap-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-4 rounded-2xl">
+            <div className="space-y-4 sm:space-y-5">
+               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-3.5 sm:p-4 rounded-2xl">
                   <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                      {selectedLocationProduct.image && !selectedLocationProduct.image.includes('placeholder.com') ? (
                         <img
