@@ -19,7 +19,7 @@ import { sortPickItemsByOptimalRoute } from '../../utils/fulfillmentRoute';
 import { isPickLineResolved, remainingPickQuantity, resolvePickProduct } from '../../utils/pickProgress';
 
 import { FloorDiscrepancyModal } from './discrepancies/FloorDiscrepancyModal';
-import { usePickExecution, PickRecountRequiredError } from '../../hooks/usePickExecution';
+import { usePrepareFefoPick,usePickExecution, PickRecountRequiredError } from '../../hooks/usePickExecution';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -81,10 +81,19 @@ export const PickTab: React.FC = () => {
         setIsJobModalOpen(true);
     };
 
-    const handleStartPick = (job: WMSJob) => {
-        handleStartJob(job);
-        setIsJobModalOpen(false);
-        setIsScannerOpen(true);
+    const preparePick=usePrepareFefoPick();
+    const preparingPick=useRef(false);
+    const handleStartPick = async(job: WMSJob) => {
+        if(preparingPick.current)return;
+        preparingPick.current=true;
+        try{
+            await handleStartJob(job);
+            const ready=await preparePick.mutateAsync(job.id);
+            setSelectedJob(ready);
+            setIsJobModalOpen(false);
+            setIsScannerOpen(true);
+        }catch(error){addNotification('alert',t(error&&typeof error==='object'&&'details' in error&&error.details==='PICK_LEGACY_RECONCILIATION_REQUIRED'?'warehouse.fefoExistingWorkReview':'warehouse.fefoPrepareFailed'));}
+        finally{preparingPick.current=false;}
     };
 
     const [isCompletingPick, setIsCompletingPick] = useState(false);
@@ -289,7 +298,7 @@ export const PickTab: React.FC = () => {
                         employees={employees}
                         onStartPick={handleStartPick}
                         onCompleteJob={handleCompleteJob}
-                        isSubmitting={isSubmitting || isCompletingPick}
+                        isSubmitting={isSubmitting || isCompletingPick || preparePick.isPending}
                         currentItem={currentScannerItem}
                         resolveOrderRef={resolveOrderRef}
                         onDeleteJob={deleteJob}

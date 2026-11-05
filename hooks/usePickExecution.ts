@@ -14,3 +14,5 @@ export function usePickExecution() {
         return pickingExecutionService.recordLine(input);
     } });
 }
+
+export function usePrepareFefoPick(){return useMutation({mutationFn:(jobId:string)=>pickingExecutionService.prepare(jobId)});}

@@ -52,7 +52,7 @@ const InputGroup: React.FC<InputGroupProps> = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)] disabled:opacity-50"
+                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)] disabled:opacity-50"
                 />
                 {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
             </div>

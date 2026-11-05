@@ -126,7 +126,7 @@ export function POSIdentityTab({
                   setReceiptBranding(prev => ({ ...prev, posReceiptPolicy: e.target.value }))
                 }
                 placeholder="Items may be returned within 7 days with valid receipt."
-                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
+                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
               />
             </div>
           </div>
@@ -227,7 +227,7 @@ export function POSIdentityTab({
             type="button"
             onClick={() => handleSaveSection('branding')}
             disabled={isSavingBranding}
-            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isSavingBranding ? (
               <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />

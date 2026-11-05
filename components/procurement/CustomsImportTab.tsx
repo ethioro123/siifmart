@@ -89,7 +89,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
   return (
     <div className="space-y-6">
       {/* Header Container */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
             <Anchor size={22} strokeWidth={1.5} />
@@ -118,27 +118,27 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
+          className="w-full sm:w-auto h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
         >
           <Plus size={16} strokeWidth={2} /> New Customs Entry
         </button>
       </div>
 
       {loading ? (
-        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-secondary)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
+        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-secondary)] rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
           Loading customs entries...
         </div>
       ) : declarations.length === 0 ? (
-        <div className="p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+        <div className="p-8 sm:p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
           No import clearance declarations on file for {countryCode}. Register freight shipments to track customs releases.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {declarations.map(d => {
             const isCleared = d.customsStatus === 'Cleared';
             return (
-              <div key={d.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
-                <div className="flex items-start justify-between gap-3">
+              <div key={d.id} className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)]">{d.declarationNumber}</span>
@@ -154,13 +154,13 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                       <Ship size={14} className="text-[var(--theme-accent)] shrink-0" /> {d.portOfEntry} • {d.transportMode}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-left sm:text-right shrink-0">
                     <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Assessed Duty</p>
                     <p className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{d.currency} {d.dutyAmount.toLocaleString()}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 text-xs bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] p-3.5 rounded-2xl font-mono">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] p-3.5 rounded-2xl font-mono">
                   <div>
                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Bill of Lading:</span>
                     <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.billOfLading || 'N/A'}</span>
@@ -179,7 +179,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
                   <div>
                     <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
                       Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
@@ -194,7 +194,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     <button
                       type="button"
                       onClick={() => handleAuthorizeRelease(d)}
-                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                      className="w-full sm:w-auto h-9 px-3.5 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center justify-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0 touch-manipulation"
                     >
                       <Check size={13} /> Authorize Release
                     </button>
@@ -207,8 +207,8 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
       )}
 
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full space-y-4 sm:space-y-5 shadow-2xl max-h-[92dvh] overflow-y-auto">
             <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">Register Customs Declaration</h3>
             <div className="space-y-4">
               <div>
@@ -221,7 +221,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">Port of Entry</label>
                   <select
@@ -246,7 +246,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">Bill of Lading #</label>
                   <input

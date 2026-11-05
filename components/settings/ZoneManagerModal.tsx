@@ -88,7 +88,7 @@ export function ZoneManagerModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Zone Name *</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. South Hub Zone"
                 value={zoneNameInput}
                 onChange={(e) => setZoneNameInput(e.target.value)}
@@ -98,7 +98,7 @@ export function ZoneManagerModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Description</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. Southern region stores and Warehouses"
                 value={zoneDescInput}
                 onChange={(e) => setZoneDescInput(e.target.value)}

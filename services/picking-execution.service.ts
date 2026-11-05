@@ -10,6 +10,13 @@ const lineInput = z.object({
 }).strict().refine(value=>value.quantity===0||value.lotVerified===true,{message:'Verify the physical lot before picking'});
 export type PickLineInput = z.infer<typeof lineInput>;
 export const pickingExecutionService = {
+    async prepare(jobId:string){
+        z.string().uuid().parse(jobId);
+        const {data,error}=await supabase.rpc('prepare_fefo_pick',{p_job:jobId});
+        if(error)throw error;
+        if(!data?.id||data.type!=='PICK')throw new Error('Server did not confirm FEFO preparation');
+        return mapWmsJobRow(data);
+    },
     async recordLine(input: PickLineInput) {
         const value = lineInput.parse(input);
         const { data, error } = await supabase.rpc('verify_pick_lot_and_record', {

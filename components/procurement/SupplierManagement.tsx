@@ -100,7 +100,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
     return (
         <div className="space-y-6">
             {/* Header Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
                         <Building size={22} strokeWidth={1.5} />
@@ -115,7 +115,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                 <Protected permission="MANAGE_SUPPLIERS">
                     <button
                         onClick={() => setIsAddSupplierOpen(true)}
-                        className="h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer shrink-0"
+                        className="w-full sm:w-auto h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer shrink-0"
                     >
                         <Plus size={16} strokeWidth={2} /> Add New Supplier
                     </button>
@@ -124,7 +124,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
             {verificationError && <p role="alert" className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">{verificationError}</p>}
 
             {/* Filter and Search Bar */}
-            <div className="p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                 <div className="relative flex-1 max-w-md">
                     <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                     <input
@@ -136,10 +136,10 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                     />
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0">
                     <button
                         onClick={() => setSelectedCategory('ALL')}
-                        className={`h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        className={`h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                             selectedCategory === 'ALL'
                                 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
@@ -151,7 +151,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                            className={`h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                                 selectedCategory === cat
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
@@ -164,7 +164,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
             </div>
 
             {/* Suppliers Table Container */}
-            <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden">
+            <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse hidden md:table">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -272,7 +272,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                             <div
                                 key={sup.id}
                                 onClick={() => handleSupplierClick(sup)}
-                                className="p-4 space-y-3.5 hover:bg-[var(--theme-bg-subtle)]/40 transition-colors cursor-pointer group"
+                                className="p-3.5 sm:p-4 space-y-3 hover:bg-[var(--theme-bg-subtle)]/40 transition-colors cursor-pointer group"
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
                                         </div>
                                     </div>
-                                    <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                    <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${
                                         sup.status === 'Active' && sup.verificationStatus === 'verified'
                                             ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                             : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
@@ -310,8 +310,8 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-1">
-                                    <div className="flex flex-col text-left">
+                                <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[var(--theme-border-subtle)]">
+                                    <div className="flex flex-col text-left min-w-0">
                                         {sup.email && (
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] truncate max-w-[170px]">{sup.email}</span>
                                         )}
@@ -319,19 +319,21 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{sup.phone}</span>
                                         )}
                                     </div>
-                                    <button
-                                        onClick={(e) => handleCatalogClick(e, sup)}
-                                        className="h-8 px-3 rounded-full text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] inline-flex items-center gap-1.5"
-                                    >
-                                        <Package size={12} strokeWidth={1.5} /> Catalog
-                                    </button>
-                                    {canVerify && sup.createdBy !== viewerEmployeeId && sup.verificationStatus === 'pending' && (
-                                        <button type="button" disabled={verifyingId === sup.id}
-                                            onClick={e => { e.stopPropagation(); void handleVerify(sup); }}
-                                            className="h-8 px-3 rounded-full text-xs font-semibold border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-50">
-                                            {verifyingId === sup.id ? 'Verifying…' : 'Verify'}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            onClick={(e) => handleCatalogClick(e, sup)}
+                                            className="min-h-[38px] px-3.5 rounded-full text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] inline-flex items-center gap-1.5 touch-manipulation cursor-pointer"
+                                        >
+                                            <Package size={13} strokeWidth={1.5} /> Catalog
                                         </button>
-                                    )}
+                                        {canVerify && sup.createdBy !== viewerEmployeeId && sup.verificationStatus === 'pending' && (
+                                            <button type="button" disabled={verifyingId === sup.id}
+                                                onClick={e => { e.stopPropagation(); void handleVerify(sup); }}
+                                                className="min-h-[38px] px-3.5 rounded-full text-xs font-semibold border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-50 touch-manipulation cursor-pointer">
+                                                {verifyingId === sup.id ? 'Verifying…' : 'Verify'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -350,7 +352,33 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+                <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                    Showing <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{filteredSuppliers.length}</span> of <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount}</span> Partners
+                </p>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1 || loading}
+                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                        <ChevronLeft size={14} /> Previous
+                    </button>
+                    <div className="flex items-center px-3.5 h-9 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono">
+                        <span className="text-[var(--theme-text-secondary)] mr-1.5">Page</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{currentPage}</span>
+                        <span className="text-[var(--theme-text-secondary)] mx-1.5">of</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{totalPages}</span>
+                    </div>
+                    <button
+                        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage >= totalPages || loading}
+                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                        Next <ChevronRight size={14} />
+                    </button>
+                </div>
+            </div>
                 <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
                     Showing <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{filteredSuppliers.length}</span> of <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount}</span> Partners
                 </p>

@@ -2,7 +2,7 @@
 BEGIN;
 DO $test$
 DECLARE s public.sites%ROWTYPE; base public.products%ROWTYPE; e public.employees%ROWTYPE;
- early uuid:=gen_random_uuid(); late uuid:=gen_random_uuid(); expired uuid:=gen_random_uuid(); undated uuid:=gen_random_uuid();
+ early uuid:=gen_random_uuid(); late uuid:=gen_random_uuid(); expired uuid:=gen_random_uuid(); undated uuid:=gen_random_uuid(); oldest uuid:=gen_random_uuid();
  first_job uuid:=gen_random_uuid(); second_job uuid:=gen_random_uuid(); blocked boolean; data jsonb; again jsonb; sku text:='ET-FEFO-'||substr(gen_random_uuid()::text,1,8);
  web uuid:=gen_random_uuid(); wearly uuid:=gen_random_uuid(); wlate uuid:=gen_random_uuid(); wjob uuid:=gen_random_uuid(); po uuid:=gen_random_uuid(); item uuid:=gen_random_uuid(); receipt uuid:=gen_random_uuid();
  line jsonb; proof text; n integer; target uuid; qty numeric; exp date; batch text; barcode text; v record;
@@ -20,8 +20,8 @@ BEGIN
  IF base.id IS NULL THEN INSERT INTO public.products(name,sku,category,price,stock,status,location,site_id) VALUES('Rollback cooking oil',sku||'-BASE','Pantry',10,0,'active','On Order',s.id) RETURNING * INTO base; END IF;
  IF s.id IS NULL OR e.id IS NULL OR base.id IS NULL THEN RAISE EXCEPTION 'Missing warehouse regression fixture'; END IF;
  PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
- FOR v IN SELECT * FROM (VALUES(early,'EARLY',2,current_date+1),(late,'LATE',5,current_date+5),(expired,'EXPIRED',50,current_date-1),(undated,'UNDATED',2,NULL::date))t(id,batch,stock,expiry) LOOP
-  INSERT INTO public.products SELECT (jsonb_populate_record(NULL::public.products,to_jsonb(base)||jsonb_build_object('id',v.id,'sku',sku,'name','FEFO rollback cooking oil','stock',v.stock,'batch_number',v.batch,'expiry_date',v.expiry,'status','active','location','A-01-01','zone_id',NULL,'site_id',s.id,'received_on',current_date,'barcode',sku))).*;
+ FOR v IN SELECT * FROM (VALUES(early,'EARLY',2,current_date+1),(late,'LATE',5,current_date+5),(expired,'EXPIRED',50,current_date-1),(undated,'UNDATED',2,NULL::date),(oldest,'UNDATED-OLD',1,NULL::date))t(id,batch,stock,expiry) LOOP
+  INSERT INTO public.products SELECT (jsonb_populate_record(NULL::public.products,to_jsonb(base)||jsonb_build_object('id',v.id,'sku',sku,'name','FEFO rollback cooking oil','stock',v.stock,'batch_number',v.batch,'expiry_date',v.expiry,'status','active','location','A-01-01','zone_id',NULL,'site_id',s.id,'received_on',CASE WHEN v.batch='UNDATED-OLD' THEN NULL ELSE current_date END,'created_at',CASE WHEN v.batch='UNDATED-OLD' THEN now()-interval '10 days' ELSE now() END,'barcode',sku))).*;
  END LOOP;
  INSERT INTO public.wms_jobs(id,site_id,country_code,type,status,priority,items_count,order_ref,assigned_to,line_items)
  VALUES(first_job,s.id,'ET','PICK','Pending','Normal',1,gen_random_uuid()::text,e.id::text,jsonb_build_array(jsonb_build_object('productId',late,'sku',sku,'name','Cooking oil','expectedQty',4,'pickedQty',0,'status','Pending')));
@@ -29,13 +29,20 @@ BEGIN
  IF jsonb_array_length(data)<>2 OR data->0->>'productId'<>early::text OR (data->0->>'expectedQty')::numeric<>2 OR data->1->>'productId'<>late::text OR (data->1->>'expectedQty')::numeric<>2 THEN RAISE EXCEPTION 'FEFO did not split earliest lots'; END IF;
  INSERT INTO public.job_assignments(job_id,employee_id,employee_name,status) VALUES(first_job,e.id,e.name,'Assigned');
  INSERT INTO public.wms_jobs(id,site_id,country_code,type,status,priority,items_count,order_ref,line_items)
- VALUES(second_job,s.id,'ET','PICK','Pending','Normal',1,gen_random_uuid()::text,jsonb_build_array(jsonb_build_object('productId',late,'sku',sku,'expectedQty',5,'pickedQty',0,'status','Pending')));
+ VALUES(second_job,s.id,'ET','PICK','Pending','Normal',1,gen_random_uuid()::text,jsonb_build_array(jsonb_build_object('productId',late,'sku',sku,'expectedQty',6,'pickedQty',0,'status','Pending')));
  SELECT line_items INTO again FROM public.wms_jobs WHERE id=second_job;
- IF jsonb_array_length(again)<>2 OR again->0->>'productId'<>late::text OR (again->0->>'expectedQty')::numeric<>3 OR again->1->>'productId'<>undated::text THEN RAISE EXCEPTION 'Reservation or undated-last allocation failed'; END IF;
+ IF jsonb_array_length(again)<>3 OR again->0->>'productId'<>late::text OR (again->0->>'expectedQty')::numeric<>3 OR again->1->>'productId'<>oldest::text OR again->2->>'productId'<>undated::text THEN RAISE EXCEPTION 'Reservation or undated-last allocation failed'; END IF;
  blocked:=false;BEGIN
  INSERT INTO public.wms_jobs(site_id,country_code,type,status,priority,items_count,order_ref,line_items) VALUES(s.id,'ET','PICK','Pending','Normal',1,gen_random_uuid()::text,jsonb_build_array(jsonb_build_object('sku',sku,'expectedQty',1)));
  EXCEPTION WHEN raise_exception THEN blocked:=SQLERRM LIKE '%Insufficient available unexpired stock%';END;
  IF NOT blocked THEN RAISE EXCEPTION 'Reserved or expired stock allocated'; END IF;
+ -- Simulate an older, untouched one-lot manifest; preparation must safely upgrade it.
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',(SELECT id FROM public.employees WHERE role='group_ceo' AND lower(status)='active' LIMIT 1),'role','service_role')::text,true);
+ UPDATE public.wms_jobs SET line_items=jsonb_build_array(jsonb_build_object('productId',late,'sku',sku,'expectedQty',4,'pickedQty',0,'status','Pending')),items_count=1 WHERE id=first_job;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',e.id,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';
+ again:=public.prepare_fefo_pick(first_job);
+ IF again->'line_items' IS DISTINCT FROM data THEN RAISE EXCEPTION 'Legacy preparation failed to rebuild the FEFO plan'; END IF;
+ EXECUTE 'RESET ROLE';PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
  blocked:=false;BEGIN UPDATE public.products SET stock=stock-1 WHERE id=early;EXCEPTION WHEN raise_exception THEN blocked:=SQLERRM LIKE '%reserved%';END;
  IF NOT blocked THEN RAISE EXCEPTION 'Another writer consumed reserved pick stock'; END IF;
  IF private.fefo_today(s.id) IS DISTINCT FROM (now() AT TIME ZONE 'Africa/Addis_Ababa')::date THEN RAISE EXCEPTION 'Expiry uses the wrong country date'; END IF;

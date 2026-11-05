@@ -337,12 +337,12 @@ export default function InfrastructureSettings() {
                                 type="button"
                                 onClick={handleSave}
                                 disabled={mutation.isPending || !isAuthorized}
-                                className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {mutation.isPending ? (
-                                    <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
+                                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
-                                    <Save size={13} />
+                                    <Save size={14} />
                                 )}
                                 Save Device Config
                             </button>

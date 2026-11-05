@@ -108,7 +108,7 @@ export const BudgetTab: React.FC = () => {
                     </div>
 
                     <div className="h-[280px]">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={0} initialDimension={{ width: 320, height: 280 }}>
                             <ComposedChart data={cashflowData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.5} vertical={false} />
                                 <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />
@@ -277,7 +277,7 @@ export const BudgetTab: React.FC = () => {
                         Based on trailing 6-month revenue trends and seasonality factors.
                     </p>
                     <div className="h-[240px]">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={0} initialDimension={{ width: 320, height: 240 }}>
                             <AreaChart data={forecastData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.5} vertical={false} />
                                 <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />

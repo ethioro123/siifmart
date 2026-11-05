@@ -187,7 +187,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="KSh">Kenyan Shilling (KSh)</option>
                             <option value="ETB">Ethiopian Birr (ETB)</option>
@@ -210,7 +210,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={timezone}
                             onChange={(e) => setTimezone(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="Africa/Nairobi">East Africa Time - Nairobi (UTC+3)</option>
                             <option value="Africa/Addis_Ababa">East Africa Time - Addis Ababa (UTC+3)</option>
@@ -240,7 +240,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={language}
                             disabled={isKenya || !isCeo}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="en">English (Official System Language)</option>
                             {!isKenya && <option value="am">አማርኛ (Amharic)</option>}

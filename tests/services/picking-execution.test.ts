@@ -25,6 +25,10 @@ describe('verified picking persistence',()=>{
   await pickingExecutionService.recordLine({...input,quantity:1,itemBarcode:'ET-OIL',batch:'LOT1',expiry:'2027-01-01',lotVerified:true});
   expect(supabase.rpc).toHaveBeenCalledWith('verify_pick_lot_and_record',expect.objectContaining({p_batch:'LOT1',p_expiry:'2027-01-01',p_lot_verified:true}));
  });
+ it('prepares older work through the assigned-worker RPC',async()=>{
+  reply({id,type:'PICK',line_items:[]});await pickingExecutionService.prepare(id);
+  expect(supabase.rpc).toHaveBeenCalledWith('prepare_fefo_pick',{p_job:id});
+ });
  it('completes only through the atomic RPC and supports the confirmed no-pack outcome',async()=>{
   reply({job:{id,type:'PICK',status:'Completed',line_items:[]},pack:null});
   expect((await pickingExecutionService.complete(id)).pack).toBeNull();

@@ -36,7 +36,7 @@ export function MarkdownPlanResults({plan,currency,selectedStage,onSelectStage,c
         <details className="rounded-xl border border-[var(--theme-border)] p-3">
             <summary className="min-h-[44px] content-center cursor-pointer text-sm font-medium">View estimated stock trend</summary>
             <p className="text-xs text-[var(--theme-text-secondary)] mb-2">Closing stock in units. Exact values are available in the stage table.</p>
-            <div className="h-52" aria-label="Estimated closing stock chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={plan.stages}>
+            <div className="h-52" aria-label="Estimated closing stock chart"><ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 208 }}><AreaChart data={plan.stages}>
                 <CartesianGrid vertical={false} stroke="var(--theme-border)"/><XAxis dataKey="week" stroke="var(--theme-text-secondary)" fontSize={12}/><YAxis allowDecimals={false} stroke="var(--theme-text-secondary)" fontSize={12}/><Tooltip/><Area type="linear" dataKey="stock" name="Closing stock (units)" stroke="var(--theme-accent)" fill="var(--theme-bg-subtle)" isAnimationActive={false}/>
             </AreaChart></ResponsiveContainer></div>
         </details>

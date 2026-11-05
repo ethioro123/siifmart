@@ -42,11 +42,11 @@ export default function SettingsPage() {
     const [isNavOpen, setIsNavOpen] = useState(false);
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100dvh-130px)] min-h-[560px]">
             {/* Sidebar Overlay */}
             {isNavOpen && (
                 <div
-                    className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] z-[40] animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-[var(--theme-overlay)]/40 backdrop-blur-xs z-[40] animate-in fade-in duration-200"
                     onClick={() => setIsNavOpen(false)}
                 />
             )}

@@ -108,7 +108,7 @@ export function POSStationTab({
             help="Enable this to process sales without requiring a customer profile. Ideal for quick retail transactions."
           />
           {workflow.posGuestCheckout && (
-            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium col-span-full p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
+            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium col-span-full p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
               <AlertTriangle size={14} className="shrink-0" />
               <span>Guest checkout is ON — anonymous cash sales are untraceable. HQ audit visibility required.</span>
             </div>
@@ -161,7 +161,7 @@ export function POSStationTab({
             type="button"
             onClick={() => handleSaveSection('workflow')}
             disabled={isSavingWorkflow}
-            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="min-h-11 px-5 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-accent-text,var(--theme-text-primary))] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isSavingWorkflow ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={15} />}
             Apply Changes

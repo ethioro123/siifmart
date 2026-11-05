@@ -39,7 +39,7 @@ export const DashboardFlowDynamics: React.FC<DashboardFlowDynamicsProps> = ({
             </div>
             
             <div className="h-[340px] w-full relative touch-pan-y">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} initialDimension={{ width: 320, height: 340 }}>
                     <BarChart data={data} barGap={10}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.5} vertical={false} />
                         <XAxis

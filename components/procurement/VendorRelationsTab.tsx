@@ -102,7 +102,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
             <Award size={22} strokeWidth={1.5} />
@@ -130,14 +130,14 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
           {/* Segmented Sub-tab pill selector */}
-          <div className="flex items-center bg-[var(--theme-bg-subtle)] p-1 rounded-full border border-[var(--theme-border)]">
+          <div className="flex items-center overflow-x-auto no-scrollbar bg-[var(--theme-bg-subtle)] p-1 rounded-full border border-[var(--theme-border)] w-full sm:w-auto">
             {(['scorecards', 'contracts', 'farmers'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setSubTab(tab)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial text-center px-3.5 sm:px-4 py-2 sm:py-1.5 rounded-full text-xs font-semibold whitespace-nowrap min-h-[36px] transition-all cursor-pointer ${
                   subTab === tab
                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -151,7 +151,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           {subTab === 'scorecards' && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="w-full sm:w-auto h-11 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
             >
               <Plus size={15} strokeWidth={2} /> New Scorecard
             </button>
@@ -160,7 +160,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           {subTab === 'contracts' && (
             <button
               onClick={() => setShowContractModal(true)}
-              className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="w-full sm:w-auto h-11 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
             >
               <Plus size={15} strokeWidth={2} /> New Master Contract
             </button>
@@ -169,7 +169,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           {subTab === 'farmers' && (
             <button
               onClick={() => setShowFarmerModal(true)}
-              className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="w-full sm:w-auto h-11 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0"
             >
               <Plus size={15} strokeWidth={2} /> New Farmer Program
             </button>
@@ -182,36 +182,36 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           Loading vendor data...
         </div>
       ) : subTab === 'scorecards' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {scorecards.length === 0 ? (
-            <div className="col-span-full p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+            <div className="col-span-full p-8 sm:p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
               No vendor scorecards recorded for {countryCode}. Click "New Scorecard" to evaluate a vendor.
             </div>
           ) : (
             scorecards.map(sc => {
               const sup = suppliers.find(s => s.id === sc.supplierId);
               return (
-                <div key={sc.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
+                <div key={sc.id} className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-bold text-[var(--theme-text-primary)] text-base tracking-tight">{sup?.name || 'Verified Vendor'}</h3>
                       <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">Period: {sc.evaluationPeriod}</p>
                     </div>
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-bold font-mono tabular-nums">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-bold font-mono tabular-nums shrink-0">
                       <Star size={11} fill="currentColor" /> {sc.overallScore}%
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                    <div className="p-2 sm:p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                       <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Quality</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.qualityScore}%</p>
                     </div>
-                    <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                    <div className="p-2 sm:p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                       <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Delivery</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.deliveryScore}%</p>
                     </div>
-                    <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                    <div className="p-2 sm:p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                       <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Pricing</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.pricingScore}%</p>
                     </div>
@@ -231,26 +231,26 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           )}
         </div>
       ) : subTab === 'contracts' ? (
-        <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/30 font-semibold text-xs uppercase tracking-wider text-[var(--theme-text-secondary)]">
+        <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/30 font-semibold text-xs uppercase tracking-wider text-[var(--theme-text-secondary)]">
             Active Vendor Master Agreements & Terms
           </div>
           <div className="divide-y divide-[var(--theme-border)]">
             {contracts.length === 0 ? (
-              <div className="p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium">
+              <div className="p-8 sm:p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium">
                 No active master contracts registered for {countryCode}.
               </div>
             ) : (
               contracts.map(c => {
                 const sup = suppliers.find(s => s.id === c.supplierId);
                 return (
-                  <div key={c.id} className="p-5 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
+                  <div key={c.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
                     <div>
                       <h4 className="font-bold text-sm text-[var(--theme-text-primary)]">{c.title} ({c.contractNumber})</h4>
                       <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">{sup?.name || 'Supplier'} • Terms: {c.paymentTerms}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border-subtle)]">
+                      <div className="text-left sm:text-right">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                           c.status === 'Active'
                             ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
@@ -269,7 +269,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                         <button
                           type="button"
                           onClick={() => handleAuthorizeContract(c)}
-                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
+                          className="min-h-[38px] px-3.5 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm touch-manipulation"
                         >
                           <Check size={13} /> Sign Off
                         </button>
@@ -282,7 +282,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           </div>
         </div>
       ) : (
-        <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm p-6 space-y-5">
+        <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm p-4 sm:p-6 space-y-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
               <Users size={18} strokeWidth={1.5} />
@@ -317,8 +317,8 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-md w-full space-y-4 sm:space-y-5 shadow-2xl max-h-[92dvh] overflow-y-auto">
             <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">New Vendor Scorecard</h3>
             <div className="space-y-4">
               <div>

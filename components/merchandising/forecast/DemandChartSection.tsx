@@ -54,7 +54,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
             )}
 
             <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={0} initialDimension={{ width: 320, height: 280 }}>
                     <ComposedChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} opacity={0.6} />
                         <XAxis dataKey="period" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />

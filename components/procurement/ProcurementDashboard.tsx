@@ -160,7 +160,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                 <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-4 sm:p-6">
                     <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-4 sm:mb-6 text-xs uppercase tracking-wider">Spend by Category</h3>
                     <div className="h-[260px] sm:h-[300px] w-full min-w-0 touch-pan-y">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240} initialDimension={{ width: 320, height: 260 }}>
                             <PieChart>
                                 <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={4} dataKey="value">
                                     {metrics.categoryData.map((entry, index) => (
@@ -191,7 +191,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                 <div className="rounded-2xl sm:rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-4 sm:p-6">
                     <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-4 sm:mb-6 text-xs uppercase tracking-wider">Monthly Spend Trend</h3>
                     <div className="h-[260px] sm:h-[300px] w-full min-w-0 touch-pan-y">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240} initialDimension={{ width: 320, height: 260 }}>
                             <AreaChart data={metrics.trendData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.4} vertical={false} />
                                 <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} />

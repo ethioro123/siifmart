@@ -192,7 +192,7 @@ export function SiteModal({
                 {newSite.type === 'Administration' ? 'Office Name' : 'Location Name'} *
               </label>
               <input
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                 placeholder={
                   newSite.type === 'Administration' ? (newSite.country === 'KE' ? 'e.g. Nairobi Regional Office' : 'e.g. Central Administration HQ') :
                     newSite.type === 'Warehouse' ? (newSite.country === 'KE' ? 'e.g. Nairobi Central Warehouse' : 'e.g. Addis Ababa Central Warehouse') :
@@ -210,7 +210,7 @@ export function SiteModal({
                 {newSite.type === 'Administration' ? 'Office Address' : 'Physical Address'} *
               </label>
               <input
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                 placeholder={newSite.country === 'KE' ? "e.g. Waiyaki Way, Westlands, Nairobi" : "e.g. Bole Medhanialem, Addis Ababa"}
                 value={newSite.address || ''}
                 onChange={(e) => setNewSite({ ...newSite, address: e.target.value })}
@@ -221,7 +221,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Status</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.status || 'Active'}
                 onChange={(e) => setNewSite({ ...newSite, status: e.target.value as Site['status'] })}
                 aria-label="Location Status"
@@ -235,7 +235,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Operational Region</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.region_code || newSite.regionCode || ''}
                 onChange={(e) => setNewSite({ ...newSite, region_code: e.target.value || undefined, regionCode: e.target.value || undefined, areaManagerId: null })}
                 aria-label="Operational Region"
@@ -254,7 +254,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Logistics Zone</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.logisticsZoneId || ''}
                 onChange={(e) => setNewSite({ ...newSite, logisticsZoneId: e.target.value || undefined })}
                 aria-label="Logistics Zone"
@@ -281,7 +281,7 @@ export function SiteModal({
                     type="number"
                     min="1"
                     placeholder="e.g. 50 employees"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.capacity || ''}
                     onChange={(e) => setNewSite({ ...newSite, capacity: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Staff Capacity"
@@ -315,7 +315,7 @@ export function SiteModal({
                     type="number"
                     min="100"
                     placeholder="e.g. 5000"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.capacity || ''}
                     onChange={(e) => setNewSite({ ...newSite, capacity: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Storage Capacity"
@@ -327,7 +327,7 @@ export function SiteModal({
                     type="number"
                     min="0"
                     placeholder="e.g. 4"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.terminalCount || ''}
                     onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Loading Docks"
@@ -347,7 +347,7 @@ export function SiteModal({
                 <div>
                   <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Store Manager</label>
                   <input
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     placeholder="Manager name..."
                     value={newSite.manager || ''}
                     onChange={(e) => setNewSite({ ...newSite, manager: e.target.value })}
@@ -390,7 +390,7 @@ export function SiteModal({
                     type="number"
                     min="1"
                     placeholder="e.g. 3"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.terminalCount || ''}
                     onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="POS Terminals"
