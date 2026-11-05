@@ -109,12 +109,13 @@ export const salesService = {
         return mapSaleRow(data);
     },
 
-    async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'>, items: any[], discountCodeId?: string | null) {
+    async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'> & { pointsRedeemed?: number }, items: any[], discountCodeId?: string | null) {
         const { data, error } = await supabase.rpc('create_pos_sale_atomic', {
             p_sale: {
                 id: sale.id,
                 site_id: sale.siteId,
                 customer_id: sale.customerId,
+                points_redeemed: sale.pointsRedeemed || 0,
                 payment_method: sale.method,
                 amount_tendered: sale.amountTendered,
                 total: sale.total,

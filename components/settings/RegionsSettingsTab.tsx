@@ -136,7 +136,7 @@ export default function RegionsSettingsTab() {
                         <Building2 size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                        {regions.filter(r => r.status === 'active').length}
+                        {isLoading ? '—' : regions.filter(r => r.status === 'active').length}
                         <span className="text-xs font-normal text-[var(--theme-text-secondary)] ml-1">
                             / {regions.length} total
                         </span>
@@ -149,7 +149,7 @@ export default function RegionsSettingsTab() {
                         <DollarSign size={15} className="text-[var(--theme-status-success-text)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                        {totalRegionalBudget.toLocaleString()}
+                        {queries.regions.isPending ? '—' : totalRegionalBudget.toLocaleString()}
                         <span className="text-xs font-normal text-[var(--theme-text-secondary)] ml-1">
                             {currency}
                         </span>
@@ -162,7 +162,7 @@ export default function RegionsSettingsTab() {
                         <Store size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                        {governedSitesCount}
+                        {queries.directory.isPending || queries.directory.isError ? '—' : governedSitesCount}
                         <span className="text-xs font-normal text-[var(--theme-text-secondary)] ml-1">
                             / {countrySites.length} visible sites
                         </span>
@@ -248,12 +248,12 @@ export default function RegionsSettingsTab() {
                         <Building2 size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
-                        {searchQuery ? 'No matching regions found' : `No operational regions in ${countryProfile.name}`}
+                        {searchQuery || statusFilter !== 'all' ? 'No regions match these filters' : `No regional administrations in ${countryProfile.name}`}
                     </h3>
                     <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-md mx-auto">
-                        {searchQuery
+                        {searchQuery || statusFilter !== 'all'
                             ? 'Try clearing your search query or adjusting the status filter.'
-                            : 'All sites are currently governed directly by Central National HQ. Provision a regional administration to delegate procurement and workforce operations.'}
+                            : 'No regional administration records are available in this country. Authorized leadership can provision a region.'}
                     </p>
                     {!searchQuery && isHQExecutive && (
                         <button

@@ -4,7 +4,7 @@ import type {
     PaymentMethod, ReturnItem, SystemLog, StorePoints
 } from '../../types';
 import { DEFAULT_STORE_POINT_RULES } from '../../types';
-import { customersService, productsService, salesService } from '../../services/supabase.service';
+import { productsService, salesService } from '../../services/supabase.service';
 import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
@@ -84,7 +84,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 : undefined;
             const finalReceiptNumber = receiptNumber || generateCountryScopedReceiptNumber({ activeSite });
 
-            let saleRecord: SaleRecord & { discountCodeId?: string | null } = {
+            let saleRecord: SaleRecord & { discountCodeId?: string | null; pointsRedeemed?: number } = {
                 id: saleId,
                 siteId: activeSite?.id || '',
                 customerId: customerId,
@@ -101,6 +101,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 cashierName: user,
                 type,
                 discountCodeId: discountCodeId || null,
+                pointsRedeemed: pointsRedeemed || 0,
                 mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
                 receiptNumber: finalReceiptNumber,
@@ -183,17 +184,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                         c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: newTotalSpent, lastVisit: new Date().toISOString() } : c
                     ));
 
-                    if (!queued && navigator.onLine) {
-                        try {
-                            await customersService.update(customerId, {
-                                loyaltyPoints: newLoyaltyPoints,
-                                totalSpent: newTotalSpent,
-                                lastVisit: new Date().toISOString()
-                            });
-                        } catch (e) {
-                            logger.warn('useSaleActions', 'Fallback loyalty sync failed', { error: String(e) });
-                        }
-                    }
+
                 }
             }
 

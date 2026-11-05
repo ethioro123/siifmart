@@ -190,7 +190,7 @@ export const ShelfTagsTab: React.FC = () => {
    return (
       <div className="space-y-6 animate-in fade-in" aria-label="Shelf Tags and Floor Parity">
          {/* Top Stat Cards */}
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                <p className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Active Facility SKUs</p>
                <p className="text-2xl font-bold text-[var(--theme-text-primary)] mt-1 font-mono">{scopedProducts.length}</p>

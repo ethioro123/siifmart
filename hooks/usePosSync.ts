@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { posDB } from '../services/db/pos.db';
-import { salesService, customersService } from '../services/supabase.service';
+import { salesService } from '../services/supabase.service';
 import { logger } from '../utils/logger';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
@@ -116,7 +116,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                 try {
                     if (op.type === 'CREATE_SALE') {
                         const salePayload = op.payload;
-                        const { items, pointsRedeemed, loyaltyRate, enableLoyalty, discountCodeId, ...saleData } = salePayload;
+                        const { items, loyaltyRate, enableLoyalty, discountCodeId, ...saleData } = salePayload;
 
                         // 1. Send sale to Supabase
                         const persistedSale = await salesService.create(saleData, items, discountCodeId);
@@ -124,26 +124,8 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                             await posDB.updateSale({ ...salePayload, ...persistedSale, items });
                         }
 
-                        // 3. Customer loyalty points reconciliation
-                        if (salePayload.customerId && salePayload.total && enableLoyalty !== false) {
-                            try {
-                                const customer = await customersService.getById(salePayload.customerId);
-                                if (customer) {
-                                    const rate = typeof loyaltyRate === 'number' && loyaltyRate > 0 ? loyaltyRate : 100;
-                                    const baseAmount = typeof salePayload.subtotal === 'number' ? salePayload.subtotal : salePayload.total;
-                                    const earned = Math.floor(baseAmount / rate);
-                                    const redeemed = typeof pointsRedeemed === 'number' ? pointsRedeemed : 0;
-                                    const updatedPoints = Math.max(0, (customer.loyaltyPoints || 0) + earned - redeemed);
-                                    await customersService.update(salePayload.customerId, {
-                                        loyaltyPoints: updatedPoints,
-                                        totalSpent: (customer.totalSpent || 0) + salePayload.total,
-                                        lastVisit: salePayload.date || new Date().toISOString()
-                                    });
-                                }
-                            } catch (custErr) {
-                                logger.warn('usePosSync', 'Failed to update customer loyalty on sync');
-                            }
-                        }
+                        // Customer points/spending are posted atomically by the sale RPC.
+
                     }
 
                     // Remove from queue upon success

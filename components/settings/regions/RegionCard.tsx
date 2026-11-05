@@ -48,7 +48,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     const isNearCap = budgetStatus?.isNearCap ?? (monthlyBudget > 0 && percentUsed >= 85);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[var(--theme-accent)]/40 transition-all flex-col justify-between">
+        <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[var(--theme-accent)]/40 transition-all flex flex-col justify-between">
             <div>
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -188,7 +188,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <div className="mt-1.5 pt-1.5 border-t border-[var(--theme-border)]/40 flex items-center justify-between text-[11px]">
                         <span className="text-[var(--theme-text-secondary)]">Autonomous Expense Limit:</span>
                         <span className="font-mono font-medium text-[var(--theme-text-primary)]">
-                            {(region.autonomous_expense_limit ?? 25000) > 0 ? `${(region.autonomous_expense_limit ?? 25000).toLocaleString()} ${currency}` : '0 (Country/HQ approval required)'}
+                            {(region.autonomous_expense_limit ?? 0) > 0 ? `${(region.autonomous_expense_limit ?? 0).toLocaleString()} ${currency}` : '0 (Country/HQ approval required)'}
                         </span>
                     </div>
                 </div>

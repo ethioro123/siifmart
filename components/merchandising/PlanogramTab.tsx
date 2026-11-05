@@ -250,7 +250,7 @@ export const PlanogramTab: React.FC = () => {
           type="button"
           onClick={() => setIsReviewModalOpen(true)}
           disabled={isSubmittingRevision || pendingLoading || Boolean(pendingError) || !selectedStoreId || suggestedMoves.length === 0}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-1.5 shadow-sm cursor-pointer"
+          className="w-full sm:w-auto min-h-11 px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
         >
           <Sparkles size={13} />
           <span>Review Suggested Moves ({suggestedMoves.length})</span>

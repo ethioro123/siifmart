@@ -27,7 +27,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
    const currentCondition = newRule.condition || 'Stock > X';
 
    return (
-      <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title="New Pricing Rule">
+      <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title="New Pricing Rule" mobileFullScreen>
          <div className="space-y-4">
             <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-start gap-2.5 text-xs text-[var(--theme-text-secondary)]">
                <Info size={16} className="text-[var(--theme-accent)] shrink-0 mt-0.5" />
@@ -170,7 +170,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleCreateRule}
-                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold cursor-pointer shadow-sm transition-colors flex items-center justify-center gap-2"
+                  className="w-full min-h-11 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold cursor-pointer shadow-sm transition-colors flex items-center justify-center gap-2"
                >
                   {isSubmitting && <Loader2 size={15} className="animate-spin" />}
                   <span>{isSubmitting ? 'Saving Rule...' : 'Save & Enable Pricing Rule'}</span>

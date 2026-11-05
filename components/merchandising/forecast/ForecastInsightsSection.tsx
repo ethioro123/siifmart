@@ -20,7 +20,7 @@ export const ForecastInsightsSection: React.FC<ForecastInsightsSectionProps> = (
     const unhedgedDeficits = recommendations.filter(r => r.onOrder === 0 && r.inTransit === 0);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
                 <div className="flex items-center gap-3 mb-1">
                     <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">

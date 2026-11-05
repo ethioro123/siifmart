@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
-import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult, summarizeTransferReceiptDiscrepancies } from './utils/receivingIntake';
+import { transferIntakeService } from '../../../services/transfer-intake.service';
 import { verifyPOSTransferReceipt } from './utils/verifyPOSTransferReceipt';
 import { transferReceiptVerificationService } from '../../../services/transfer-receipt-verification.service';
 
@@ -72,8 +72,8 @@ export const usePOSReceiving = ({
         const isExt = delMethod === 'External';
         const shippedAt = (job as any)?.shippedAt || (transfer as any)?.shippedAt || (dispatchJob as any)?.shippedAt;
         const effTransferStatus = (job as any)?.transferStatus || (transfer as any)?.transferStatus || (dispatchJob as any)?.transferStatus || (job as any)?.status || (transfer as any)?.status;
-        const rawStat = String(effTransferStatus || '').toLowerCase().replace(/[-_]/g, '');
-        const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
+        const rawStat = String(effTransferStatus || '').toLowerCase().replace(/[-_\s]/g, '');
+        const isDone = ['delivered', 'partiallydelivered', 'completed', 'received'].includes(rawStat);
         const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
 
         // 0. Rejected or Cancelled transfers cannot be received
@@ -262,7 +262,6 @@ export const usePOSReceiving = ({
         }
 
         setIsConfirmingReceive(true);
-        let intakeResult: ReceivingStockIntakeResult | null = null;
         try {
             const { wmsJobsService } = await import('../../../services/supabase.service');
             const selectedId = selectedTransferForReceiving;
@@ -318,104 +317,8 @@ export const usePOSReceiving = ({
             const receivedItems = await verifyPOSTransferReceipt(targetTransferId, transferReceivingItems);
             setTransferReceivingItems(receivedItems);
 
-            const rawLineItems = finalTransfer.lineItems || finalTransfer.items || [];
-            const updatedLineItems = rawLineItems.map((item: any) => {
-                const itemSku = (item.sku || '').trim().toUpperCase();
-                const rx = receivedItems.find(i =>
-                    i.sku?.trim()?.toUpperCase() === itemSku ||
-                    i.productId === (item.productId || item.product_id)
-                );
-                const expectedQty = item.expectedQty ?? item.expected_qty ?? item.quantity ?? 0;
-                const isComplete = rx && (rx.receivedQty >= (rx.displayExpectedQty || expectedQty));
-                return {
-                    ...item,
-                    receivedQty: rx ? rx.receivedQty : 0,
-                    received_qty: rx ? rx.receivedQty : 0,
-                    condition: rx ? rx.condition : 'Good',
-                    status: isComplete && (rx?.condition || 'Good') === 'Good' ? 'Completed' : 'Discrepancy'
-                };
-            });
-
-            const timestampStr = new Date().toISOString();
-            const receiverName = user?.name || t('posCommand.posUser');
-            const destSiteId = transfer.destSiteId || activeSite?.id;
-
-            // 1. Process and verify stock intake BEFORE marking transfer completed
-            if (destSiteId) {
-                intakeResult = await processReceivingStockIntake({
-                    transferId: targetTransferId,
-                    destSiteId,
-                    transferReceivingItems: receivedItems,
-                    allProducts,
-                    receiverName,
-                    timestampStr,
-                    addNotification
-                });
-                if (!intakeResult.success && intakeResult.failedItems.length > 0) {
-                    throw new Error(`Inventory intake failed for: ${intakeResult.failedItems.join(', ')}. Receipt halted to prevent inventory drift.`);
-                }
-            }
-
-            const verifiedReceipt = await transferReceiptVerificationService.get(targetTransferId);
-            const hasDiscrepancies = verifiedReceipt.hasDiscrepancy === true;
-            const discrepancyDetails = hasDiscrepancies ? 'Physical receipt variance recorded against the private arrival manifest.' : undefined;
-            // 2. Update WMS job with verified quantities
-            try {
-                await wmsJobsService.update(targetTransferId, {
-                    transferStatus: 'Received',
-                    receivedAt: timestampStr,
-                    receivedBy: receiverName,
-                    status: 'Completed',
-                    lineItems: updatedLineItems,
-                    hasDiscrepancy: hasDiscrepancies,
-                    discrepancyDetails
-                } as any);
-            } catch (updateErr: any) {
-                logger.error('usePOSReceiving', `Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
-                throw updateErr;
-            }
-
-            const targetDispatchJob = dispatchJob || jobs.find(j =>
-                j.type === 'DISPATCH' &&
-                (j.orderRef === targetTransferId || j.orderRef === finalTransfer.jobNumber)
-            );
-
-            if (targetDispatchJob && targetDispatchJob.id !== targetTransferId) {
-                try {
-                    await wmsJobsService.update(targetDispatchJob.id, {
-                        status: 'Completed',
-                        transferStatus: 'Received',
-                        receivedAt: timestampStr,
-                        receivedBy: receiverName
-                    } as any);
-                } catch (dErr) {
-                    logger.warn('usePOSReceiving', 'Failed to update DISPATCH job:');
-                }
-            }
-
-            if (transferJob && transferJob.id !== targetTransferId) {
-                try {
-                    await wmsJobsService.update(transferJob.id, {
-                        status: 'Completed',
-                        transferStatus: 'Received',
-                        receivedAt: timestampStr,
-                        receivedBy: receiverName,
-                        lineItems: updatedLineItems
-                    } as any);
-                } catch (pErr) {
-                    logger.warn('usePOSReceiving', 'Failed to update parent TRANSFER job:');
-                }
-            }
-
-            // WMS-only shipments have no transfers-table mirror to synchronize.
-            if (persistedTransfer) {
-                const { transfersService } = await import('../../../services/transfers.service');
-                await transfersService.receiveAtomic(persistedTransfer.id, {
-                    receiverName,
-                    hasDiscrepancy: hasDiscrepancies,
-                    discrepancyDetails
-                });
-            }
+            const confirmed = await transferIntakeService.accept(targetTransferId);
+            const hasDiscrepancies = confirmed.hasDiscrepancy;
             setReceivingSummary({
                 orderRef: transfer.orderRef || selectedId,
                 jobNumber: transfer.jobNumber || (transfer as any).job_number,
@@ -429,18 +332,16 @@ export const usePOSReceiving = ({
                     unit: i.unit,
                     productSize: i.productSize || 0
                 })),
-                timestamp: new Date().toISOString(),
+                timestamp: confirmed.receivedAt,
                 hasDiscrepancies
             });
 
-            await refreshData();
-            refreshJobs();
+            // Receipt is committed: refresh failure must not reverse inventory or claim save failure.
+            try { await refreshData(); refreshJobs(); }
+            catch (error) { logger.warn('usePOSReceiving', 'Receipt saved; refresh failed', { error: String(error) }); }
             addNotification('success', t('posCommand.shipmentReceivedSuccess'));
             setSelectedTransferForReceiving(null);
         } catch (err: any) {
-            if (intakeResult?.appliedItems?.length) {
-                await rollbackReceivingStockIntake(intakeResult.appliedItems);
-            }
             logger.error('usePOSReceiving', 'Error confirming receipt:', err);
             addNotification('alert', `${t('posCommand.failedToFinalize')} ${err.message}`);
         } finally {

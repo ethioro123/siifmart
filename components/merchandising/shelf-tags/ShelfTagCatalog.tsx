@@ -100,9 +100,9 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
    return (
       <div className="space-y-4">
          {/* Filter Toolbar */}
-         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap gap-3 items-center justify-between shadow-xs">
-            <div className="flex items-center gap-2 flex-1 min-w-[220px]">
-               <Search size={15} className="text-[var(--theme-text-secondary)]" />
+         <div className="p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between shadow-xs">
+            <div className="flex items-center gap-2 flex-1 min-w-[220px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 h-11 sm:h-9">
+               <Search size={15} className="text-[var(--theme-text-secondary)] shrink-0" />
                <input
                   type="text"
                   placeholder="Search products by name or SKU..."
@@ -122,7 +122,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                      setSelectedCategory(e.target.value);
                      setPage(1);
                   }}
-                  className="px-2.5 py-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] outline-none"
+                  className="min-h-11 sm:h-auto px-3 py-2 sm:py-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] outline-none flex-1 sm:flex-initial"
                >
                   <option value="all">All Categories</option>
                   {categories.map((c) => (
@@ -136,7 +136,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                      setSelectedShelfPosition(e.target.value);
                      setPage(1);
                   }}
-                  className="px-2.5 py-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] outline-none"
+                  className="min-h-11 sm:h-auto px-3 py-2 sm:py-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] outline-none flex-1 sm:flex-initial"
                >
                   <option value="all">All Shelf Tiers</option>
                   <option value="Eye Level">Eye Level (Prime)</option>
@@ -151,7 +151,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                      setFilterOnlySales(!filterOnlySales);
                      setPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`min-h-11 sm:h-auto px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                      filterOnlySales
                         ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
@@ -163,7 +163,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                <button
                   type="button"
                   onClick={() => onToggleSelectAll(allFilteredIds)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] cursor-pointer"
+                  className="min-h-11 sm:h-auto px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] cursor-pointer"
                >
                   {isAllSelected ? 'Deselect All' : `Select All (${filteredProducts.length})`}
                </button>
@@ -172,7 +172,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                   type="button"
                   onClick={onOpenPreview}
                   disabled={selectedIds.size === 0}
-                  className="px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-40 text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="min-h-11 sm:h-auto px-3 py-2 sm:py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-40 text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                >
                   <Eye size={14} /> Preview
                </button>
@@ -181,7 +181,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                   type="button"
                   onClick={onPrintSelected}
                   disabled={selectedIds.size === 0 || isPrinting}
-                  className="px-4 py-1.5 bg-[var(--theme-accent)] disabled:opacity-40 text-[var(--theme-text-primary)] rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5 shadow-xs"
+                  className="min-h-11 sm:h-auto px-4 py-2 sm:py-1.5 bg-[var(--theme-accent)] disabled:opacity-40 text-[var(--theme-text-primary)] rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center gap-1.5 shadow-xs w-full sm:w-auto"
                >
                   <Printer size={14} /> Print Tags ({selectedIds.size})
                </button>

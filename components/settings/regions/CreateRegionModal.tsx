@@ -1,3 +1,4 @@
+import Modal from '../../Modal';
 import { isEligibleRegionalHub, isEligibleRegionalManager } from '../../../utils/regionalAdministration';
 import type { RegionalAdminEmployee } from '../../../types/regionalAdministration';
 import React, { useEffect, useState, useMemo } from 'react';
@@ -237,34 +238,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
-                            <Building2 size={18} />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
-                                Provision Operational Region
-                            </h3>
-                            <p className="text-[11px] text-[var(--theme-text-secondary)]">
-                                Establish decentralized administrative authority for {activeProfile.name || selectedCountry}
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">
+        <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title={"Provision operational region"} size="lg" closeOnEscape={!isSubmitting} closeOnClickOutside={!isSubmitting}>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Region Name & Code */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -424,6 +399,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <button
                             type="button"
                             onClick={onClose}
+                            disabled={isSubmitting}
                             className="px-4 py-2 rounded-xl text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                         >
                             Cancel
@@ -438,7 +414,6 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </Modal>
     );
 };

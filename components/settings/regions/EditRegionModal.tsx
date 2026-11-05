@@ -1,3 +1,4 @@
+import Modal from '../../Modal';
 import { isEligibleRegionalHub, isEligibleRegionalManager } from '../../../utils/regionalAdministration';
 import type { RegionalAdminEmployee } from '../../../types/regionalAdministration';
 import React, { useState } from 'react';
@@ -38,7 +39,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     const [monthlyBudget, setMonthlyBudget] = useState(String(region.monthly_procurement_budget ?? 0));
     const [autonomousLimit, setAutonomousLimit] = useState(String(region.autonomous_po_limit ?? ''));
     const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState(String(region.monthly_expense_budget ?? 0));
-    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState(String(region.autonomous_expense_limit ?? 25000));
+    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState(String(region.autonomous_expense_limit ?? 0));
     const [changeReason, setChangeReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -154,34 +155,8 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
-                            <Building2 size={18} />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
-                                Configure Region: {region.name}
-                            </h3>
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
-                                Code: {region.code} ({region.country})
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">
+        <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title={`Configure region: ${region.name} (${region.code})`} size="lg" closeOnEscape={!isSubmitting} closeOnClickOutside={!isSubmitting}>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Basic Info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -299,6 +274,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     type="number"
                                     min="0"
                                     step="5000"
+                                    aria-label="Autonomous PO limit"
                                     value={autonomousLimit}
                                     onChange={(e) => setAutonomousLimit(e.target.value)}
                                     className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
@@ -328,6 +304,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                     type="number"
                                     min="0"
                                     step="1000"
+                                    aria-label="Autonomous expense limit"
                                     value={autonomousExpenseLimit}
                                     onChange={(e) => setAutonomousExpenseLimit(e.target.value)}
                                     className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
@@ -363,12 +340,15 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             ) : (
                                 countrySites.map(site => {
                                     const isSelected = assignedSiteIds.includes(site.id);
+                                    const isProtectedHub = site.code === `${site.country}-HQ` || regions.some(r => r.admin_hub_site_id === site.id);
                                     return (
                                         <button
                                             key={site.id}
                                             type="button"
                                             onClick={() => toggleSite(site.id)}
-                                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[var(--theme-bg-card)] text-left transition-colors cursor-pointer"
+                                            disabled={isProtectedHub}
+                                            title={isProtectedHub ? 'Change designated hubs through the hub selector; country HQ stays outside regions' : undefined}
+                                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[var(--theme-bg-card)] text-left transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                                         >
                                             <div className="flex items-center gap-2">
                                                 {isSelected ? (
@@ -399,6 +379,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         <button
                             type="button"
                             onClick={onClose}
+                            disabled={isSubmitting}
                             className="px-4 py-2 rounded-xl text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                         >
                             Cancel
@@ -413,7 +394,6 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+        </Modal>
     );
 };

@@ -38,7 +38,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
   }, 0);
 
   return (
-    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 space-y-6">
+    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-3.5 sm:p-6 space-y-4 sm:space-y-6">
       {/* Fixture Header & Heatmap Legend */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--theme-border)]">
         <div>
@@ -126,7 +126,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
 
               {/* Shelf Rack Bay Container (Horizontally Scrollable, Accessible) */}
               <div
-                className={`min-h-[120px] p-3 border-b-4 rounded-b-2xl flex items-end gap-3 overflow-x-auto custom-scrollbar relative transition-colors ${
+                className={`min-h-[120px] p-3 border-b-4 rounded-b-2xl flex items-end gap-3 overflow-x-auto custom-scrollbar touch-manipulation relative transition-colors ${
                   tier.isPrime
                     ? 'bg-[var(--theme-accent)]/5 border-b-[var(--theme-accent)]/50'
                     : 'bg-[var(--theme-bg-card)]/60 border-b-[var(--theme-border)]'

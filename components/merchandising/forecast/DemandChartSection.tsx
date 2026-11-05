@@ -36,7 +36,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1.5 rounded-full text-[var(--theme-text-secondary)] font-medium">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1.5 rounded-full text-[var(--theme-text-secondary)] font-medium">
                     <span className="flex items-center gap-1.5">
                         <span className="w-2 h-2 bg-[var(--theme-accent)] rounded-full"></span> Observed Sales
                     </span>

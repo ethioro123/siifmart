@@ -207,11 +207,11 @@ export const MerchandisingReviewsTab: React.FC = () => {
             Prices at or above 15% margin need one independent commercial approval. Below-floor prices need Country Finance clearance and country commercial approval. Product details and shelf layouts retain three regional approvals.
           </p>
         </div>
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] overflow-x-auto no-scrollbar w-full sm:w-auto">
           <button
             type="button"
             onClick={() => handleTabChange('pending')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`min-h-11 sm:min-h-0 px-3.5 sm:px-3 py-2 sm:py-1.5 whitespace-nowrap shrink-0 rounded-lg text-xs font-semibold transition-colors ${
               statusFilter === 'pending'
                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -222,7 +222,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('completed')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`min-h-11 sm:min-h-0 px-3.5 sm:px-3 py-2 sm:py-1.5 whitespace-nowrap shrink-0 rounded-lg text-xs font-semibold transition-colors ${
               statusFilter === 'completed'
                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -233,7 +233,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`min-h-11 sm:min-h-0 px-3.5 sm:px-3 py-2 sm:py-1.5 whitespace-nowrap shrink-0 rounded-lg text-xs font-semibold transition-colors ${
               statusFilter === 'all'
                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -280,9 +280,9 @@ export const MerchandisingReviewsTab: React.FC = () => {
             return (
               <article
                 key={request.id}
-                className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 space-y-4"
+                className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3.5 sm:p-5 space-y-4"
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-base text-[var(--theme-text-primary)]">
@@ -322,16 +322,16 @@ export const MerchandisingReviewsTab: React.FC = () => {
                     </p>
                   </div>
 
-                  <button type="button" onClick={() => setSelectedReview(request)} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={'Review proposal for ' + request.productName}>Review proposal</button>
+                  <button type="button" onClick={() => setSelectedReview(request)} className="w-full sm:w-auto min-h-11 rounded-xl border border-[var(--theme-border)] px-4 text-xs sm:text-sm font-semibold flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={'Review proposal for ' + request.productName}>Review proposal</button>
                   {/* Actions for Pending Proposals */}
                   {isPending && (
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                       {isPrice && request.priceApprovalRoute?.canFinance && (
                         <button
                           type="button"
                           disabled={decision.isPending}
                           onClick={() => decision.mutate({ id: request.id, action: 'finance' })}
-                          className="rounded-xl border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
+                          className="min-h-11 flex-1 sm:flex-initial rounded-xl border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors flex items-center justify-center text-center"
                         >
                           Finance signoff
                         </button>
@@ -341,7 +341,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           type="button"
                           disabled={decision.isPending}
                           onClick={() => setSelectedRejectRequest(request)}
-                          className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
+                          className="min-h-11 flex-1 sm:flex-initial rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors flex items-center justify-center text-center"
                         >
                           Reject proposal
                         </button>
@@ -353,7 +353,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           onClick={() => {
                             setSelectedReview(request);
                           }}
-                          className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] disabled:opacity-50 hover:opacity-90 transition-opacity"
+                          className="min-h-11 flex-1 sm:flex-initial rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] disabled:opacity-50 hover:opacity-90 transition-opacity flex items-center justify-center text-center"
                         >
                           {isPrice ? 'Approve price change' : 'Record regional approval'}
                         </button>

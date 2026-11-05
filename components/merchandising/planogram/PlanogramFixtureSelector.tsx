@@ -22,9 +22,9 @@ export function PlanogramFixtureSelector(props: Props) {
         <select aria-label="Placement group" value={props.fixtureType} onChange={e => props.onSelectFixtureType(e.target.value as FixtureType)} className="mt-1 block min-h-11 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3">
           {Object.values(FIXTURE_DEFINITIONS).map(fixture => <option key={fixture.type} value={fixture.type}>{fixture.label}</option>)}
         </select></label>
-      <div className="flex gap-2" aria-label="Planogram view">
-        {(['visual', 'list'] as const).map(mode => <button type="button" key={mode} aria-pressed={props.viewMode === mode} onClick={() => props.onToggleViewMode(mode)} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{mode === 'visual' ? 'Shelves' : 'Product list'}</button>)}
-        <button type="button" aria-pressed={props.showHeatmap} onClick={props.onToggleHeatmap} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4">Velocity colors {props.showHeatmap ? 'on' : 'off'}</button>
+      <div className="flex flex-wrap gap-2 w-full sm:w-auto" aria-label="Planogram view">
+        {(['visual', 'list'] as const).map(mode => <button type="button" key={mode} aria-pressed={props.viewMode === mode} onClick={() => props.onToggleViewMode(mode)} className="flex-1 sm:flex-initial min-h-11 rounded-xl border border-[var(--theme-border)] px-4 text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{mode === 'visual' ? 'Shelves' : 'Product list'}</button>)}
+        <button type="button" aria-pressed={props.showHeatmap} onClick={props.onToggleHeatmap} className="flex-1 sm:flex-initial min-h-11 rounded-xl border border-[var(--theme-border)] px-4 text-xs font-semibold">Velocity colors {props.showHeatmap ? 'on' : 'off'}</button>
       </div>
     </div>
   </header>;
