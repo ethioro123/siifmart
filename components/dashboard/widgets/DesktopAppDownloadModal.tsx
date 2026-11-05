@@ -1,3 +1,5 @@
+import { useInstallerDownload } from '../../../hooks/useInstallerDownload';
+import { APP_VERSION } from '../../../lib/app-version';
 import React, { useState, useMemo } from 'react';
 import {
     Monitor, Download, Apple, Check, ShieldCheck,
@@ -203,14 +205,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
     const currentPlatform = platforms[selectedOS];
     const currentVariant = currentPlatform.variants.find(v => v.id === selectedVariant) || currentPlatform.variants[0];
 
-    const handleDownload = () => {
-        const a = document.createElement('a');
-        a.href = currentVariant.downloadUrl;
-        a.download = currentVariant.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
+    const {download:handleDownload,isChecking,error:downloadError}=useInstallerDownload(currentVariant.downloadUrl,currentVariant.filename);
 
     const handleCopyBuildCmd = () => {
         const cmd = selectedOS === 'mac'
@@ -271,7 +266,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                             <div className="flex items-center gap-2.5">
                                 <ShieldCheck className="text-[var(--theme-primary)]" size={18} />
                                 <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
-                                    You are currently running the native desktop app ({appVersion || 'v3.5.3'}).
+                                    You are currently running the native desktop app ({appVersion || APP_VERSION}).
                                 </span>
                             </div>
                             <span className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
@@ -366,10 +361,12 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                             </div>
                         </div>
 
+                        {downloadError && <p role="alert" className="text-sm text-[var(--theme-status-danger-text)]">{downloadError}</p>}
                         {/* Download CTA Button */}
                         <div className="flex flex-col sm:flex-row gap-2.5">
                             <button
                                 onClick={handleDownload}
+                                disabled={isChecking}
                                 className="flex-1 py-3 px-4 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
                             >
                                 <Download size={16} />

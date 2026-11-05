@@ -1,16 +1,18 @@
 // @vitest-environment jsdom
 import React from 'react';
-import {act,renderHook} from '@testing-library/react';
+import {act,cleanup,renderHook} from '@testing-library/react';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
-import {beforeEach,describe,expect,it,vi} from 'vitest';
+import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {useGeneralSettingsMutation,GeneralSettingsPayload} from '../../hooks/useGeneralSettingsMutation';
 import type {SystemConfig} from '../../types';
 const state=vi.hoisted(()=>({role:'group_ceo',save:vi.fn(),apply:vi.fn(),toast:vi.fn()}));
 vi.mock('../../contexts/CentralStore',()=>({useStore:()=>({user:{id:'ceo',role:state.role},showToast:state.toast})}));
 vi.mock('../../contexts/DataContext',()=>({useData:()=>({applyConfirmedSettings:state.apply})}));
 vi.mock('../../services/general-settings.service',()=>({generalSettingsFields:{branding:['slogan']},generalSettingsService:{save:state.save}}));
-function Wrapper({children}:{children:React.ReactNode}){return <QueryClientProvider client={new QueryClient({defaultOptions:{mutations:{retry:false}}})}>{children}</QueryClientProvider>;}
-beforeEach(()=>{vi.clearAllMocks();state.role='group_ceo';});
+let client: QueryClient;
+function Wrapper({children}:{children:React.ReactNode}){return <QueryClientProvider client={client}>{children}</QueryClientProvider>;}
+beforeEach(()=>{vi.clearAllMocks();state.role='group_ceo';client=new QueryClient({defaultOptions:{mutations:{retry:false,gcTime:0}}});});
+afterEach(async()=>{await act(async()=>{cleanup();client.clear();await new Promise(resolve=>setTimeout(resolve,0));});});
 const payload:GeneralSettingsPayload={section:'branding',targetCountry:'ET',data:{slogan:'New'}};
 describe('confirmed general settings mutation',()=>{
  it('never replaces the cache on failure and reuses the retry key',async()=>{

@@ -160,9 +160,8 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                         })
                     } as any;
                 }
-                if (table === 'employees') {
-                    return { insert: insertMock } as any;
-                }
+                if (table === 'employees') return { insert: insertMock } as unknown as ReturnType<typeof supabase.from>;
+                if (table === 'employee_directory') return { select: () => ({ eq: () => ({ single: async () => ({data:insertMock.mock.calls[0][0],error:null}) }) }) } as unknown as ReturnType<typeof supabase.from>;
                 return {} as any;
             });
 
@@ -204,7 +203,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             };
 
             vi.spyOn(supabase, 'from').mockImplementation((table: string) => {
-                if (table === 'employees') {
+                if (table === 'employee_directory') {
                     return {
                         select: vi.fn((_cols: string, opts?: any) => {
                             if (opts?.count === 'exact') return mockQuery;
@@ -365,7 +364,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             };
 
             vi.spyOn(supabase, 'from').mockImplementation((table: string) => {
-                if (table === 'employees') {
+                if (table === 'employee_directory') {
                     return {
                         select: vi.fn((_cols: string, opts?: any) => {
                             if (opts?.count === 'exact') return mockQuery;

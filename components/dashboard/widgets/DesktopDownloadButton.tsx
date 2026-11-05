@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../../../lib/app-version';
 import React, { useState, useMemo } from 'react';
 import { Monitor, Download, Apple, Terminal, CheckCircle2 } from 'lucide-react';
 import { useElectron } from '../../../hooks/useElectron';
@@ -26,7 +27,7 @@ export const DesktopDownloadButton: React.FC = () => {
                 <CheckCircle2 size={15} className="text-[var(--theme-status-success-text)]" />
                 <span className="font-mono">Desktop Active</span>
                 <span className="px-1.5 py-0.5 rounded text-[11px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
-                    {appVersion || 'v3.5.3'}
+                    {appVersion || APP_VERSION}
                 </span>
             </div>
         );

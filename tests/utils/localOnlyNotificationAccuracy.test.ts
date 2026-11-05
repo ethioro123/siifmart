@@ -37,8 +37,8 @@ describe('Omit unconfirmed save and payment notices', () => {
     const expense = { id: 'expense-a' } as ExpenseRecord;
     await result.current.addExpense(expense);
     await result.current.deleteExpense(expense.id);
-    await result.current.processPayroll('site-a', 'Manager');
-    expect(deps.setExpenses).toHaveBeenCalledTimes(3);
+    await expect(result.current.processPayroll('site-a', 'Manager')).rejects.toThrow('Select the payroll workplace');
+    expect(deps.setExpenses).toHaveBeenCalledTimes(2);
     expect(deps.addNotification).not.toHaveBeenCalled();
     expect(deps.logSystemEvent).not.toHaveBeenCalled();
   });

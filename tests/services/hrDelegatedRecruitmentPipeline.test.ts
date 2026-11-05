@@ -1,3 +1,4 @@
+import { supabase } from '../../lib/supabase';
 vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({ id: 'audit' }) } }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { recruitmentService } from '../../services/recruitment.service';
@@ -11,6 +12,13 @@ let inMemoryEmployees: any[] = [];
 
 vi.mock('../../lib/supabase', () => ({
   supabase: {
+    rpc: vi.fn((name: string, params: {p_id:string;p_action:string}) => {
+      const candidate=inMemoryCandidateDb.find(row=>row.id===params.p_id);
+      if(name!=='candidate_decision'||!candidate)return Promise.resolve({data:null,error:new Error('Candidate unavailable')});
+      if(params.p_action==='hr')Object.assign(candidate,{hr_approved_by:'Martha Hailu',hr_approved_at:'2026-11-06',hr_approved_by_id:'server-hr'});
+      if(params.p_action==='manager')Object.assign(candidate,{hiring_manager_approved_by:'Dawit Store Manager',hiring_manager_approved_at:'2026-11-06',hiring_manager_approved_by_id:'server-manager',stage:'offered'});
+      return Promise.resolve({data:candidate,error:null});
+    }),
     from: vi.fn().mockImplementation((table: string) => {
       let currentFiltered = table === 'job_candidates' ? inMemoryCandidateDb : inMemoryQuotaReqDb;
 
@@ -64,7 +72,8 @@ vi.mock('../../lib/supabase', () => ({
             const recs = recArr.map((r: any) => ({ id: r.id || `id-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...r }));
             if (table === 'job_candidates') inMemoryCandidateDb.push(...recs);
             if (table === 'headcount_quota_requests') inMemoryQuotaReqDb.push(...recs);
-            return Promise.resolve({ data: recs[0], error: null });
+            const reply=Promise.resolve({data:recs[0],error:null});
+            return {select:()=>({single:()=>reply}),then:reply.then.bind(reply)};
           }),
           update: vi.fn((updates: any) => {
             const updateChain: any = {
@@ -186,7 +195,7 @@ describe('Phase 4: Delegated HR & Workforce Hiring Pipeline', () => {
       expect(updated?.hiring_manager_approved_by).toBe('Dawit Store Manager');
     });
 
-    it('enforces Zero-Trust anti-self-approval: Candidate cannot clear themselves', async () => {
+    it('propagates the trusted refusal of candidate self-clearance', async () => {
       const candidate = await recruitmentService.createCandidate({
         country_code: 'ET',
         name: 'Solomon HR',
@@ -196,13 +205,14 @@ describe('Phase 4: Delegated HR & Workforce Hiring Pipeline', () => {
         role: 'cashier'
       });
 
+      vi.mocked(supabase.rpc).mockResolvedValueOnce({data:null,error:new Error('Independent scoped candidate reviewer required')} as Awaited<ReturnType<typeof supabase.rpc>>);
       await expect(
         recruitmentService.approveCandidateHR(
           candidate.id,
           { id: 'user-solomon', name: 'Solomon HR', role: 'regional_hr_manager' },
           'Self-clearance attempt'
         )
-      ).rejects.toThrow('Zero-Trust Anti-Fraud Violation');
+      ).rejects.toThrow('Independent scoped candidate reviewer required');
     });
   });
 

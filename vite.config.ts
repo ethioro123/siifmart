@@ -1,4 +1,5 @@
 import path from 'path';
+import { readFileSync } from 'node:fs';
 import https from 'https';
 import dns from 'dns';
 import { defineConfig, loadEnv } from 'vite';
@@ -9,6 +10,8 @@ import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import { stagingQuickLoginPlugin } from './dev/stagingQuickLoginPlugin';
 import { aiReloadGatePlugin } from './dev/aiReloadGatePlugin';
+
+const appVersion = (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }).version;
 
 // Custom HTTPS agent that resolves Supabase to its reachable Cloudflare IPv4 edge (172.64.149.246)
 // when the local mobile hotspot / ISP DNS64 returns unreachable IPv6 addresses.
@@ -115,8 +118,8 @@ export default defineConfig(({ mode }) => {
             type: 'asset',
             fileName: 'version.json',
             source: JSON.stringify({
-              version: process.env.npm_package_version || '3.6.1',
-              buildId: `${process.env.npm_package_version || '3.6.1'}-${Date.now()}`,
+              version: appVersion,
+              buildId: `${appVersion}-${Date.now()}`,
               builtAt: new Date().toISOString()
             }, null, 2)
           });
@@ -202,7 +205,7 @@ export default defineConfig(({ mode }) => {
     ],
     // SECURITY: API keys must NEVER be injected into the client bundle.
     // Route AI requests through Supabase Edge Functions instead.
-    // define: { ... } — removed for security
+    define: { __APP_VERSION__: JSON.stringify(appVersion) },
     build: {
       sourcemap: false, // Never expose source maps in production
       rollupOptions: {

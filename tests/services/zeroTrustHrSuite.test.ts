@@ -1,3 +1,4 @@
+import { supabase } from '../../lib/supabase';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { leaveRequestsService, getStatutoryLeaveConfig, STATUTORY_LEAVE_POLICIES } from '../../services/leave-requests.service';
 import { attendanceService } from '../../services/attendance.service';
@@ -372,27 +373,16 @@ describe('Zero-Trust HR Suite Tests', () => {
   });
 
   describe('Finding 7: Attendance & Dynamic Rates', () => {
-    it('records clock-in with GPS metadata and calculates dynamic attendance rate', async () => {
-      const clockIn = await attendanceService.clockIn({
-        country_code: 'ET',
-        site_id: 'SITE-01',
-        employee_id: 'EMP-ATT-01',
-        employee_name: 'Haile Gebrselassie',
-        gps_coordinates: '9.0105,38.7612',
-        device_info: 'DEV-POS-04'
-      });
-
-      expect(clockIn.id).toBeDefined();
-      expect(clockIn.status).toBe('Present');
-      expect(clockIn.clock_in).toBeDefined();
-
-      const clockOut = await attendanceService.clockOut(clockIn.id);
-      expect(clockOut).toBeDefined();
-      expect(clockOut!.clock_out).toBeDefined();
-      expect(clockOut!.hours_worked).toBeDefined();
-
-      const rate = attendanceService.calculateDynamicAttendanceRate([clockOut!]);
-      expect(rate).toBe(100);
+    it('uses confirmed server clock times and calculates the rate from saved attendance', async () => {
+      const record={id:'11111111-1111-4111-8111-111111111111',country_code:'ET',site_id:'SITE-01',employee_id:'22222222-2222-4222-8222-222222222222',employee_name:'Worker',status:'Present',date:'2026-11-06',clock_in:'2026-11-06T06:00:00Z',created_at:'2026-11-06T06:00:00Z'};
+      vi.mocked(supabase.rpc).mockResolvedValueOnce({data:record,error:null} as Awaited<ReturnType<typeof supabase.rpc>>);
+      const clockIn=await attendanceService.clockIn({country_code:'ET',site_id:record.site_id,employee_id:record.employee_id,employee_name:'Untrusted name',gps_coordinates:'9.0105,38.7612'});
+      expect(clockIn.clock_in).toBe(record.clock_in);
+      expect(supabase.rpc).toHaveBeenCalledWith('record_employee_attendance',{p_employee:record.employee_id,p_site:record.site_id,p_country:'ET',p_record:null});
+      vi.mocked(supabase.from).mockReturnValueOnce({select:()=>({eq:()=>({single:async()=>({data:record,error:null})})})} as unknown as ReturnType<typeof supabase.from>);
+      vi.mocked(supabase.rpc).mockResolvedValueOnce({data:{...record,clock_out:'2026-11-06T14:00:00Z',hours_worked:8},error:null} as Awaited<ReturnType<typeof supabase.rpc>>);
+      const clockOut=await attendanceService.clockOut(record.id);
+      expect(clockOut.hours_worked).toBe(8);expect(attendanceService.calculateDynamicAttendanceRate([clockOut])).toBe(100);
     });
   });
 

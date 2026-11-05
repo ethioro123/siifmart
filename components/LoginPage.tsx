@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../lib/app-version';
 import { StagingDevicePairing } from './login/StagingDevicePairing';
 import { ThemeSelector } from './ThemeSelector';
 import React, { useState } from 'react';
@@ -348,7 +349,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 pt-6 border-t border-[var(--theme-border-subtle)] text-center select-none">
-            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold tracking-[0.16em] uppercase">SIIFMART Operations v{APP_VERSION}</p>
           </div>
         </div>
 

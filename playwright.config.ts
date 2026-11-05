@@ -13,7 +13,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
     },
     webServer: {
-        command: `${staging ? 'npm run dev:staging' : 'npm run dev'} -- --host 127.0.0.1`,
+        command: `${staging ? 'npm run dev:staging' : 'npm run dev'} -- --host 127.0.0.1 --port ${port}`,
         url: `http://127.0.0.1:${port}/tests/e2e/pack-flow-harness.html`,
         reuseExistingServer: !process.env.CI,
         timeout: 30_000,
