@@ -26,6 +26,10 @@ export interface GetMerchandisingOptions {
 }
 
 export const inventoryRequestsService = {
+    async applyCatalogRequest(id: string): Promise<string> {
+        const {data,error}=await supabase.rpc('apply_inventory_catalog_request',{p_request:id});
+        if(error)throw error;if(typeof data!=='string')throw new Error('Catalog approval was not confirmed');return data;
+    },
     async applyStockRequest(id: string) {
         const {data,error}=await supabase.rpc('apply_inventory_stock_request',{p_request:id});
         if(error)throw error;if(data?.saved!==true||data?.requestId!==id)throw new Error('Stock adjustment was not confirmed');

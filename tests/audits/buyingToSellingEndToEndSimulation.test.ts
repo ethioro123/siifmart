@@ -456,7 +456,6 @@ describe('End-to-End Buying-to-Selling Stateful Simulation', () => {
       change: 0,
       cashierName: 'Ifnan Gobena',
       countryCode: 'ET',
-      currency: 'ETB',
       type: 'In-Store',
       pointsRedeemed: 5,
       items: [],

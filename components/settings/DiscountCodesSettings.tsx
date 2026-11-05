@@ -177,11 +177,11 @@ const DiscountCodesSettings: React.FC = () => {
 
   const getStatusColor = (status: DiscountCode['status']) => {
     switch (status) {
-      case 'Active': return 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20';
-      case 'Expired': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
-      case 'Disabled': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
-      case 'Scheduled': return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
-      default: return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
+      case 'Active': return 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20';
+      case 'Expired': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
+      case 'Disabled': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
+      case 'Scheduled': return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
+      default: return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
     }
   };
 
@@ -201,10 +201,10 @@ const DiscountCodesSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
               <Tag className="w-4.5 h-4.5" />
             </div>
             Discount & Promotional Codes
@@ -217,13 +217,13 @@ const DiscountCodesSettings: React.FC = () => {
           <button
             onClick={handleOpenCreate}
             disabled={isPending}
-            className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="min-h-11 sm:h-9 px-4 bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40 touch-manipulation"
           >
             {isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
             Create Code
           </button>
         ) : (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-secondary)] font-medium">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-secondary)] font-medium">
             <Lock size={13} />
             <span>HQ Managed</span>
           </div>
@@ -231,8 +231,8 @@ const DiscountCodesSettings: React.FC = () => {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 flex items-start gap-3 shadow-xs">
-        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
           <AlertTriangle className="w-4 h-4" />
         </div>
         <div className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
@@ -243,24 +243,24 @@ const DiscountCodesSettings: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border-[var(--theme-border)] shadow-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Total Codes</p>
           <p className="text-2xl font-bold text-[var(--theme-text-primary)]">{discountCodes.length}</p>
         </div>
-        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border-[var(--theme-border)] shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Active</p>
           <p className="text-2xl font-bold text-[var(--theme-accent)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Active').length}
           </p>
         </div>
-        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border-[var(--theme-border)] shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Scheduled</p>
           <p className="text-2xl font-bold text-[var(--theme-status-warning-text)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Scheduled').length}
           </p>
         </div>
-        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border-[var(--theme-border)] shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Expired</p>
           <p className="text-2xl font-bold text-[var(--theme-text-secondary)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Expired').length}
@@ -269,8 +269,8 @@ const DiscountCodesSettings: React.FC = () => {
       </div>
 
       {/* Codes List */}
-      <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
-        <div className="grid-cols-12 gap-4 px-4 py-3 bg-[var(--theme-bg-subtle)] text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider border-b border-[var(--theme-border)]">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs overflow-x-auto">
+        <div className="min-w-[640px] grid grid-cols-12 gap-4 px-4 py-3 bg-[var(--theme-bg-subtle)] text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider border-b border-[var(--theme-border)]">
           <div className="col-span-3">Code</div>
           <div className="col-span-2">Type</div>
           <div className="col-span-3">Valid Period</div>
@@ -291,23 +291,23 @@ const DiscountCodesSettings: React.FC = () => {
               const effectiveStatus = getEffectiveStatus(code);
               const codeCurrency = code.currency || currentCurrency;
               return (
-                <div key={code.id} className="grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                <div key={code.id} className="min-w-[640px] grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
                   {/* Code */}
                   <div className="col-span-3">
                     <div className="flex items-center gap-2">
-                      <code className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-mono text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold text-xs tracking-wider">
+                      <code className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-mono text-[var(--theme-accent)] font-semibold text-xs tracking-wider">
                         {showCode[code.id] ? code.code : '••••••••'}
                       </code>
                       <button
                         onClick={() => toggleShowCode(code.id)}
-                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
+                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer touch-manipulation"
                         title={showCode[code.id] ? "Hide Code" : "Show Code"}
                       >
                         {showCode[code.id] ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                       <button
                         onClick={() => handleCopyCode(code.code)}
-                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] dark:hover:text-[var(--theme-accent)] transition-colors cursor-pointer"
+                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] transition-colors cursor-pointer touch-manipulation"
                         title="Copy Code"
                         aria-label="Copy code to clipboard"
                       >
@@ -321,9 +321,9 @@ const DiscountCodesSettings: React.FC = () => {
                   <div className="col-span-2">
                     <div className="flex items-center gap-1.5">
                       {code.type === 'PERCENTAGE' ? (
-                        <Percent className="w-3.5 h-3.5 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                        <Percent className="w-3.5 h-3.5 text-[var(--theme-accent)]" />
                       ) : (
-                        <DollarSign className="w-3.5 h-3.5 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
+                        <DollarSign className="w-3.5 h-3.5 text-[var(--theme-accent)]" />
                       )}
                       <span className="font-semibold text-xs text-[var(--theme-text-primary)]">
                         {code.type === 'PERCENTAGE' ? `${code.value}%` : formatCompactNumber(code.value, { currency: codeCurrency })}
@@ -357,7 +357,7 @@ const DiscountCodesSettings: React.FC = () => {
 
                   {/* Status */}
                   <div className="col-span-2">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${getStatusColor(effectiveStatus)}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${getStatusColor(effectiveStatus)}`}>
                       {effectiveStatus === 'Active' && <CheckCircle size={12} />}
                       {effectiveStatus === 'Expired' && <XCircle size={12} />}
                       {effectiveStatus === 'Disabled' && <XCircle size={12} />}
@@ -373,7 +373,7 @@ const DiscountCodesSettings: React.FC = () => {
                         <button
                           onClick={() => handleOpenEdit(code)}
                           disabled={isPending}
-                          className="p-1.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
+                          className="min-h-11 sm:min-h-8 min-w-11 sm:min-w-8 flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer touch-manipulation"
                           title="Edit Discount Code"
                         >
                           <Edit2 size={14} />
@@ -383,13 +383,13 @@ const DiscountCodesSettings: React.FC = () => {
                             <button
                               onClick={() => handleDelete(code.id)}
                               disabled={isPending}
-                              className="px-2 py-0.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
+                              className="min-h-11 sm:min-h-7 px-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50 touch-manipulation"
                             >
                               Confirm
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="px-2 py-0.5 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] text-[10px] rounded-lg cursor-pointer"
+                              className="min-h-11 sm:min-h-7 px-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-[10px] rounded-lg cursor-pointer touch-manipulation"
                             >
                               Cancel
                             </button>
@@ -398,7 +398,7 @@ const DiscountCodesSettings: React.FC = () => {
                           <button
                             onClick={() => setDeleteConfirm(code.id)}
                             disabled={isPending}
-                            className="p-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors cursor-pointer"
+                            className="min-h-11 sm:min-h-8 min-w-11 sm:min-w-8 flex items-center justify-center text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors cursor-pointer touch-manipulation"
                             title="Delete Discount Code"
                           >
                             <Trash2 size={14} />

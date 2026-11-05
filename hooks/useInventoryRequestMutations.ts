@@ -61,19 +61,8 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
 
             // 1. Apply the change to production
             if (change.changeType === 'create' && change.proposedChanges) {
-                const productToCreate = {
-                    ...change.proposedChanges,
-                    approvalStatus: 'approved' as const,
-                    approvedBy: user?.name,
-                    approvedAt: new Date().toISOString()
-                };
-                resultProduct = await productsService.create(productToCreate as Product);
-                if (resultProduct && resultProduct.id) {
-                    success = true;
-                    if (createPutawayJob && (change.adjustmentQty || 0) > 0) {
-                        await createPutawayJob(resultProduct, change.adjustmentQty || 0, user?.name || 'System', 'Approved Creation');
-                    }
-                }
+                await inventoryRequestsService.applyCatalogRequest(change.id);
+                return { success: true, change };
             }
             else if (change.changeType === 'delete') {
                 await productsService.cascadeDelete(change.productId);
