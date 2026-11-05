@@ -22,8 +22,8 @@ export function DeleteSiteModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Facility History Protected">
       <div className="space-y-5 text-[var(--theme-text-primary)]">
-        <div className="p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center shrink-0">
+        <div className="p-4 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] flex items-center justify-center shrink-0">
             <ShieldAlert size={18} className="text-[var(--theme-status-warning-text)]" />
           </div>
           <div className="space-y-1">
@@ -40,11 +40,11 @@ export function DeleteSiteModal({
           To decommission or transition this facility, submit a formal closure request through executive governance. Outstanding orders and stock transfers must be resolved first.
         </p>
 
-        <div className="pt-3 border-t border-[var(--theme-border)] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+        <div className="pt-3 border-t border-[var(--theme-border)] flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 px-4 rounded-xl border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
+            className="min-h-11 px-4 rounded-xl border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
           >
             <X size={14} />
             Close

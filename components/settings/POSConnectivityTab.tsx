@@ -52,7 +52,7 @@ export function POSConnectivityTab({
               <div className="w-2 h-2 rounded-full bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]" />
               Active Tender Methods
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid-cols-2 md:grid-cols-4 gap-3">
               {['Cash', 'Card', 'Mobile Money', 'Store Credit'].map(method => {
                 const methodKey = `payment_${method.toLowerCase().replace(' ', '_')}` as keyof typeof payments;
                 const isActive = payments[methodKey];
@@ -63,12 +63,12 @@ export function POSConnectivityTab({
                     role="checkbox"
                     aria-checked={isActive}
                     onClick={() => setPayments(prev => ({ ...prev, [methodKey]: !isActive }))}
-                    className={`min-h-[88px] h-28 rounded-xl border transition-colors flex flex-col items-center justify-center gap-2.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${isActive
+                    className={`min-h-[88px] h-28 rounded-xl border transition-colors flex-col items-center justify-center gap-2.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 ${isActive
                       ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                       : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-accent,var(--theme-border))]'
                     }`}
                   >
-                    <div className={`p-2.5 rounded-lg transition-transform ${isActive ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
+                    <div className={`p-2.5 rounded-lg transition-transform ${isActive ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'}`}>
                       {method === 'Cash' ? <Banknote size={20} /> : method === 'Card' ? <CreditCard size={20} /> : method === 'Mobile Money' ? <Smartphone size={20} /> : <UserCheck size={20} />}
                     </div>
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-center px-2">{method}</span>
@@ -78,7 +78,7 @@ export function POSConnectivityTab({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-[var(--theme-border)]">
+          <div className="grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-[var(--theme-border)]">
             <ToggleRow
               label="Digital Receipts"
               sub="SMS & Email checkout slips"
@@ -134,7 +134,7 @@ export function POSConnectivityTab({
                     }, 250);
                   }
                 }}
-                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-text-secondary)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
+                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:border-[var(--theme-text-secondary)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
               >
                 <Printer size={14} />
                 Print Test Slip

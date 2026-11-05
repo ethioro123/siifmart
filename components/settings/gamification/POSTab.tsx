@@ -43,7 +43,7 @@ export const POSTab: React.FC = () => {
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* POS HEADER INFO */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Store size={18} />
                 </div>
@@ -56,8 +56,8 @@ export const POSTab: React.FC = () => {
             </div>
 
             {/* POS MAIN CONTROLS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+            <div className="grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
@@ -81,7 +81,7 @@ export const POSTab: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
                         <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Calendar size={20} />
@@ -95,7 +95,7 @@ export const POSTab: React.FC = () => {
                         title="Select POS payout frequency"
                         value={posPayoutFrequency}
                         onChange={(e) => setPosPayoutFrequency(e.target.value as any)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
+                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
                     >
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
@@ -103,7 +103,7 @@ export const POSTab: React.FC = () => {
                     </select>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
                         <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Percent size={20} />
@@ -113,14 +113,14 @@ export const POSTab: React.FC = () => {
                             <p className="text-[11px] text-[var(--theme-text-secondary)]">Target: exactly 100%</p>
                         </div>
                     </div>
-                    <div className={`w-full text-center py-2 rounded-xl font-semibold text-xs border ${totalRolePercentage === 100 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'}`}>
+                    <div className={`w-full text-center py-2 rounded-xl font-semibold text-xs border ${totalRolePercentage === 100 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'}`}>
                         {totalRolePercentage}% allocated
                     </div>
                 </div>
             </div>
 
             {/* STORE ELIGIBILITY SECTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -139,7 +139,7 @@ export const POSTab: React.FC = () => {
                         <p>No retail stores configured</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {stores.map(store => {
                             const isEnabled = store.bonusEnabled !== false;
                             return (
@@ -169,7 +169,7 @@ export const POSTab: React.FC = () => {
                                         </button>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-[var(--theme-border)]">
-                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             {isEnabled ? 'Earning team points' : 'Not participating'}
                                         </p>
                                     </div>
@@ -180,7 +180,7 @@ export const POSTab: React.FC = () => {
                 )}
 
                 <div className="flex gap-4 text-xs">
-                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
+                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] font-semibold">
                         <div className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]"></div>
                         {stores.filter(s => s.bonusEnabled !== false).length} stores enabled
                     </div>
@@ -192,7 +192,7 @@ export const POSTab: React.FC = () => {
             </div>
 
             {/* POS BONUS TIERS */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -207,7 +207,7 @@ export const POSTab: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => handleResetDefaults('pos')}
-                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-colors cursor-pointer"
+                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border-[var(--theme-border)] transition-colors cursor-pointer"
                         >
                             Reset Defaults
                         </button>
@@ -225,7 +225,7 @@ export const POSTab: React.FC = () => {
                     {useGamification().posBonusTiers.sort((a, b) => a.minPoints - b.minPoints).map((tier, index) => (
                         <div
                             key={tier.id}
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 transition-all group"
+                            className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3.5 transition-all group"
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getColorClass(tier.tierColor)} flex items-center justify-center shrink-0`}>
@@ -273,7 +273,7 @@ export const POSTab: React.FC = () => {
             </div>
 
             {/* ROLE DISTRIBUTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -302,7 +302,7 @@ export const POSTab: React.FC = () => {
             </div>
 
             {/* POS POINT RULES */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -317,7 +317,7 @@ export const POSTab: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => handleResetDefaults('pos')}
-                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-colors cursor-pointer"
+                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border-[var(--theme-border)] transition-colors cursor-pointer"
                         >
                             Reset Defaults
                         </button>
@@ -341,12 +341,12 @@ export const POSTab: React.FC = () => {
                 />
 
                 {/* Point Calculation Preview */}
-                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl space-y-3">
+                <div className="p-4 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl space-y-3">
                     <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                         <Target className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={15} />
                         Example: Selling 5 Electronics + 10 Grocery items = {currency} 2,500
                     </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="grid-cols-2 md:grid-cols-4 gap-2">
                         {(() => {
                             const electronicsRule = posPointRules.find(r => r.enabled && r.categoryId === 'Electronics');
                             const groceryRule = posPointRules.find(r => r.enabled && r.categoryId === 'Groceries');
@@ -361,7 +361,7 @@ export const POSTab: React.FC = () => {
                             ];
 
                             return items.map((item, idx) => (
-                                <div key={idx} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg p-2 text-center">
+                                <div key={idx} className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-lg p-2 text-center">
                                     <p className="text-[10px] text-[var(--theme-text-secondary)]">{item.label}</p>
                                     <p className="text-sm font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-0.5">
                                         +{item.points}

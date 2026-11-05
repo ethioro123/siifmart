@@ -236,7 +236,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -264,7 +264,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">
                     {/* Region Name & Code */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Region Name *
@@ -275,7 +275,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 onChange={(e) => handleNameChange(e.target.value)}
                                 placeholder="e.g. Mombasa Coastal"
                                 required
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             />
                         </div>
                         <div>
@@ -310,7 +310,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 }`}
                             />
                             {!codeValidation.valid && (
-                                <div className="mt-1.5 p-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-lg flex items-center justify-between gap-1 text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
+                                <div className="mt-1.5 p-2 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-lg flex items-center justify-between gap-1 text-[11px] text-[var(--theme-status-warning-text)]">
                                     <div className="flex items-center gap-1.5 min-w-0 pr-1">
                                         <AlertTriangle size={12} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                                         <span className="truncate">{codeValidation.error}</span>
@@ -319,7 +319,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => handleApplySuggestion(codeValidation.suggestedCode!)}
-                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] bg-[var(--theme-status-warning-bg)] transition-colors cursor-pointer text-[10px]"
+                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-warning-border)] hover:bg-[var(--theme-status-warning-border)]/20 transition-colors cursor-pointer text-[10px]"
                                         >
                                             Use {codeValidation.suggestedCode}
                                         </button>
@@ -342,7 +342,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                     value={city}
                                     onChange={(e) => handleCityChange(e.target.value)}
                                     placeholder="e.g. Mombasa"
-                                    className="w-full pl-8 pr-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                    className="w-full pl-8 pr-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>
                         </div>
@@ -356,7 +356,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <select
                             value={adminHubSiteId}
                             onChange={(e) => setAdminHubSiteId(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         >
                             <option value="">Designate Later / Virtual Office</option>
                             {administrationSites.map(s => (
@@ -375,7 +375,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <select
                             value={regionalManagerId}
                             onChange={(e) => setRegionalManagerId(e.target.value)}
-                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         >
                             <option value="">Select Later (Unassigned)</option>
                             {countryEmployees.map(e => (
@@ -397,7 +397,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             maxLength={500}
                             rows={2}
                             placeholder="Record the business reason for this change"
-                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         />
                     </div>
 

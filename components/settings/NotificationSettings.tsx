@@ -76,7 +76,7 @@ export default function NotificationSettings() {
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Bell size={18} />
                 </div>
@@ -93,19 +93,19 @@ export default function NotificationSettings() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* EMAIL CONFIG (SMTP) */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-5">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex-col justify-between space-y-5">
                     <div>
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center">
                                 <Mail size={20} />
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
                                     emailEnabled
-                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {emailEnabled ? 'Active' : 'Disabled'}
@@ -128,7 +128,7 @@ export default function NotificationSettings() {
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] mb-1">Email Settings (SMTP)</h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mb-4">Transactional mail relay for receipts, invoices, and operational alerts.</p>
 
-                        <div className="space-y-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
+                        <div className="space-y-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border-[var(--theme-border)]">
                             <div>
                                 <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block mb-1">SMTP Server Host</label>
                                 <input
@@ -136,10 +136,10 @@ export default function NotificationSettings() {
                                     value="smtp.postmarkapp.com"
                                     aria-label="SMTP Host"
                                     readOnly
-                                    className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
+                                    className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid-cols-2 gap-3">
                                 <div>
                                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block mb-1">Port</label>
                                     <input
@@ -147,7 +147,7 @@ export default function NotificationSettings() {
                                         value="587"
                                         aria-label="SMTP Port"
                                         readOnly
-                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
+                                        className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
                                     />
                                 </div>
                                 <div>
@@ -157,7 +157,7 @@ export default function NotificationSettings() {
                                         value="TLS Encrypted"
                                         aria-label="SMTP Security"
                                         readOnly
-                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
+                                        className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
                                     />
                                 </div>
                             </div>
@@ -176,16 +176,16 @@ export default function NotificationSettings() {
                 </div>
 
                 {/* SMS CONFIG */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-5">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex-col justify-between space-y-5">
                     <div>
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center">
                                 <MessageSquare size={20} />
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
                                     smsEnabled
-                                        ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
+                                        ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {smsEnabled ? 'Active' : 'Disabled'}
@@ -212,11 +212,11 @@ export default function NotificationSettings() {
                         <p className="text-xs text-[var(--theme-text-secondary)] mb-4">Cellular SMS dispatch for driver dispatch, delivery updates, and OTPs.</p>
 
                         {!smsEnabled ? (
-                            <div className="text-[var(--theme-text-secondary)] text-xs py-8 text-center border border-dashed border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-subtle)] font-medium">
+                            <div className="text-[var(--theme-text-secondary)] text-xs py-8 text-center border-dashed border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-subtle)] font-medium">
                                 SMS Notifications are currently disabled. Enable the toggle above to configure cellular dispatch.
                             </div>
                         ) : (
-                            <div className="space-y-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
+                            <div className="space-y-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border-[var(--theme-border)]">
                                 <div>
                                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block mb-1">Provider</label>
                                     <input
@@ -224,7 +224,7 @@ export default function NotificationSettings() {
                                         value={activeCountry === 'ET' ? 'Ethio Telecom Enterprise SMS' : 'Safaricom SMS / Africa\'s Talking'}
                                         aria-label="SMS Provider"
                                         readOnly
-                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
+                                        className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
                                     />
                                 </div>
                                 <div>
@@ -234,7 +234,7 @@ export default function NotificationSettings() {
                                         value={activeCountry === 'ET' ? 'SIIFMART (+251 911 000 000)' : 'SIIFMART (+254 700 000 000)'}
                                         aria-label="SMS From Number"
                                         readOnly
-                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
+                                        className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none"
                                     />
                                 </div>
                             </div>
@@ -254,7 +254,7 @@ export default function NotificationSettings() {
             </div>
 
             {/* TEMPLATES */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Notification Templates</h3>
@@ -266,7 +266,7 @@ export default function NotificationSettings() {
                     {templates.map(tmpl => (
                         <div
                             key={tmpl.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-all group"
+                            className="flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-all group"
                         >
                             <div className="flex items-start sm:items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
@@ -275,7 +275,7 @@ export default function NotificationSettings() {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-semibold text-[var(--theme-text-primary)]">{tmpl.name}</span>
-                                        <span className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
+                                        <span className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                             {tmpl.channel}
                                         </span>
                                     </div>
@@ -287,7 +287,7 @@ export default function NotificationSettings() {
                                 <button
                                     type="button"
                                     onClick={() => setEditingTemplate(tmpl)}
-                                    className="h-8 px-3 text-xs bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-semibold transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
+                                    className="h-8 px-3 text-xs bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border-[var(--theme-border)] rounded-xl font-semibold transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
                                 >
                                     <Edit2 size={12} /> Edit
                                 </button>
@@ -315,7 +315,7 @@ export default function NotificationSettings() {
                             <button
                                 type="button"
                                 onClick={() => setEditingTemplate(null)}
-                                className="h-9 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors"
+                                className="h-9 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors"
                             >
                                 Cancel
                             </button>
@@ -336,7 +336,7 @@ export default function NotificationSettings() {
                                 type="text"
                                 value={editingTemplate.subject}
                                 onChange={(e) => setEditingTemplate({ ...editingTemplate, subject: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -345,11 +345,11 @@ export default function NotificationSettings() {
                                 rows={5}
                                 value={editingTemplate.body}
                                 onChange={(e) => setEditingTemplate({ ...editingTemplate, body: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
-                        <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] text-[var(--theme-text-secondary)]">
-                            <strong className="font-semibold text-[var(--theme-text-primary)]">Dynamic Variables:</strong> <code className="font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{customer_name}}"}</code>, <code className="font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{order_number}}"}</code>, <code className="font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{total_amount}}"}</code>
+                        <div className="p-3 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[11px] text-[var(--theme-text-secondary)]">
+                            <strong className="font-semibold text-[var(--theme-text-primary)]">Dynamic Variables:</strong> <code className="font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{customer_name}}"}</code>, <code className="font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{order_number}}"}</code>, <code className="font-mono bg-[var(--theme-bg-card)] border-[var(--theme-border)] px-1.5 py-0.5 rounded text-[var(--theme-text-primary)]">{"{{total_amount}}"}</code>
                         </div>
                     </div>
                 </Modal>

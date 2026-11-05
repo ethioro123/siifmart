@@ -16,19 +16,19 @@ interface SecurityCardProps {
 }
 
 const SecurityCard: React.FC<SecurityCardProps> = ({ title, status, desc, icon: Icon }) => (
-    <div className="p-4 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs flex flex-col justify-between">
+    <div className="p-4 rounded-2xl border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs flex-col justify-between">
         <div>
             <div className="flex justify-between items-start mb-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                    status === 'secure' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
-                    status === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' :
-                    'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                    status === 'secure' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' :
+                    status === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]' :
+                    'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]'
                 }`}>
                     <Icon size={18} />
                 </div>
-                {status === 'secure' && <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />}
-                {status === 'warning' && <AlertTriangle size={16} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />}
-                {status === 'critical' && <AlertTriangle size={16} className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]" />}
+                {status === 'secure' && <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)]" />}
+                {status === 'warning' && <AlertTriangle size={16} className="text-[var(--theme-status-warning-text)]" />}
+                {status === 'critical' && <AlertTriangle size={16} className="text-[var(--theme-status-danger-text)]" />}
             </div>
             <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs mb-1">{title}</h4>
             <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">{desc}</p>
@@ -45,7 +45,7 @@ interface PolicyToggleProps {
 const PolicyToggle: React.FC<PolicyToggleProps> = ({ label, enabled, onChange }) => (
     <div
         onClick={onChange}
-        className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer"
+        className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer"
     >
         <span className="font-medium text-[var(--theme-text-primary)] text-xs pr-3">{label}</span>
         <button
@@ -157,7 +157,7 @@ export default function SecuritySettings() {
             <RetailLossPreventionCard />
 
             {/* STATUS CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid-cols-1 md:grid-cols-3 gap-4">
                 <SecurityCard
                     title="SSL / TLS 1.3 Transport Security"
                     status="secure"
@@ -178,17 +178,17 @@ export default function SecuritySettings() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* GLOBAL POLICIES */}
-                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
+                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                         <Lock size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                         Global Authentication Policies
                     </h3>
 
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid-cols-1 md:grid-cols-2 gap-3">
                             <PolicyToggle
                                 label="Enforce MFA for Admins"
                                 enabled={policies.enforceMfaAdmin}
@@ -212,7 +212,7 @@ export default function SecuritySettings() {
                         </div>
 
                         {/* Administrative IP Allowlist */}
-                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
+                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3">
                             <h5 className="font-semibold text-[var(--theme-text-primary)] text-xs flex items-center gap-2">
                                 <Network size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                 Administrative IP Allowlist
@@ -226,7 +226,7 @@ export default function SecuritySettings() {
                                     value={ipInput}
                                     onChange={(e) => setIpInput(e.target.value)}
                                     placeholder="e.g. 192.168.1.0/24"
-                                    className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none font-mono transition-colors"
+                                    className="flex-1 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none font-mono transition-colors"
                                 />
                                 <button
                                     type="button"
@@ -238,9 +238,9 @@ export default function SecuritySettings() {
                             </div>
 
                             {ipList.length > 0 && (
-                                <div className="flex flex-wrap gap-2 pt-1">
+                                <div className="flex-wrap gap-2 pt-1">
                                     {ipList.map((ip) => (
-                                        <span key={ip} className="px-2.5 py-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-xs font-mono text-[var(--theme-text-primary)] flex items-center gap-1.5">
+                                        <span key={ip} className="px-2.5 py-1 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-lg text-xs font-mono text-[var(--theme-text-primary)] flex items-center gap-1.5">
                                             {ip}
                                             <button
                                                 type="button"
@@ -260,7 +260,7 @@ export default function SecuritySettings() {
 
                 {/* COMPLIANCE & DATA */}
                 <div className="space-y-6">
-                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+                    <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                         <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             Audit & Data Retention
                         </h3>
@@ -276,7 +276,7 @@ export default function SecuritySettings() {
                                         setRetentionDrawer(e.target.value);
                                         showToast('Audit log retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                                 >
                                     <option>Keep Indefinitely (Recommended)</option>
                                     <option>Delete after 3 years</option>
@@ -294,7 +294,7 @@ export default function SecuritySettings() {
                                         setRetentionBarcode(e.target.value);
                                         showToast('Barcode approval retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                                 >
                                     <option>Keep for 7 years (Audit Trail)</option>
                                     <option>Keep Indefinitely</option>
@@ -303,7 +303,7 @@ export default function SecuritySettings() {
                         </div>
                     </div>
 
-                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-3">
+                    <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-3">
                         <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             Security Compliance Export
                         </h3>
@@ -313,7 +313,7 @@ export default function SecuritySettings() {
                         <button
                             type="button"
                             onClick={handleExportAudit}
-                            className="w-full h-9 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="w-full h-9 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <Download size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             <span>Export Certified Audit Log</span>

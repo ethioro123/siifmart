@@ -49,7 +49,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className={`w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl py-2 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40 disabled:opacity-50 ${paddingLeft}`}
+                    className={`w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl py-2 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40 disabled:opacity-50 ${paddingLeft}`}
                 />
                 {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
             </div>
@@ -73,7 +73,7 @@ export interface RadioCardProps<T extends string = string> {
 
 export function RadioCard<T extends string = string>({ options, value, onChange, disabled = false }: RadioCardProps<T>) {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="grid-cols-1 sm:grid-cols-2 gap-2.5">
             {options.map((opt) => (
                 <button
                     key={opt.value}
@@ -111,7 +111,7 @@ export interface ToggleRowProps {
 }
 
 export const ToggleRow: React.FC<ToggleRowProps> = ({ label, sub, checked = false, onChange, disabled = false }) => (
-    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">
+    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">
         <div className="space-y-0.5 pr-2">
             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{label}</p>
             {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">{sub}</p>}

@@ -58,7 +58,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                                 <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs">{rule.name}</h4>
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                     {rule.type}
                                 </span>
                                 {rule.multiplier && rule.multiplier > 1 && (
@@ -79,13 +79,13 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
 
                         <div className="text-right px-3 border-l border-[var(--theme-border)]">
                             <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Points/Unit</p>
-                            <p className="text-sm font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">+{rule.pointsPerUnit}</p>
+                            <p className="text-sm font-semibold text-[var(--theme-accent)]">+{rule.pointsPerUnit}</p>
                         </div>
 
                         {rule.pointsPerRevenue && (
                             <div className="text-right px-3 border-l border-[var(--theme-border)]">
                                 <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Per {currency}{rule.revenueThreshold}</p>
-                                <p className="text-sm font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">+{rule.pointsPerRevenue}</p>
+                                <p className="text-sm font-semibold text-[var(--theme-status-success-text)]">+{rule.pointsPerRevenue}</p>
                             </div>
                         )}
 
@@ -98,7 +98,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                             <button
                                 type="button"
                                 onClick={() => openPointRuleModal(rule)}
-                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
+                                className="min-h-[32px] min-w-[32px] p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
                                 title="Edit Rule"
                                 aria-label="Edit Rule"
                             >
@@ -107,7 +107,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                             <button
                                 type="button"
                                 onClick={() => handleDeletePointRule(rule.id)}
-                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
+                                className="min-h-[32px] min-w-[32px] p-1.5 rounded-lg text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
                                 title="Delete Rule"
                                 aria-label="Delete Rule"
                             >

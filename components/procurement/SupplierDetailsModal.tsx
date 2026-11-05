@@ -16,19 +16,19 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
     if (!supplier) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Supplier Details: ${supplier.name || ''}`} size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={`Supplier Details: ${supplier.name || ''}`} size="lg" mobileFullScreen>
             <div className="space-y-6">
                 {/* Status & Overview */}
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                    <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                    <div className="flex-1 min-w-[90px]">
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Category</p>
                         <p className="text-[var(--theme-text-primary)] font-bold text-sm mt-0.5">{supplier.category || 'General'}</p>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-[90px]">
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Type</p>
                         <p className="text-[var(--theme-text-primary)] font-bold text-sm mt-0.5">{supplier.type}</p>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-[120px]">
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Status</p>
                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border mt-0.5 ${
                             supplier.status === 'Active'
@@ -42,7 +42,7 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                 </div>
 
                 {/* Performance Stats */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-center">
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Performance</p>
                         <div className="flex items-center justify-center gap-1 text-[var(--theme-status-warning-text)] font-bold font-mono tabular-nums text-sm">

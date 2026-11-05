@@ -77,7 +77,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
     if (!supplier) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Products from ${supplier.name || 'Supplier'}`} size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={`Products from ${supplier.name || 'Supplier'}`} size="xl" mobileFullScreen>
             <div className="space-y-4">
                 {/* Header Banner */}
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center gap-3">
@@ -234,7 +234,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                         onAddToPO(product);
                                         showToast(`Added "${product.name}" to PO`, 'info');
                                     }}
-                                    className="w-full mt-3 h-9 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-full transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                                    className="w-full mt-3 min-h-[40px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-full transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation"
                                 >
                                     <Plus size={14} strokeWidth={2} /> Add to Order
                                 </button>

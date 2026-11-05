@@ -135,14 +135,14 @@ export default function WMSSettings() {
     );
 
     const activeProfile = getCountryProfile(activeCountry);
-    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs";
+    const cardBase = "bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs";
 
     return (
         <React.Fragment>
         {/* ── ROLE GATE — L3/L4 staff cannot access WMS configuration ── */}
         {!canConfigureWMS && (
-            <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center">
+            <div className="flex-col items-center justify-center py-24 gap-4 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex items-center justify-center">
                     <Lock size={22} className="text-[var(--theme-text-secondary)]" />
                 </div>
                 <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm">Access Restricted</h3>
@@ -155,7 +155,7 @@ export default function WMSSettings() {
 
         <div className={`w-full max-w-full space-y-6 ${canConfigureWMS ? 'block' : 'hidden'}`}>
             {/* Tab Switcher */}
-            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] mb-6">
                 {[
                     { id: 'rules' as const, label: 'Fulfillment Rules', icon: Package },
                     { id: 'pick-control' as const, label: 'Pick Control Hub', icon: Scan },
@@ -181,7 +181,7 @@ export default function WMSSettings() {
 
             {activeTab === 'rules' && (
                 <div className="space-y-6">
-                    <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
+                    <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
                         <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0 mt-0.5" size={20} />
                         <div>
                             <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Enterprise WMS Engine</h4>
@@ -191,7 +191,7 @@ export default function WMSSettings() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* INBOUND STRATEGY */}
                         <div className={cardBase}>
                             <SectionHeader title="Inbound Strategy" desc="Receiving, QC, and Putaway" />
@@ -207,12 +207,12 @@ export default function WMSSettings() {
                                     onChange={(val) => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                                 />
                                 {inbound.receivingLogic === 'verified' && (
-                                    <div className="flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-[11px] text-[var(--theme-status-warning-text)] font-medium">
+                                    <div className="flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-xl text-[11px] text-[var(--theme-status-warning-text)] font-medium">
                                         <AlertTriangle size={14} className="shrink-0" />
                                         <span>Verified Receive exposes expected quantities to staff. Zero-trust blind receiving is recommended.</span>
                                     </div>
                                 )}
-                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-4">
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-4">
                                     <SliderGroup
                                         label="QC Sampling Rate"
                                         icon={Search}
@@ -351,7 +351,7 @@ export default function WMSSettings() {
                                         value={outbound.pickingMethod}
                                         onChange={(val) => setOutbound(prev => ({ ...prev, pickingMethod: val }))}
                                     />
-                                    <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
+                                    <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3">
                                         <ToggleRow
                                             label="Strict Barcode Validation"
                                             checked={outbound.strictScanning}
@@ -366,7 +366,7 @@ export default function WMSSettings() {
                                             warning={!isHQAdmin ? 'HQ Executive Admin required to toggle barcode scanning' : undefined}
                                         />
                                         {!outbound.strictScanning && (
-                                            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
+                                            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border-[var(--theme-status-warning-border)]">
                                                 <AlertTriangle size={14} className="shrink-0" />
                                                 <span>Barcode validation disabled — scan fraud risk elevated. HQ audit active.</span>
                                             </div>

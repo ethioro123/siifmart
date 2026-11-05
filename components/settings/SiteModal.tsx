@@ -62,7 +62,7 @@ export function SiteModal({
       <div className="space-y-6">
         <div>
           <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-3 block">Select Location Type</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid-cols-2 md:grid-cols-3 gap-3">
             {[
               { type: 'Administration', label: 'Administration', desc: 'Central Operations', icon: Building },
               { type: 'Warehouse', label: 'Warehouse', desc: 'Storage & Fulfillment', icon: Box },
@@ -96,16 +96,16 @@ export function SiteModal({
         </div>
 
         <div className="border-t border-[var(--theme-border)] pt-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid-cols-1 md:grid-cols-2 gap-4">
             {/* Operating Market & Localization */}
             <div className="md:col-span-2">
               <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2.5 flex items-center gap-1.5">
                 <Globe size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Operating Market & Localization *
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Facility Country Immutability Notice */}
                 {!!newSite.id && (
-                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
+                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-medium">
                     <Lock size={14} className="shrink-0" />
                     <span>Operating market is permanently locked for existing facilities. Sovereign borders cannot be altered after creation.</span>
                   </div>
@@ -155,7 +155,7 @@ export function SiteModal({
               </div>
 
               {/* Country ID & Human-Readable Site ID Sequencing Preview */}
-              <div className="mt-3.5 p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="mt-3.5 p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Hash size={16} />
@@ -163,7 +163,7 @@ export function SiteModal({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Country ID:</span>
-                      <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">
+                      <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-full border-[var(--theme-border)]">
                         {selectedCountry}
                       </span>
                     </div>
@@ -175,7 +175,7 @@ export function SiteModal({
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Site ID:</span>
-                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shadow-xs">
+                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20 shadow-xs">
                     {displaySiteCode}
                   </span>
                   {newSite.id && (
@@ -192,7 +192,7 @@ export function SiteModal({
                 {newSite.type === 'Administration' ? 'Office Name' : 'Location Name'} *
               </label>
               <input
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                 placeholder={
                   newSite.type === 'Administration' ? (newSite.country === 'KE' ? 'e.g. Nairobi Regional Office' : 'e.g. Central Administration HQ') :
                     newSite.type === 'Warehouse' ? (newSite.country === 'KE' ? 'e.g. Nairobi Central Warehouse' : 'e.g. Addis Ababa Central Warehouse') :
@@ -210,7 +210,7 @@ export function SiteModal({
                 {newSite.type === 'Administration' ? 'Office Address' : 'Physical Address'} *
               </label>
               <input
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                 placeholder={newSite.country === 'KE' ? "e.g. Waiyaki Way, Westlands, Nairobi" : "e.g. Bole Medhanialem, Addis Ababa"}
                 value={newSite.address || ''}
                 onChange={(e) => setNewSite({ ...newSite, address: e.target.value })}
@@ -221,7 +221,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Status</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.status || 'Active'}
                 onChange={(e) => setNewSite({ ...newSite, status: e.target.value as Site['status'] })}
                 aria-label="Location Status"
@@ -235,7 +235,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Operational Region</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.region_code || newSite.regionCode || ''}
                 onChange={(e) => setNewSite({ ...newSite, region_code: e.target.value || undefined, regionCode: e.target.value || undefined, areaManagerId: null })}
                 aria-label="Operational Region"
@@ -254,7 +254,7 @@ export function SiteModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Logistics Zone</label>
               <select
-                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.logisticsZoneId || ''}
                 onChange={(e) => setNewSite({ ...newSite, logisticsZoneId: e.target.value || undefined })}
                 aria-label="Logistics Zone"
@@ -281,7 +281,7 @@ export function SiteModal({
                     type="number"
                     min="1"
                     placeholder="e.g. 50 employees"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.capacity || ''}
                     onChange={(e) => setNewSite({ ...newSite, capacity: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Staff Capacity"
@@ -293,7 +293,7 @@ export function SiteModal({
                 <div>
                   <label htmlFor="warehouse-manager-account" className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Warehouse Manager account</label>
                   {newSite.id && canAssignAreaManager ? <select id="warehouse-manager-account"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)]"
                     value={newSite.warehouseManagerId || ''}
                     onChange={e => setNewSite({ ...newSite, warehouseManagerId: e.target.value || null })}>
                     <option value="">Unassigned</option>
@@ -303,7 +303,7 @@ export function SiteModal({
                 {newSite.id && (
                   <div>
                     <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Site Code (ID)</label>
-                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
+                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
                     <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
@@ -315,7 +315,7 @@ export function SiteModal({
                     type="number"
                     min="100"
                     placeholder="e.g. 5000"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.capacity || ''}
                     onChange={(e) => setNewSite({ ...newSite, capacity: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Storage Capacity"
@@ -327,7 +327,7 @@ export function SiteModal({
                     type="number"
                     min="0"
                     placeholder="e.g. 4"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.terminalCount || ''}
                     onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="Loading Docks"
@@ -347,7 +347,7 @@ export function SiteModal({
                 <div>
                   <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Store Manager</label>
                   <input
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     placeholder="Manager name..."
                     value={newSite.manager || ''}
                     onChange={(e) => setNewSite({ ...newSite, manager: e.target.value })}
@@ -361,7 +361,7 @@ export function SiteModal({
                     </label>
                     <select
                       id="store-area-manager"
-                      className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                      className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                       value={newSite.areaManagerId || ''}
                       onChange={(e) => setNewSite({ ...newSite, areaManagerId: e.target.value || null })}
                     >
@@ -378,7 +378,7 @@ export function SiteModal({
                 {newSite.id && (
                   <div>
                     <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Site Code (ID)</label>
-                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
+                    <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
                     <p className="text-[11px] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
@@ -390,7 +390,7 @@ export function SiteModal({
                     type="number"
                     min="1"
                     placeholder="e.g. 3"
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
                     value={newSite.terminalCount || ''}
                     onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     aria-label="POS Terminals"
@@ -401,7 +401,7 @@ export function SiteModal({
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
+        <div className="p-3.5 rounded-2xl border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
           <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed flex items-center gap-2">
             {newSite.type === 'Administration' ? (
               <>
@@ -426,7 +426,7 @@ export function SiteModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all cursor-pointer active:scale-[0.98]"
           >
             Cancel
           </button>

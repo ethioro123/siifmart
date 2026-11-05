@@ -49,14 +49,14 @@ export function POSIdentityTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <GlassCard className="p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)] mb-6">
+        <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)] mb-6">
           <SectionHeader
             title="Receipt Layout & Thermal Branding"
             desc="Configure how your brand appears on printed slips and digital invoices."
             icon={Sparkles}
           />
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl self-start sm:self-auto">
-            <span className="w-5 h-5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center font-bold text-[10px] text-[var(--theme-text-primary)]">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl self-start sm:self-auto">
+            <span className="w-5 h-5 rounded-md bg-[var(--theme-bg-card)] border-[var(--theme-border)] flex items-center justify-center font-bold text-[10px] text-[var(--theme-text-primary)]">
               {selectedCountry}
             </span>
             <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
@@ -70,7 +70,7 @@ export function POSIdentityTab({
 
         <div className="space-y-8">
           {/* Visual Assets */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
+          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
             <div className="lg:col-span-2">
               <InputGroup
                 label="Receipt Logo URL"
@@ -96,7 +96,7 @@ export function POSIdentityTab({
           </div>
 
           {/* Messaging */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <InputGroup
               label="Receipt Header"
               value={receiptBranding.posReceiptHeader}
@@ -126,13 +126,13 @@ export function POSIdentityTab({
                   setReceiptBranding(prev => ({ ...prev, posReceiptPolicy: e.target.value }))
                 }
                 placeholder="Items may be returned within 7 days with valid receipt."
-                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
+                className="w-full h-24 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
               />
             </div>
           </div>
 
           {/* Address & Tax */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid-cols-1 md:grid-cols-3 gap-6">
             <InputGroup
               label="Store Address"
               value={receiptBranding.posReceiptAddress}
@@ -167,7 +167,7 @@ export function POSIdentityTab({
             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
               Thermal Paper Dimensions & Font
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid-cols-1 md:grid-cols-2 gap-6">
               <RadioCard
                 value={receiptBranding.posReceiptWidth}
                 onChange={(val: string) =>
@@ -197,7 +197,7 @@ export function POSIdentityTab({
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[var(--theme-border)] grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="pt-6 border-t border-[var(--theme-border)] grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <ToggleRow
               label="Customer Feedback QR"
               sub="Print survey code on slip bottom"

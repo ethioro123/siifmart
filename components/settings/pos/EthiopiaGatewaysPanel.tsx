@@ -14,10 +14,10 @@ export function EthiopiaGatewaysPanel({
     return (
         <div className="space-y-4">
             {/* TELEBIRR */}
-            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center font-bold text-xs">
                             TB
                         </div>
                         <div>
@@ -50,10 +50,10 @@ export function EthiopiaGatewaysPanel({
             </div>
 
             {/* CBE BIRR */}
-            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center font-bold text-xs">
                             CBE
                         </div>
                         <div>

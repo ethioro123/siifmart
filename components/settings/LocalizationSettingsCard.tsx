@@ -122,14 +122,14 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         </p>
                     </div>
                 </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-mono">
+                <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)] font-mono">
                     {activeProfile.code} Active
                 </span>
             </div>
 
             <div className="space-y-4">
                 {/* Fiscal Profile Summary Tile */}
-                <div className="p-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] space-y-3">
+                <div className="p-4 rounded-xl border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
@@ -143,7 +143,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)]" />
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono border-t border-[var(--theme-border)] pt-2.5">
+                    <div className="grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono border-t border-[var(--theme-border)] pt-2.5">
                         <div>
                             <span className="text-[var(--theme-text-muted)] block">Currency:</span>
                             <strong className="text-[var(--theme-text-primary)]">{activeProfile.currencySymbol} ({activeProfile.currencyCode})</strong>
@@ -165,10 +165,10 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
 
                 {/* Regional Adaptive Notice */}
                 {isKenya && (
-                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start gap-2.5">
-                        <AlertCircle className="w-4 h-4 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] flex items-start gap-2.5">
+                        <AlertCircle className="w-4 h-4 text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                         <div className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
-                            <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] block mb-0.5">
+                            <strong className="font-semibold text-[var(--theme-status-warning-text)] block mb-0.5">
                                 Kenya Localization Active:
                             </strong>
                             Ethiopian regional languages are disabled. Primary tender locked to M-Pesa. Standard KRA tax rate is 16%.
@@ -177,7 +177,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                 )}
 
                 {/* Core Field Controls */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {/* Currency */}
                     <div className="space-y-1.5">
                         <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block flex items-center gap-1.5">
@@ -187,7 +187,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="KSh">Kenyan Shilling (KSh)</option>
                             <option value="ETB">Ethiopian Birr (ETB)</option>
@@ -210,7 +210,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={timezone}
                             onChange={(e) => setTimezone(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="Africa/Nairobi">East Africa Time - Nairobi (UTC+3)</option>
                             <option value="Africa/Addis_Ababa">East Africa Time - Addis Ababa (UTC+3)</option>
@@ -231,7 +231,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                 System Language
                             </label>
                             {isKenya && (
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-warning-border)]">
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 rounded-full border-[var(--theme-status-warning-border)]">
                                     English Standard
                                 </span>
                             )}
@@ -240,7 +240,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={language}
                             disabled={isKenya || !isCeo}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="en">English (Official System Language)</option>
                             {!isKenya && <option value="am">አማርኛ (Amharic)</option>}
@@ -259,11 +259,11 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-1.5">
                                 <Calendar size={13} className="text-[var(--theme-text-muted)]" /> Date Format
                             </label>
-                            <span className="text-[11px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">
+                            <span className="text-[11px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">
                                 {getFormattedDatePreview(dateFormat)}
                             </span>
                         </div>
-                        <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] grid grid-cols-3 gap-1">
+                        <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)] grid-cols-3 gap-1">
                             {(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const).map(fmt => (
                                 <button
                                     key={fmt}

@@ -130,15 +130,15 @@ export default function AuditSettings() {
     const getLevelBadge = (module: string) => {
         switch ((module || '').toLowerCase()) {
             case 'system':
-                return 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
+                return 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
             case 'compliance':
             case 'security':
-                return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
+                return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
             case 'inventory':
             case 'wms':
-                return 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
+                return 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
             case 'hr':
-                return 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]';
+                return 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]';
             case 'finance':
             case 'pos':
                 return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-status-info-border)]';
@@ -170,14 +170,14 @@ export default function AuditSettings() {
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <FileText size={18} />
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">System Audit Log</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] flex items-center gap-1">
                             <ShieldCheck size={11} /> Immutable Ledger
                         </span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
@@ -190,10 +190,10 @@ export default function AuditSettings() {
                 </div>
             </div>
 
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
 
                 {/* TOOLBAR */}
-                <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+                <div className="flex-col md:flex-row gap-3 justify-between items-center">
                     <HistorySearch value={searchTerm} onChange={value => { setSearchTerm(value); setCurrentPage(1); }} label="Search system audit history" placeholder="Search message, product, site, or staff member" />
                     <div className="flex items-center gap-2 w-full md:w-auto">
                         <select
@@ -203,7 +203,7 @@ export default function AuditSettings() {
                                 setCurrentPage(1);
                             }}
                             aria-label="Filter Logs by Module"
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                            className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         >
                             <option value="all">All Modules</option>
                             <option value="Security">Security</option>
@@ -224,7 +224,7 @@ export default function AuditSettings() {
                 </div>
 
                 {/* LOG TABLE */}
-                <div className="overflow-x-auto border border-[var(--theme-border)] rounded-xl">
+                <div className="overflow-x-auto border-[var(--theme-border)] rounded-xl">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
@@ -268,7 +268,7 @@ export default function AuditSettings() {
 
                 {/* PAGINATION CONTROLS (LIMITED TO 25) */}
                 {totalItems > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[var(--theme-border)]">
+                    <div className="flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[var(--theme-border)]">
                         <div className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Showing <strong className="text-[var(--theme-text-primary)] font-semibold">{startIndex}</strong> to <strong className="text-[var(--theme-text-primary)] font-semibold">{endIndex}</strong> of <strong className="text-[var(--theme-text-primary)] font-semibold">{totalItems}</strong> audit logs
                         </div>
@@ -278,7 +278,7 @@ export default function AuditSettings() {
                                 type="button"
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={safeCurrentPage === 1}
-                                className="h-8 px-3 rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                                className="h-8 px-3 rounded-xl border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                             >
                                 <ChevronLeft size={14} /> Prev
                             </button>
@@ -293,7 +293,7 @@ export default function AuditSettings() {
                                 type="button"
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={safeCurrentPage >= totalPages}
-                                className="h-8 px-3 rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                                className="h-8 px-3 rounded-xl border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                             >
                                 Next <ChevronRight size={14} />
                             </button>

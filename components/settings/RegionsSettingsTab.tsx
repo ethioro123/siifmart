@@ -112,13 +112,13 @@ export default function RegionsSettingsTab() {
     return (
         <div className="space-y-6">
             {/* Header / Intro */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
+            <div className="flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                 <div>
                     <div className="flex items-center gap-2">
                         <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
                             Regional Administration & Decentralized Governance
                         </h2>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20">
                             {countryProfile.name}
                         </span>
                     </div>
@@ -126,12 +126,12 @@ export default function RegionsSettingsTab() {
                         Establish regional administrative units with delegated procurement, finance, and logistics authority under National HQ command.
                     </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={loadRegions}
                         title="Refresh regional status"
-                        className="p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
+                        className="p-2 rounded-xl border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
                     >
                         <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
                     </button>
@@ -149,8 +149,8 @@ export default function RegionsSettingsTab() {
             </div>
 
             {/* KPI Summary Deck */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
+            <div className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Active Regions</span>
                         <Building2 size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
@@ -163,7 +163,7 @@ export default function RegionsSettingsTab() {
                     </p>
                 </div>
 
-                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
+                <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Allocated Monthly Budget</span>
                         <DollarSign size={15} className="text-[var(--theme-status-success-text)]" />
@@ -176,7 +176,7 @@ export default function RegionsSettingsTab() {
                     </p>
                 </div>
 
-                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
+                <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Governed Sites</span>
                         <Store size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
@@ -189,7 +189,7 @@ export default function RegionsSettingsTab() {
                     </p>
                 </div>
 
-                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
+                <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>HQ Governance</span>
                         <Shield size={15} className="text-[var(--theme-status-warning-text)]" />
@@ -204,7 +204,7 @@ export default function RegionsSettingsTab() {
             </div>
 
             {/* Filter & Search Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="relative w-full sm:w-72">
                     <Search size={14} className="absolute left-3 top-2.5 text-[var(--theme-text-secondary)]" />
                     <input
@@ -212,13 +212,13 @@ export default function RegionsSettingsTab() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search regions or codes..."
-                        className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                     />
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Filter size={14} className="text-[var(--theme-text-secondary)] hidden sm:block" />
-                    <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-1 text-xs">
+                    <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-1 text-xs">
                         {(['all', 'active', 'suspended', 'planning'] as const).map(tab => (
                             <button
                                 key={tab}
@@ -244,8 +244,8 @@ export default function RegionsSettingsTab() {
                     Loading regional governance structure...
                 </div>
             ) : loadError ? (
-                <div className="border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-2xl p-10 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-center justify-center text-[var(--theme-status-danger-text)] mx-auto mb-3">
+                <div className="border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-2xl p-10 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] flex items-center justify-center text-[var(--theme-status-danger-text)] mx-auto mb-3">
                         <Shield size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
@@ -263,8 +263,8 @@ export default function RegionsSettingsTab() {
                     </button>
                 </div>
             ) : filteredRegions.length === 0 ? (
-                <div className="border border-dashed border-[var(--theme-border)] rounded-2xl p-12 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mx-auto mb-3">
+                <div className="border-dashed border-[var(--theme-border)] rounded-2xl p-12 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mx-auto mb-3">
                         <Building2 size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
@@ -287,7 +287,7 @@ export default function RegionsSettingsTab() {
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className="grid-cols-1 xl:grid-cols-2 gap-4">
                     {filteredRegions.map(region => (
                         <RegionCard
                             key={region.code}

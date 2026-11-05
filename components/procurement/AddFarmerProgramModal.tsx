@@ -70,8 +70,8 @@ export const AddFarmerProgramModal: React.FC<AddFarmerProgramModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-lg w-full space-y-4 sm:space-y-5 shadow-2xl max-h-[92dvh] overflow-y-auto">
         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
@@ -90,7 +90,7 @@ export const AddFarmerProgramModal: React.FC<AddFarmerProgramModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
                 Cooperative / Union Name *
@@ -117,7 +117,7 @@ export const AddFarmerProgramModal: React.FC<AddFarmerProgramModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
                 Origin Region / District *

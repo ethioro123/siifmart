@@ -102,9 +102,9 @@ export default function HRSettings() {
     return (
         <div className="space-y-6 max-w-5xl animate-in fade-in">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
+            <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--theme-bg-card)] rounded-2xl border-[var(--theme-border)] shadow-xs">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                         <Users size={18} />
                     </div>
                     <div>
@@ -128,9 +128,9 @@ export default function HRSettings() {
             </div>
 
             {/* Statutory Leave Policies */}
-            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
+            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                         <Calendar size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -138,7 +138,7 @@ export default function HRSettings() {
                     </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
                             Annual Vacation Days
@@ -147,7 +147,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.annual_leave_days}
                             onChange={(e) => setPolicy({ ...policy, annual_leave_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Statutory mandate ({activeCountry === 'KE' ? '21 days' : '16 days'})
@@ -162,7 +162,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.sick_leave_days}
                             onChange={(e) => setPolicy({ ...policy, sick_leave_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Labor code statutory allowance
@@ -177,7 +177,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.carry_over_max_days}
                             onChange={(e) => setPolicy({ ...policy, carry_over_max_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Maximum days rollable to next calendar year
@@ -186,7 +186,7 @@ export default function HRSettings() {
                 </div>
 
                 <div className="pt-1">
-                    <label className="flex items-center gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer select-none">
+                    <label className="flex items-center gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={policy.two_tier_leave_approval_required}
@@ -201,9 +201,9 @@ export default function HRSettings() {
             </div>
 
             {/* Attendance & Time-Tracking Rules */}
-            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
+            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                         <Clock size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -211,7 +211,7 @@ export default function HRSettings() {
                     </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
                             Standard Daily Hours
@@ -221,7 +221,7 @@ export default function HRSettings() {
                             step="0.5"
                             value={policy.standard_work_hours_per_day}
                             onChange={(e) => setPolicy({ ...policy, standard_work_hours_per_day: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Full-time standard daily shift</span>
                     </div>
@@ -234,7 +234,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.late_grace_period_mins}
                             onChange={(e) => setPolicy({ ...policy, late_grace_period_mins: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Allowed arrival threshold before 'Late' flag</span>
                     </div>
@@ -247,7 +247,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.geofence_radius_meters}
                             onChange={(e) => setPolicy({ ...policy, geofence_radius_meters: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Perimeter tolerance for mobile clock-in</span>
                     </div>
@@ -255,9 +255,9 @@ export default function HRSettings() {
             </div>
 
             {/* Zero-Trust Security & Dormant Account Threshold */}
-            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
+            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center border border-[var(--theme-status-warning-border)] shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center border-[var(--theme-status-warning-border)] shrink-0">
                         <ShieldAlert size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -265,7 +265,7 @@ export default function HRSettings() {
                     </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
                             Dormant Account Inactivity Threshold (Days)
@@ -274,26 +274,26 @@ export default function HRSettings() {
                             type="number"
                             value={policy.dormant_account_threshold_days}
                             onChange={(e) => setPolicy({ ...policy, dormant_account_threshold_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Accounts without login beyond this threshold are flagged in the HR Access Review
                         </span>
                     </div>
 
-                    <div className="p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center gap-3">
+                    <div className="p-4 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-xl flex items-center gap-3">
                         <ShieldCheck className="text-[var(--theme-status-warning-text)] shrink-0" size={20} />
-                        <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
-                            <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Rule 18 Enforced:</strong> Under Zero-Trust policy, HR personnel can audit dormant credentials and propose account deactivations for secondary executive sign-off.
+                        <p className="text-xs text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
+                            <strong className="font-semibold text-[var(--theme-status-warning-text)]">Rule 18 Enforced:</strong> Under Zero-Trust policy, HR personnel can audit dormant credentials and propose account deactivations for secondary executive sign-off.
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Cross-Department Profile Governance & Segregation of Duties */}
-            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
+            <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                         <ShieldCheck size={14} />
                     </div>
                     <div>
@@ -307,7 +307,7 @@ export default function HRSettings() {
                 </div>
 
                 <div className="space-y-2.5">
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_finance_approval_for_salary !== false}
@@ -324,7 +324,7 @@ export default function HRSettings() {
                         </div>
                     </label>
 
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_dept_approval_for_transfers !== false}
@@ -341,7 +341,7 @@ export default function HRSettings() {
                         </div>
                     </label>
 
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_compliance_approval_for_identity !== false}

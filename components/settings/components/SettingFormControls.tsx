@@ -36,7 +36,7 @@ export function RadioGroup<T extends string = string>({
                     {Icon && <Icon size={14} className="text-[var(--theme-accent)]" />} {label}
                 </label>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5" role="radiogroup" aria-label={label}>
+            <div className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5" role="radiogroup" aria-label={label}>
                 {options.map((opt) => {
                     const isSelected = value === opt.value;
                     return (
@@ -51,7 +51,7 @@ export function RadioGroup<T extends string = string>({
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-border-accent,var(--theme-border))] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                         >
-                            <div className="relative z-10 flex flex-col h-full justify-between gap-1.5 pr-3">
+                            <div className="relative z-10 flex-col h-full justify-between gap-1.5 pr-3">
                                 <span className={`text-xs font-semibold tracking-tight ${isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-primary)]'}`}>
                                     {opt.label}
                                 </span>
@@ -98,7 +98,7 @@ export const SliderGroup: React.FC<SliderGroupProps> = ({
             <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider group-hover:text-[var(--theme-text-primary)] transition-colors flex items-center gap-1.5">
                 {Icon && <Icon size={14} className="text-[var(--theme-accent)]" />} {label}
             </label>
-            <span className="text-xs font-mono font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 px-2.5 py-0.5 rounded-full">
                 {value}{unit}
             </span>
         </div>
@@ -134,7 +134,7 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
     warning,
     disabled = false
 }) => (
-    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-border-accent,var(--theme-border))] transition-colors">
+    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-border-accent,var(--theme-border))] transition-colors">
         <div className="space-y-0.5 pr-3">
             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{label}</p>
             {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] leading-tight">{sub}</p>}
@@ -157,7 +157,7 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
                 className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${checked ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                     }`}
             >
-                <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
+                <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'
                     }`} />
             </div>
         </button>

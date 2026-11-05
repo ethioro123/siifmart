@@ -55,7 +55,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
     return (
         <div className="space-y-6">
             {/* LIMITS & APPROVALS */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
                 <div className="mb-4 border-b border-[var(--theme-border)] pb-3 flex justify-between items-center">
                     <div>
                         <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             </div>
 
             {/* COMPLIANCE RULES (CONFIG-GATED) */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
                 <div className="mb-4 border-b border-[var(--theme-border)] pb-3 flex justify-between items-center">
                     <div>
                         <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Compliance Rules</h3>
@@ -152,7 +152,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             </div>
 
             {/* MULTI-CURRENCY & EXCHANGE RATES */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-[var(--theme-border)]">
                     <div>
                         <div className="flex items-center gap-2">
@@ -177,12 +177,12 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                    <div className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl">
                         <div>
                             <p className="text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold uppercase tracking-wider">Base Currency ({baseCurrency})</p>
                             <p className="text-lg font-bold text-[var(--theme-text-primary)] mt-0.5">{currencySymbol}</p>
                         </div>
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                             <DollarSign size={18} />
                         </div>
                     </div>
@@ -193,7 +193,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                         </label>
                         {exchangeRates.map((curr, idx) => (
                             <div key={curr.code} className="flex items-center gap-2">
-                                <div className="w-12 h-9 flex items-center justify-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)]">
+                                <div className="w-12 h-9 flex items-center justify-center bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)]">
                                     {curr.code}
                                 </div>
                                 <input
@@ -208,7 +208,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                                         setExchangeRates(newRates);
                                     }}
                                     title={`Exchange rate for ${curr.code}`}
-                                    className="flex-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
+                                    className="flex-1 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                                 />
                             </div>
                         ))}

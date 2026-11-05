@@ -81,13 +81,13 @@ const SecurityScore: React.FC<SecurityScoreProps> = ({ policies, role }) => {
     }
 
     const getColor = (s: number) => {
-        if (s >= 90) return 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/30';
-        if (s >= 70) return 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
+        if (s >= 90) return 'text-[var(--theme-accent)] border-[var(--theme-accent)]/30';
+        if (s >= 70) return 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
         return 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
     };
 
     return (
-        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4.5 flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
             <div className="flex items-center gap-3.5">
                 <div className={`w-12 h-12 rounded-xl border flex items-center justify-center font-bold text-base bg-[var(--theme-bg-card)] ${getColor(score)}`}>
                     {score}%
@@ -98,9 +98,9 @@ const SecurityScore: React.FC<SecurityScoreProps> = ({ policies, role }) => {
                 </div>
             </div>
             {issues.length > 0 && (
-                <div className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-3.5 py-2.5 rounded-xl border border-[var(--theme-status-warning-border)]">
+                <div className="text-xs text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-3.5 py-2.5 rounded-xl border-[var(--theme-status-warning-border)]">
                     <div className="flex items-center gap-1.5 font-semibold mb-1">
-                        <AlertTriangle size={13} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" /> Audit Advisories:
+                        <AlertTriangle size={13} className="text-[var(--theme-status-warning-text)]" /> Audit Advisories:
                     </div>
                     <ul className="list-disc list-inside text-[11px] opacity-90 space-y-0.5">
                         {issues.map((issue, i) => <li key={i}>{issue}</li>)}
@@ -167,10 +167,10 @@ export default function RoleSettings() {
         }
 
         return [
-            { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20', description: 'HQ executive administration with complete audit visibility' },
-            { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
-            { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', description: 'POS checkout operators locked to local terminal registers' },
-            { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]', description: 'Fulfillment and putaway personnel governed by blind scanning' },
+            { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20', description: 'HQ executive administration with complete audit visibility' },
+            { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
+            { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', description: 'POS checkout operators locked to local terminal registers' },
+            { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]', description: 'Fulfillment and putaway personnel governed by blind scanning' },
         ];
     }, [employees]);
 
@@ -226,9 +226,9 @@ export default function RoleSettings() {
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-center justify-between shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border-[var(--theme-accent)]/20 shrink-0">
                         <ShieldCheck size={18} />
                     </div>
                     <div>
@@ -236,16 +236,16 @@ export default function RoleSettings() {
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Zero-Trust Access Control & Role Policy Enforcement</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-full border border-[var(--theme-border)]">
+                <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-full border-[var(--theme-border)]">
                     <span className="flex h-2 w-2 relative">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-status-success-bg)] opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--theme-status-success-bg)]"></span>
                     </span>
-                    <span className="text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] uppercase tracking-wider">Active & Enforced</span>
+                    <span className="text-[10px] font-semibold text-[var(--theme-status-success-text)] uppercase tracking-wider">Active & Enforced</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* ROLE SIDEBAR */}
                 <div className="space-y-2.5">
                     {roleDefinitions.map(role => (
@@ -272,19 +272,19 @@ export default function RoleSettings() {
                 </div>
 
                 {/* MAIN CONTENT */}
-                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
+                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
                     {/* TABS */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-[var(--theme-border)]">
+                    <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-[var(--theme-border)]">
                         <div>
                             <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-2">
                                 {roleDefinitions.find(r => r.id === activeRole)?.name}
-                                <span className="text-[9px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2 py-0.5 bg-[var(--theme-bg-subtle)] rounded-full border border-[var(--theme-border)]">Scope</span>
+                                <span className="text-[9px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2 py-0.5 bg-[var(--theme-bg-subtle)] rounded-full border-[var(--theme-border)]">Scope</span>
                             </h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 {roleDefinitions.find(r => r.id === activeRole)?.description}
                             </p>
                         </div>
-                        <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] self-start sm:self-auto">
+                        <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)] self-start sm:self-auto">
                             {[
                                 { id: 'policies', label: 'Security Policies', icon: Shield },
                                 { id: 'permissions', label: 'Access Rights', icon: Unlock }
@@ -313,7 +313,7 @@ export default function RoleSettings() {
                                     <h5 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] rounded-full" /> {category}
                                     </h5>
-                                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl divide-y divide-[var(--theme-border)] overflow-hidden">
+                                    <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl divide-y divide-[var(--theme-border)] overflow-hidden">
                                         {items.map((perm: RolePermissionItem) => {
                                             const isGranted = perm[activeRole];
                                             const isRestrictedByPolicy = perm.hqApprovalRequired && activeRole !== 'admin';
@@ -324,7 +324,7 @@ export default function RoleSettings() {
                                                         <div className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                                                             {perm.label}
                                                             {perm.hqApprovalRequired && (
-                                                                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
+                                                                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]">
                                                                     HQ Control
                                                                 </span>
                                                             )}
@@ -364,19 +364,19 @@ export default function RoleSettings() {
                             <SecurityScore policies={currentPolicy} role={activeRole} />
 
                             {activeRole === 'admin' && (
-                                <div className="p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-start gap-2.5">
-                                    <AlertCircle className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" size={16} />
-                                    <div className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
-                                        <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Admin Safety Guardrail:</strong> Modifying Geo-IP or Shift Hour restrictions on the <strong>Admin</strong> role can prevent emergency system recovery outside working hours. Keep emergency bypass credentials secure.
+                                <div className="p-3.5 bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] rounded-xl flex items-start gap-2.5">
+                                    <AlertCircle className="text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" size={16} />
+                                    <div className="text-xs text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
+                                        <strong className="font-semibold text-[var(--theme-status-warning-text)]">Admin Safety Guardrail:</strong> Modifying Geo-IP or Shift Hour restrictions on the <strong>Admin</strong> role can prevent emergency system recovery outside working hours. Keep emergency bypass credentials secure.
                                     </div>
                                 </div>
                             )}
 
                             {/* Session Security */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                            <div className="grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl">
                                     <div className="flex items-center gap-2.5 mb-3">
-                                        <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border border-[var(--theme-accent)]/20">
+                                        <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border-[var(--theme-accent)]/20">
                                             <Clock size={15} />
                                         </div>
                                         <div>
@@ -396,17 +396,17 @@ export default function RoleSettings() {
                                     />
                                     <div className="flex justify-between mt-2 text-[10px] font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                         <span>5m</span>
-                                        <span className="bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-md border border-[var(--theme-border)]">
+                                        <span className="bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-md border-[var(--theme-border)]">
                                             {currentPolicy.session_timeout} mins
                                         </span>
                                         <span>120m</span>
                                     </div>
                                 </div>
 
-                                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border border-[var(--theme-accent)]/20">
+                                            <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border-[var(--theme-accent)]/20">
                                                 <Smartphone size={15} />
                                             </div>
                                             <div>
@@ -419,7 +419,7 @@ export default function RoleSettings() {
                                             onChange={() => updatePolicy('mfa_required', !currentPolicy.mfa_required)}
                                         />
                                     </div>
-                                    <div className="text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] p-2.5 rounded-lg border border-[var(--theme-border)] font-medium mt-2">
+                                    <div className="text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] p-2.5 rounded-lg border-[var(--theme-border)] font-medium mt-2">
                                         {currentPolicy.mfa_required
                                             ? 'Users must verify via Authenticator App OTP.'
                                             : 'Standard email/password credential login allowed.'}
@@ -428,14 +428,14 @@ export default function RoleSettings() {
                             </div>
 
                             {/* Context Access */}
-                            <div className="p-4.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-3">
+                            <div className="p-4.5 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl space-y-3">
                                 <h5 className="font-semibold text-xs text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                     <Shield size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Context-Aware Access Rules
                                 </h5>
                                 <div className="space-y-2.5">
-                                    <div className="flex items-center justify-between p-3 border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
+                                    <div className="flex items-center justify-between p-3 border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
                                         <div className="flex items-center gap-2.5 pr-2">
-                                            <MapPin size={15} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
+                                            <MapPin size={15} className="text-[var(--theme-status-warning-text)]" />
                                             <div>
                                                 <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Location Fencing (Geo-IP)</div>
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)]">Restrict login to corporate IP / VPN ranges only</div>
@@ -447,9 +447,9 @@ export default function RoleSettings() {
                                         />
                                     </div>
 
-                                    <div className="flex items-center justify-between p-3 border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
+                                    <div className="flex items-center justify-between p-3 border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
                                         <div className="flex items-center gap-2.5 pr-2">
-                                            <Clock size={15} className="text-[var(--theme-accent)] text-[var(--theme-accent)]" />
+                                            <Clock size={15} className="text-[var(--theme-accent)]" />
                                             <div>
                                                 <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Shift Hours Only</div>
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)]">Block staff access outside operational shift hours (08:00 - 22:00)</div>

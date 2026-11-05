@@ -158,12 +158,12 @@ export default function POSSettings() {
     const isSavingGateways = posSettingsMutation.isPending && posSettingsMutation.variables?.section === 'gateways';
 
     return (
-        <div className="w-full flex flex-col gap-6 transition-opacity duration-200 relative">
+        <div className="w-full flex-col gap-6 transition-opacity duration-200 relative">
 
             {/* ── ROLE GATE ── */}
             {!canConfigurePOS && (
-                <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center">
+                <div className="flex-col items-center justify-center py-24 gap-4 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] flex items-center justify-center">
                         <Lock size={22} className="text-[var(--theme-text-secondary)]" />
                     </div>
                     <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm">Access Restricted</h3>
@@ -177,7 +177,7 @@ export default function POSSettings() {
             {canConfigurePOS && (
             <>
             {/* Top Tab Bar */}
-            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] mb-6">
                 {([
                     { id: 'station' as const, label: 'Retail Station', icon: Monitor },
                     { id: 'connectivity' as const, label: 'Tender & Connectivity', icon: Globe },
@@ -258,11 +258,11 @@ export default function POSSettings() {
                 transform transition-transform duration-200 ease-out shadow-2xl
                 ${isPreviewOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
-                <div className="h-full flex flex-col p-6 sm:p-8 pt-16 overflow-y-auto relative">
+                <div className="h-full flex-col p-6 sm:p-8 pt-16 overflow-y-auto relative">
                     <button
                         onClick={() => setIsPreviewOpen(false)}
                         title="Close Live Preview"
-                        className="absolute top-6 right-6 p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        className="absolute top-6 right-6 p-2 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                     >
                         <Plus className="rotate-45" size={18} />
                     </button>

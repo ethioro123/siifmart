@@ -139,10 +139,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="" size="3xl">
+        <Modal isOpen={isOpen} onClose={onClose} title="" size="3xl" mobileFullScreen>
             {/* === SCREEN UI (Hidden in print) === */}
             <div className="space-y-6 print:hidden">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div>
                         <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {formatPONumber(po)}

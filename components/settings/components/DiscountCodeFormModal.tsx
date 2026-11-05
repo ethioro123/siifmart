@@ -59,7 +59,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
     >
       <div className="space-y-5">
         {/* Code & Name */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Code <span className="text-[var(--theme-status-danger-text)]">*</span>
@@ -69,7 +69,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               placeholder="e.g., SAVE10"
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
             />
             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">What customers enter at checkout</p>
           </div>
@@ -82,14 +82,14 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Summer Member Promo"
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
             />
             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">Descriptive promotional title</p>
           </div>
         </div>
 
         {/* Type & Value */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Discount Type
@@ -129,7 +129,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                 placeholder={formData.type === 'PERCENTAGE' ? '10' : '50'}
-                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all pr-10 font-bold"
+                className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all pr-10 font-bold"
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-semibold text-xs">
                 {formData.type === 'PERCENTAGE' ? '%' : currencySymbol}
@@ -143,7 +143,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as DiscountCode['status'] })}
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
               title="Status"
             >
               <option value="Active">Active</option>
@@ -154,7 +154,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         </div>
 
         {/* Validity Period */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Valid From
@@ -163,7 +163,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               type="date"
               value={formData.validFrom}
               onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all font-medium"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all font-medium"
               title="Valid From"
             />
           </div>
@@ -175,14 +175,14 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               type="date"
               value={formData.validUntil}
               onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all font-medium"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all font-medium"
               title="Valid Until"
             />
           </div>
         </div>
 
         {/* Constraints */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Min Purchase ({currencySymbol})
@@ -192,7 +192,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.minPurchaseAmount}
               onChange={(e) => setFormData({ ...formData, minPurchaseAmount: e.target.value })}
               placeholder="0 (No min)"
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
             />
           </div>
           <div>
@@ -205,7 +205,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })}
               placeholder="No limit"
               disabled={formData.type === 'FIXED'}
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-40"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-40"
             />
           </div>
           <div>
@@ -217,7 +217,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.usageLimit}
               onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
               placeholder="Unlimited"
-              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
             />
           </div>
         </div>
@@ -228,7 +228,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Applicable Stores (Leave empty for All Stores)
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex-wrap gap-2">
               {activeStore.map(store => (
                 <button
                   key={store.id}
@@ -264,7 +264,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Promotion campaign notes..."
             rows={2}
-            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all resize-none placeholder:text-[var(--theme-text-secondary)]/40"
+            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all resize-none placeholder:text-[var(--theme-text-secondary)]/40"
           />
         </div>
 

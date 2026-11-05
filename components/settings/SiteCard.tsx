@@ -54,27 +54,27 @@ export function SiteCard({
             </h6>
 
             {/* Sovereign Country ID Badge */}
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center gap-1">
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20 flex items-center gap-1">
               <Globe size={11} />
               <span>{countryId}</span>
             </span>
 
             {/* Human-Readable Site ID */}
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
               <Hash size={11} className="opacity-60" />
               <span>{humanReadableSiteId}</span>
             </span>
 
             {/* Regional Territory Badge */}
             {(region || site.region_code || site.regionCode) && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
                 <MapPin size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                 <span>{region ? (region.city || region.name.replace(/\s+Region$/i, '')) : (site.region_code || site.regionCode)}</span>
               </span>
             )}
 
             {isAdmin && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] flex items-center gap-1">
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)] flex items-center gap-1">
                 <Landmark size={11} />
                 <span>Central HQ</span>
               </span>
@@ -94,7 +94,7 @@ export function SiteCard({
 
       {isExpanded && (
         <div className="mt-3 pt-3 border-t border-[var(--theme-border)] space-y-2.5 text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/40 p-3 rounded-xl" onClick={(e) => e.stopPropagation()}>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid-cols-2 gap-2">
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Country & Site ID</span>
               <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 mt-0.5">
@@ -106,12 +106,12 @@ export function SiteCard({
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Status</span>
               <span className={`font-semibold mt-0.5 block ${
-                site.status === 'Active' ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
-                site.status === 'Maintenance' ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                site.status === 'Active' ? 'text-[var(--theme-status-success-text)]' :
+                site.status === 'Maintenance' ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-danger-text)]'
               }`}>{site.status}</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid-cols-2 gap-2">
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Manager</span>
               <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5" title={['Warehouse', 'Distribution Center'].includes(site.type) && !site.warehouseManagerId ? 'Unassigned account' : site.manager || 'Unassigned'}>
@@ -127,7 +127,7 @@ export function SiteCard({
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid-cols-2 gap-2">
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Operational Region</span>
               <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5 flex items-center gap-1" title={region?.name || site.region_code || 'Unassigned'}>
@@ -168,7 +168,7 @@ export function SiteCard({
           <div className="flex gap-2 justify-end pt-2.5 border-t border-[var(--theme-border)]">
             <button
               onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
-              className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+              className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
               title="Edit Location"
             >
               <Edit2 size={12} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
@@ -176,7 +176,7 @@ export function SiteCard({
             </button>
             {isAdmin ? (
               <span
-                className="h-8 px-3 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
+                className="h-8 px-3 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
                 title="Administration HQ is protected and cannot be deleted"
               >
                 <Lock size={12} />
@@ -185,7 +185,7 @@ export function SiteCard({
             ) : (
               <button
                 onClick={() => handleDeleteSite(site.id)}
-                className="h-8 px-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                className="h-8 px-3 bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
                 title="Delete Location"
                 disabled={isDeleting}
               >

@@ -41,7 +41,7 @@ export const POSRoleModal: React.FC = () => {
                         value={editedRole.role || ''}
                         onChange={(e) => setEditedRole({ ...editedRole, role: e.target.value })}
                         placeholder="e.g., Store Manager, Cashier"
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                 </div>
 
@@ -57,7 +57,7 @@ export const POSRoleModal: React.FC = () => {
                         aria-label="Pool Percentage"
                         value={editedRole.percentage || 0}
                         onChange={(e) => setEditedRole({ ...editedRole, percentage: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                     <p className="text-[10px] text-[var(--theme-text-secondary)]">Share of the store's earned bonus pool</p>
                 </div>
@@ -93,7 +93,7 @@ export const POSRoleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsRoleModalOpen(false)}
-                        className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                        className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border-[var(--theme-border)] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>

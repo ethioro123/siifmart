@@ -52,7 +52,7 @@ const InputGroup: React.FC<InputGroupProps> = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)] disabled:opacity-50"
+                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)] disabled:opacity-50"
                 />
                 {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
             </div>
@@ -150,13 +150,13 @@ export default function GeneralSettings() {
 
     const isSaving = mutation.isPending;
     const activeProfile = getCountryProfile(activeCountry);
-    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs transition-all";
+    const cardBase = "bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs transition-all";
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in">
             {/* CORPORATE SLOGAN & RECEIPT TAGLINE CARD */}
             <div className={cardBase}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-4 mb-5">
+                <div className="flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-4 mb-5">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Globe size={16} />
@@ -172,12 +172,12 @@ export default function GeneralSettings() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1.5 font-mono">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] flex items-center gap-1.5 font-mono">
                             <ShieldCheck size={12} className="text-[var(--theme-status-success-text)]" />
                             <span>SIIFMART Permanent Brand</span>
                         </span>
                         {!isAuthorized && (
-                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
                                 <Lock size={12} /> View-Only (L1 Required)
                             </span>
                         )}
@@ -214,7 +214,7 @@ export default function GeneralSettings() {
             </div>
 
             {/* LEGAL ENTITY & LOCALIZATION GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* LEGAL ENTITY CARD */}
                 <div className={cardBase}>
                     <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
@@ -232,7 +232,7 @@ export default function GeneralSettings() {
                             </div>
                         </div>
                         {!isAuthorized && (
-                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
                                 <Lock size={12} /> Locked
                             </span>
                         )}
@@ -248,7 +248,7 @@ export default function GeneralSettings() {
                             icon={Building}
                         />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid-cols-1 sm:grid-cols-2 gap-3">
                             <InputGroup
                                 label={`Tax ID / ${activeProfile.taxIdLabel}`}
                                 value={legal.taxId}
@@ -276,7 +276,7 @@ export default function GeneralSettings() {
                             icon={MapPin}
                         />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid-cols-1 sm:grid-cols-2 gap-3">
                             <InputGroup
                                 label="Support Email"
                                 value={legal.supportContact}

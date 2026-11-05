@@ -27,8 +27,8 @@ export const WarehouseTab: React.FC = () => {
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* MAIN CONTROLS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+            <div className="grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
@@ -52,7 +52,7 @@ export const WarehouseTab: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
                         <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Calendar size={20} />
@@ -66,7 +66,7 @@ export const WarehouseTab: React.FC = () => {
                         title="Select payout frequency"
                         value={payoutFrequency}
                         onChange={(e) => setPayoutFrequency(e.target.value as any)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
+                        className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
                     >
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
@@ -74,7 +74,7 @@ export const WarehouseTab: React.FC = () => {
                     </select>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
                         <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <DollarSign size={20} />
@@ -84,14 +84,14 @@ export const WarehouseTab: React.FC = () => {
                             <p className="text-[11px] text-[var(--theme-text-secondary)]">Sovereign unit</p>
                         </div>
                     </div>
-                    <div className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold">
+                    <div className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold">
                         {countryProfile.name} ({currency})
                     </div>
                 </div>
             </div>
 
             {/* WAREHOUSE ELIGIBILITY SECTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -110,7 +110,7 @@ export const WarehouseTab: React.FC = () => {
                         <p>No warehouses configured</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {warehouses.map(warehouse => {
                             const isEnabled = warehouse.warehouseBonusEnabled !== false;
                             return (
@@ -140,7 +140,7 @@ export const WarehouseTab: React.FC = () => {
                                         </button>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-[var(--theme-border)]">
-                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             {isEnabled ? 'Workers earn bonuses' : 'Not participating'}
                                         </p>
                                     </div>
@@ -151,7 +151,7 @@ export const WarehouseTab: React.FC = () => {
                 )}
 
                 <div className="flex gap-4 text-xs">
-                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
+                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] font-semibold">
                         <div className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]"></div>
                         {warehouses.filter(w => w.warehouseBonusEnabled !== false).length} warehouses enabled
                     </div>
@@ -163,7 +163,7 @@ export const WarehouseTab: React.FC = () => {
             </div>
 
             {/* ROLE ELIGIBILITY SECTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -179,7 +179,7 @@ export const WarehouseTab: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {warehousePointsRoles.map((roleConfig) => (
                         <div
                             key={roleConfig.role}
@@ -219,7 +219,7 @@ export const WarehouseTab: React.FC = () => {
                     ))}
                 </div>
 
-                <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-2">
+                <div className="p-3 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl flex items-center gap-2">
                     <Info size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                     <p className="text-xs text-[var(--theme-text-secondary)]">
                         Only enabled roles will accumulate points upon job verification. Disable roles not eligible for shift bonuses.
@@ -228,7 +228,7 @@ export const WarehouseTab: React.FC = () => {
             </div>
 
             {/* WAREHOUSE POINT RULES SECTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -260,14 +260,14 @@ export const WarehouseTab: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => handleResetDefaults('warehouse')}
-                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-colors cursor-pointer"
+                            className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border-[var(--theme-border)] transition-colors cursor-pointer"
                         >
                             Reset Defaults
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {warehousePointRules.map((rule) => (
                         <div
                             key={rule.id}
@@ -331,7 +331,7 @@ export const WarehouseTab: React.FC = () => {
             </div>
 
             {/* BONUS TIERS SECTION */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
@@ -355,7 +355,7 @@ export const WarehouseTab: React.FC = () => {
                     {bonusTiers.sort((a, b) => a.minPoints - b.minPoints).map((tier, index) => (
                         <div
                             key={tier.id}
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 transition-all group"
+                            className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3.5 transition-all group"
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getColorClass(tier.tierColor)} flex items-center justify-center shrink-0`}>
@@ -413,7 +413,7 @@ export const WarehouseTab: React.FC = () => {
             </div>
 
             {/* BONUS CALCULATOR PREVIEW */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                     <TrendingUp className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                     Bonus Calculator Preview
@@ -422,14 +422,14 @@ export const WarehouseTab: React.FC = () => {
                     Simulate how bonuses are awarded at various operational points milestones
                 </p>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid-cols-2 md:grid-cols-4 gap-3">
                     {[100, 300, 600, 1000, 1500, 2000, 3000, 5000].map(points => {
                         const bonus = calculateExampleBonus(points);
                         const tier = bonusTiers.find(t =>
                             points >= t.minPoints && (t.maxPoints === null || points <= t.maxPoints)
                         );
                         return (
-                            <div key={points} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-center">
+                            <div key={points} className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3 text-center">
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{points.toLocaleString()} pts</p>
                                 <p className="text-sm font-semibold text-[var(--theme-text-primary)] mt-0.5">
                                     {currency} {bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}

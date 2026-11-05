@@ -90,7 +90,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] mb-6">
                 {[
                     { id: 'strategies', label: 'Strategies', icon: Globe },
                     { id: 'zones', label: 'Zone Priority', icon: Layers },
@@ -119,7 +119,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
             </div>
 
             {activeSubTab === 'strategies' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid-cols-1 md:grid-cols-2 gap-4">
                     {fulfillmentSites.map(site => (
                         <div key={site.id} className={`p-5 rounded-2xl border transition-all ${isSaving === site.id ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
                             <div className="flex items-center justify-between mb-4">
@@ -151,7 +151,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                     onChange={(e) => handleStrategyChange(site.id, e.target.value as FulfillmentStrategy)}
                                     disabled={!!isSaving}
                                     title={`Select strategy for ${site.name}`}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all disabled:opacity-40"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all disabled:opacity-40"
                                 >
                                     <option value="NEAREST">Nearest Warehouse</option>
                                     <option value="LOCAL_ONLY">Local Only</option>
@@ -166,7 +166,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
 
             {activeSubTab === 'zones' && (
                 <div className="space-y-6">
-                    <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-4 rounded-2xl border-[var(--theme-border)] shadow-xs">
                         <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Layers size={16} />
                         </div>
@@ -174,12 +174,12 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                             value={selectedSiteId}
                             onChange={(e) => setSelectedSiteId(e.target.value)}
                             title="Select site"
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all"
+                            className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all"
                         >
                             {fulfillmentSites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid-cols-1 md:grid-cols-2 gap-4">
                         {siteZones.map(zone => (
                             <div key={zone.id} className={`p-4 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
                                 <div className="flex items-center justify-between">
@@ -195,7 +195,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                             title={`Priority for ${zone.name}`}
                                             value={zone.pickingPriority || 10}
                                             onChange={(e) => handlePriorityChange(zone.id, parseInt(e.target.value))}
-                                            className="w-16 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1.5 text-center text-xs font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
+                                            className="w-16 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-2 py-1.5 text-center text-xs font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                                         />
                                     </div>
                                 </div>
@@ -206,7 +206,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
             )}
 
             {activeSubTab === 'release' && (
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
                     <div className="p-4 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                         <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                             <Clock size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Pending Release Orders

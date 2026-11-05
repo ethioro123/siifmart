@@ -80,7 +80,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
 
     return (
         <div className="space-y-6">
-            <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
+            <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
                 <MapPin className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0 mt-0.5" size={20} />
                 <div>
                     <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Smart Putaway Routing</h4>
@@ -90,9 +90,9 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                 </div>
             </div>
 
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
                 <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] mb-4">Add Routing Rule</h3>
-                <div className="flex flex-col sm:flex-row items-end gap-4">
+                <div className="flex-col sm:flex-row items-end gap-4">
                     <div className="flex-1 w-full">
                         <label className="text-[11px] uppercase text-[var(--theme-text-secondary)] font-semibold tracking-wider block mb-1.5">Category</label>
                         <select
@@ -100,7 +100,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                             aria-label="Product Category"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
+                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                         >
                             {ALL_CATEGORY_OPTIONS.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -117,7 +117,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                             aria-label="Default Zone"
                             value={newZone}
                             onChange={(e) => setNewZone(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
+                            className="w-full bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                         >
                             {zones.map(z => (
                                 <option key={z.id} value={z.name}>{z.name} ({z.type})</option>
@@ -137,7 +137,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                 </div>
             </div>
 
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
                 <table className="w-full text-left">
                     <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                         <tr>

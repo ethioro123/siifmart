@@ -51,7 +51,7 @@ export function POSStationTab({
           icon={Monitor}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <InputGroup
             label={t('pos.countryPosIdentifier')}
             value={workflow.posTerminalId}
@@ -83,7 +83,7 @@ export function POSStationTab({
 
           <div className="space-y-3 md:col-span-2 xl:col-span-3">
             <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider pl-0.5">Operational Mode</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid-cols-1 sm:grid-cols-2 gap-4">
               <RadioCard
                 value={workflow.posRegisterMode}
                 onChange={(val: 'cashier' | 'kiosk') => setWorkflow(prev => ({ ...prev, posRegisterMode: val }))}
@@ -96,7 +96,7 @@ export function POSStationTab({
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-[var(--theme-border)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-8 pt-8 border-t border-[var(--theme-border)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* ── GUEST CHECKOUT (ZERO-TRUST: default OFF) ──
                Anonymous sales are untraceable — enabling requires HQ-level decision. */}
           <ToggleRow
@@ -108,7 +108,7 @@ export function POSStationTab({
             help="Enable this to process sales without requiring a customer profile. Ideal for quick retail transactions."
           />
           {workflow.posGuestCheckout && (
-            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium col-span-full p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
+            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[11px] font-medium col-span-full p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border-[var(--theme-status-warning-border)]">
               <AlertTriangle size={14} className="shrink-0" />
               <span>Guest checkout is ON — anonymous cash sales are untraceable. HQ audit visibility required.</span>
             </div>

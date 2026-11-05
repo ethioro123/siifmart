@@ -173,7 +173,7 @@ export default function DataSettings() {
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Database size={18} />
                 </div>
@@ -190,11 +190,11 @@ export default function DataSettings() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* --- REPORTS ARCHIVE --- */}
-                <div className="md:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
+                <div className="md:col-span-2 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
+                    <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                         <div>
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                                 <Archive className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
@@ -204,12 +204,12 @@ export default function DataSettings() {
                                 Generate and retrieve fiscal records, procurement summaries, and operational turnover.
                             </p>
                         </div>
-                        <span className="self-start sm:self-auto bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide flex items-center gap-1">
+                        <span className="self-start sm:self-auto bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide flex items-center gap-1">
                             <ShieldCheck size={11} /> Immutable Ledger
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         {/* Year Selector */}
                         <div className="space-y-1.5">
                             <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Fiscal Year</label>
@@ -217,7 +217,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedYear}
                                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Fiscal Year"
                                 >
                                     {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map(y => (
@@ -235,7 +235,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedPeriod}
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
-                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Period"
                                 >
                                     {['Q1 (Jan-Mar)', 'Q2 (Apr-Jun)', 'Q3 (Jul-Sep)', 'Q4 (Oct-Dec)', 'Full Year'].map(p => (
@@ -253,7 +253,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedReportType}
                                     onChange={(e) => setSelectedReportType(e.target.value as 'Operations' | 'Financials' | 'Procurement')}
-                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
+                                    className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Report Type"
                                 >
                                     {['Financials', 'Procurement', 'Operations'].map(t => (
@@ -284,10 +284,10 @@ export default function DataSettings() {
                 </div>
 
                 {/* BACKUP & RESTORE */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                     <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Backup & Recovery</h3>
                     <div className="space-y-3">
-                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
+                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] flex items-center justify-between">
                             <div>
                                 <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Create Backup Snapshot</h5>
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Download JSON snapshot of system state</p>
@@ -300,7 +300,7 @@ export default function DataSettings() {
                                 <Download size={13} /> Download
                             </button>
                         </div>
-                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
+                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] flex items-center justify-between">
                             <div>
                                 <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Restore Snapshot</h5>
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Upload verified .json configuration backup</p>
@@ -308,7 +308,7 @@ export default function DataSettings() {
                             <button
                                 type="button"
                                 onClick={() => showToast('Restore engine ready. Select backup archive.', 'info')}
-                                className="h-8 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="h-8 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border-[var(--theme-border)] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                             >
                                 <Upload size={13} /> Upload
                             </button>
@@ -317,12 +317,12 @@ export default function DataSettings() {
                 </div>
 
                 {/* BULK CSV EXPORTS */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+                <div className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                     <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Bulk Data Exports</h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid-cols-2 gap-3">
                         <div
                             onClick={handleExportProductsCSV}
-                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
+                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
                         >
                             <FileText size={20} className="mx-auto text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mb-2" />
                             <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Products Catalog</h5>
@@ -330,7 +330,7 @@ export default function DataSettings() {
                         </div>
                         <div
                             onClick={handleExportCustomersCSV}
-                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
+                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
                         >
                             <FileText size={20} className="mx-auto text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mb-2" />
                             <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Customer Registry</h5>
@@ -341,7 +341,7 @@ export default function DataSettings() {
             </div>
 
             {/* DANGER ZONE */}
-            <div className="bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div>
                     <h3 className="text-sm font-semibold text-[var(--theme-status-danger-text)] mb-1 flex items-center gap-2">
                         <AlertTriangle size={16} /> Danger Zone: Factory Reset
@@ -351,7 +351,7 @@ export default function DataSettings() {
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-[var(--theme-status-danger-border)]">
+                <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-[var(--theme-status-danger-border)]">
                     <div>
                         <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Purge System Data</h5>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Restore factory baseline configuration and reset local cache.</p>
@@ -359,7 +359,7 @@ export default function DataSettings() {
                     <button
                         type="button"
                         onClick={() => setIsResetModalOpen(true)}
-                        className="min-h-11 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:bg-[var(--theme-status-danger-border)]/20 px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
+                        className="min-h-11 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] hover:bg-[var(--theme-status-danger-border)]/20 px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
                     >
                         <Trash2 size={13} /> Reset System
                     </button>
@@ -383,7 +383,7 @@ export default function DataSettings() {
                                     setIsResetModalOpen(false);
                                     setConfirmText('');
                                 }}
-                                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
+                                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)] rounded-xl text-xs font-semibold cursor-pointer hover:bg-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30"
                             >
                                 Cancel
                             </button>
@@ -391,7 +391,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleFactoryResetConfirm}
                                 disabled={confirmText !== 'RESET-SIIFMART'}
-                                className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
+                                className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-text)]/30"
                             >
                                 Confirm System Reset
                             </button>
@@ -399,10 +399,10 @@ export default function DataSettings() {
                     )}
                 >
                     <div className="space-y-4">
-                        <div className="p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-start gap-3">
+                        <div className="p-4 bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] rounded-xl flex items-start gap-3">
                             <ShieldAlert className="text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={18} />
                             <div className="text-xs text-[var(--theme-status-danger-text)] leading-relaxed">
-                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-[color-mix(in_srgb,var(--theme-bg-card)_60%,transparent)] px-1.5 py-0.5 rounded border border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
+                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-[color-mix(in_srgb,var(--theme-bg-card)_60%,transparent)] px-1.5 py-0.5 rounded border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
                             </div>
                         </div>
 
@@ -413,7 +413,7 @@ export default function DataSettings() {
                                 value={confirmText}
                                 onChange={(e) => setConfirmText(e.target.value)}
                                 placeholder="Type RESET-SIIFMART"
-                                className="w-full min-h-[42px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-semibold outline-none focus:border-[var(--theme-status-danger-border)] transition-colors"
+                                className="w-full min-h-[42px] bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-semibold outline-none focus:border-[var(--theme-status-danger-border)] transition-colors"
                             />
                         </div>
                     </div>

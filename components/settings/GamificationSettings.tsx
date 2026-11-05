@@ -28,7 +28,7 @@ export default function GamificationSettings() {
         <GamificationProvider value={contextValue}>
             <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
                 {/* HEADER BANNER with SAVE BUTTON */}
-                <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl shadow-xs flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Trophy size={20} />
@@ -66,7 +66,7 @@ export default function GamificationSettings() {
                 </div>
 
                 {/* TABS: Warehouse vs POS */}
-                <div className="flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
+                <div className="flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border-[var(--theme-border)]">
                     <button
                         type="button"
                         onClick={() => setActiveTab('warehouse')}

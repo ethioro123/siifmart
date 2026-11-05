@@ -29,9 +29,9 @@ interface IntegrationCardProps {
 const IntegrationCard: React.FC<IntegrationCardProps> = ({
     name, desc, icon: Icon, connected, category, badge, onAction
 }) => (
-    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col justify-between hover:border-[var(--theme-accent)]/30 transition-all shadow-xs relative">
+    <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4 flex-col justify-between hover:border-[var(--theme-accent)]/30 transition-all shadow-xs relative">
         {connected && (
-            <div className="absolute top-3 right-3 px-2 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[10px] font-semibold rounded-full flex items-center gap-1">
+            <div className="absolute top-3 right-3 px-2 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] text-[10px] font-semibold rounded-full flex items-center gap-1">
                 <CheckCircle2 size={11} /> Active
             </div>
         )}
@@ -39,7 +39,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             <div className="flex items-start gap-3 mb-3">
                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 ${
                     connected
-                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}>
                     <Icon size={18} />
@@ -66,7 +66,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             onClick={onAction}
             className={`w-full h-8 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center justify-center ${
                 connected
-                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
+                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
                     : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98]'
             }`}
         >
@@ -138,7 +138,7 @@ export default function IntegrationsSettings() {
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
 
             {/* HEADER BANNER */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+            <div className="p-4 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Globe size={18} />
                 </div>
@@ -155,7 +155,7 @@ export default function IntegrationsSettings() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid-cols-1 lg:grid-cols-4 gap-6">
 
                 {/* SIDEBAR TABS */}
                 <div className="lg:col-span-1 space-y-1">
@@ -183,7 +183,7 @@ export default function IntegrationsSettings() {
                         );
                     })}
 
-                    <div className="mt-4 p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2">
+                    <div className="mt-4 p-4 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl space-y-2">
                         <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-1.5">
                             <Database size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             Developer Docs
@@ -194,7 +194,7 @@ export default function IntegrationsSettings() {
                         <button
                             type="button"
                             onClick={() => showToast('Opening API Documentation...', 'info')}
-                            className="text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors w-full justify-center border border-[var(--theme-border)] cursor-pointer mt-1"
+                            className="text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-border)] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors w-full justify-center border-[var(--theme-border)] cursor-pointer mt-1"
                         >
                             <span>View Documentation</span>
                             <ExternalLink size={12} className="text-[var(--theme-text-secondary)]" />
@@ -203,7 +203,7 @@ export default function IntegrationsSettings() {
                 </div>
 
                 {/* MAIN CONTENT */}
-                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
+                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
 
                     {/* MARKETPLACE */}
                     {activeTab === 'marketplace' && (
@@ -212,7 +212,7 @@ export default function IntegrationsSettings() {
                                 title="App Marketplace"
                                 desc={`Extend SIIFMART with sovereign payment gateways and enterprise ERP connectors for ${countryProfile.name}.`}
                             />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid-cols-1 md:grid-cols-2 gap-4">
                                 {activeCountry === 'ET' ? (
                                     <>
                                         <IntegrationCard
@@ -317,7 +317,7 @@ export default function IntegrationsSettings() {
                                 desc="Manage secret access tokens for external warehouse scanners and POS stations."
                             />
 
-                            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 space-y-3">
+                            <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-4 space-y-3">
                                 <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">
                                     Generate New API Key
                                 </h4>
@@ -327,7 +327,7 @@ export default function IntegrationsSettings() {
                                         placeholder="Enter client application name (e.g. 'Warehouse Handheld')"
                                         value={newKeyName}
                                         onChange={(e) => setNewKeyName(e.target.value)}
-                                        className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors"
+                                        className="flex-1 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors"
                                     />
                                     <button
                                         type="button"
@@ -344,7 +344,7 @@ export default function IntegrationsSettings() {
                                 {apiKeys.map(key => (
                                     <div
                                         key={key.id}
-                                        className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 flex items-center justify-between hover:border-[var(--theme-accent)]/30 transition-all"
+                                        className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl p-3.5 flex items-center justify-between hover:border-[var(--theme-accent)]/30 transition-all"
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
@@ -353,7 +353,7 @@ export default function IntegrationsSettings() {
                                             <div>
                                                 <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">{key.name}</h5>
                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                    <code className="bg-[var(--theme-bg-card)] px-2 py-0.5 rounded text-[11px] text-[var(--theme-text-primary)] font-mono border border-[var(--theme-border)]">
+                                                    <code className="bg-[var(--theme-bg-card)] px-2 py-0.5 rounded text-[11px] text-[var(--theme-text-primary)] font-mono border-[var(--theme-border)]">
                                                         {key.key.substring(0, 14)}••••••••
                                                     </code>
                                                     <span className="text-[10px] text-[var(--theme-text-secondary)]">Created {key.created}</span>
@@ -396,7 +396,7 @@ export default function IntegrationsSettings() {
                                 desc="Event-driven JSON notifications for real-time order, inventory, and shift events."
                             />
 
-                            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-subtle)] p-6">
+                            <div className="flex-col items-center justify-center py-12 text-center border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-subtle)] p-6">
                                 <div className="w-12 h-12 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] rounded-2xl flex items-center justify-center mb-3">
                                     <Webhook size={24} />
                                 </div>

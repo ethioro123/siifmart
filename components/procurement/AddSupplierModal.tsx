@@ -74,7 +74,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Add New Supplier" size="md">
+        <Modal isOpen={isOpen} onClose={onClose} title="Add New Supplier" size="md" mobileFullScreen>
             <div className="space-y-4">
                 <div>
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Supplier Name *</label>
@@ -107,7 +107,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         <option value="One-Time" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">One-Time / Spot Vendor</option>
                     </select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Email</label>
                         <input

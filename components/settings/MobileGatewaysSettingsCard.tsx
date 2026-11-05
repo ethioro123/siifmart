@@ -107,7 +107,7 @@ export function MobileGatewaysSettingsCard({
 
     return (
         <GlassCard className="p-6 lg:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
+            <div className="flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <SectionHeader
                     title="Mobile Money & Digital Payment Gateways"
                     desc="Configure Till Numbers, Daraja STK Push credentials, and Airtel Money accounts"

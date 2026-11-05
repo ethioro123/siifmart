@@ -3,10 +3,10 @@ import { AlertTriangle } from 'lucide-react';
 
 export const HelpBubble = ({ text }: { text: string }) => (
   <span className="group/help relative inline-block ml-1.5">
-    <div className="w-3.5 h-3.5 rounded-full border border-[var(--theme-border)] flex items-center justify-center text-[9px] font-semibold text-[var(--theme-text-secondary)] cursor-help hover:border-[var(--theme-accent)] dark:hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)] dark:hover:text-[var(--theme-accent)] transition-colors">
+    <div className="w-3.5 h-3.5 rounded-full border-[var(--theme-border)] flex items-center justify-center text-[9px] font-semibold text-[var(--theme-text-secondary)] cursor-help hover:border-[var(--theme-accent)] dark:hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)] dark:hover:text-[var(--theme-accent)] transition-colors">
       ?
     </div>
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[11px] text-[var(--theme-text-primary)] opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50 shadow-md pointer-events-none">
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-xl text-[11px] text-[var(--theme-text-primary)] opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50 shadow-md pointer-events-none">
       <div className="relative z-10 font-normal leading-relaxed">
         {text}
       </div>
@@ -33,7 +33,7 @@ export const NavButton = ({ label, icon: Icon, active, onClick }: any) => (
 );
 
 export const GlassCard = ({ children, className = "" }: any) => (
-  <div className={`bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs ${className}`}>
+  <div className={`bg-[var(--theme-bg-card)] border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs ${className}`}>
     {children}
   </div>
 );
@@ -62,11 +62,11 @@ export const ToggleRow = ({ label, sub, checked, onChange, warning, icon: Icon, 
         onChange?.();
       }
     }}
-    className="min-h-[44px] flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-border-accent,var(--theme-border))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 transition-colors group/row cursor-pointer select-none"
+    className="min-h-[44px] flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border-[var(--theme-border)] hover:border-[var(--theme-border-accent,var(--theme-border))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]/30 transition-colors group/row cursor-pointer select-none"
   >
     <div className="flex items-center gap-3 pr-2 min-w-0">
       {Icon && (
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'}`}>
           <Icon size={16} />
         </div>
       )}
@@ -102,7 +102,7 @@ export const InputGroup = ({ label, value, onChange, placeholder, sub, icon: Ico
         value={value || ''}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/40"
+        className="w-full min-h-[42px] bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/40"
       />
       {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
     </div>
@@ -110,7 +110,7 @@ export const InputGroup = ({ label, value, onChange, placeholder, sub, icon: Ico
 );
 
 export const RadioCard = ({ options, value, onChange }: any) => (
-  <div className="grid grid-cols-2 gap-3" role="radiogroup">
+  <div className="grid-cols-2 gap-3" role="radiogroup">
     {options.map((opt: any) => {
       const isSelected = value === opt.value;
       return (
@@ -131,7 +131,7 @@ export const RadioCard = ({ options, value, onChange }: any) => (
             </div>
           )}
           <div className="flex items-center gap-2.5 mb-2">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isSelected ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isSelected ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-text,var(--theme-text-primary))]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'}`}>
               {opt.icon && <opt.icon size={16} />}
             </div>
             <div>

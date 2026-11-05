@@ -403,6 +403,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

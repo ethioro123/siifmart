@@ -11,7 +11,7 @@ export const LocationEmptyState: React.FC<LocationEmptyStateProps> = ({
     onAddLocation
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-dashed border-[var(--theme-border)] rounded-2xl p-12 text-center">
+        <div className="bg-[var(--theme-bg-card)] border-dashed border-[var(--theme-border)] rounded-2xl p-12 text-center">
             <div className="w-14 h-14 rounded-2xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-7 h-7" />
             </div>
