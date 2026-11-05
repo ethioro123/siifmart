@@ -14,7 +14,7 @@ export const MiscItemModal: React.FC = () => {
     } = usePOS();
 
     return (
-        <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title={t('pos.miscItemTitle')} size="sm">
+        <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title={t('pos.miscItemTitle')} size="sm" mobileFullScreen={true}>
             <div className="space-y-4">
                 <div>
                     <label htmlFor="misc-desc" className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider mb-1.5 block">{t('pos.description')}</label>
@@ -22,7 +22,7 @@ export const MiscItemModal: React.FC = () => {
                         id="misc-desc"
                         value={miscItem.name}
                         onChange={e => setMiscItem({ ...miscItem, name: e.target.value })}
-                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-3.5 py-2.5 text-[var(--theme-input-text)] focus:outline-none focus:border-[var(--theme-border-focus)] transition-colors text-sm"
+                        className="w-full min-h-11 bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-3.5 py-2.5 text-[var(--theme-input-text)] focus:outline-none focus:border-[var(--theme-border-focus)] transition-colors text-sm"
                     />
                 </div>
                 <div>
@@ -31,15 +31,16 @@ export const MiscItemModal: React.FC = () => {
                         type="number"
                         value={miscItem.price}
                         onChange={e => setMiscItem({ ...miscItem, price: e.target.value })}
-                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-3.5 py-2.5 text-[var(--theme-input-text)] font-mono focus:outline-none focus:border-[var(--theme-border-focus)] transition-colors text-sm"
+                        className="w-full min-h-11 bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-3.5 py-2.5 text-[var(--theme-input-text)] font-mono focus:outline-none focus:border-[var(--theme-border-focus)] transition-colors text-sm"
                         placeholder="0.00"
                         autoFocus
                     />
                 </div>
                 <button
+                    type="button"
                     onClick={addMiscItem}
                     disabled={!miscItem.price}
-                    className="w-full py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer text-xs uppercase tracking-wider"
+                    className="w-full min-h-11 py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer touch-manipulation text-xs uppercase tracking-wider flex items-center justify-center"
                 >
                     {t('pos.addToCart')}
                 </button>

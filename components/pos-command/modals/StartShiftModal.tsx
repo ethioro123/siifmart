@@ -99,6 +99,7 @@ export const StartShiftModal: React.FC = () => {
             onClose={() => setIsStartShiftModalOpen(false)}
             title={t('posCommand.startShiftModalTitle')}
             size="md"
+            mobileFullScreen={true}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Cashier & Sovereign Identity Card */}
@@ -157,7 +158,7 @@ export const StartShiftModal: React.FC = () => {
                                     type="button"
                                     disabled={isOccupied}
                                     onClick={() => setSelectedCounter(counter)}
-                                    className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                    className={`min-h-11 p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                         isOccupied
                                             ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] opacity-60 cursor-not-allowed'
                                             : isSelected
@@ -228,7 +229,7 @@ export const StartShiftModal: React.FC = () => {
                                 key={val}
                                 type="button"
                                 onClick={() => setOpeningFloat(String(val))}
-                                className={`py-1.5 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                className={`min-h-11 py-1.5 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer touch-manipulation flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                     floatNum === val
                                         ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-xs'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)]'
@@ -249,18 +250,18 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-1">
+                <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-1">
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(false)}
-                        className="flex-1 min-h-11 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider rounded-2xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full sm:w-auto sm:flex-1 min-h-11 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider rounded-2xl transition-colors cursor-pointer touch-manipulation border border-[var(--theme-border)] shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('common.cancel') || 'Cancel'}
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || floatNum < 0 || !activeSite?.id || occupiedCounters.has(selectedCounter) || hasOpenShiftForCashier}
-                        className="flex-2 min-h-11 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full sm:w-auto sm:flex-2 min-h-11 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer touch-manipulation active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Play size={14} className="fill-current" />
                         <span>{isSubmitting ? t('posCommand.starting') : t('posCommand.openCounterAndStart', { counter: selectedCounter })}</span>

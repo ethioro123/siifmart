@@ -113,6 +113,7 @@ export const StartShiftModal: React.FC = () => {
             onClose={handleClose}
             title={t('pos.startCashierShift')}
             size="md"
+            mobileFullScreen={true}
         >
             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
                 {/* Cashier & Station Header */}
@@ -125,7 +126,7 @@ export const StartShiftModal: React.FC = () => {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <p className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight tracking-tight">{user?.name || 'Cashier'}</p>
-                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-mono text-[10px] font-black tracking-wider border border-[var(--theme-status-info-border)]">
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] font-mono text-[10px] font-black tracking-wider border border-[var(--theme-status-info-border)]">
                                         {cashierBadge}
                                     </span>
                                 </div>
@@ -171,7 +172,7 @@ export const StartShiftModal: React.FC = () => {
                                     type="button"
                                     disabled={isOccupied}
                                     onClick={() => setSelectedCounter(counter)}
-                                    className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                                    className={`min-h-11 p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between touch-manipulation ${
                                         isOccupied
                                             ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] opacity-60 cursor-not-allowed'
                                             : isSelected
@@ -241,7 +242,7 @@ export const StartShiftModal: React.FC = () => {
                                     setOpeningFloat(String(amount));
                                     native.haptic();
                                 }}
-                                className={`py-2 px-1 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer text-center tabular-nums active:scale-95 shadow-xs ${
+                                className={`min-h-11 py-2 px-1 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer touch-manipulation text-center tabular-nums active:scale-95 shadow-xs flex items-center justify-center ${
                                     floatNum === amount
                                         ? 'bg-[var(--theme-primary)] border-transparent text-[var(--theme-primary-text)]'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
@@ -262,11 +263,11 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2.5 pt-1">
+                <div className="flex flex-col-reverse sm:flex-row items-center gap-2.5 pt-1">
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-[var(--theme-border)] shadow-xs active:scale-95 tracking-tight"
+                        className="w-full sm:w-auto sm:flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer touch-manipulation border border-[var(--theme-border)] shadow-xs active:scale-95 tracking-tight"
                     >
                         <ArrowLeft size={15} />
                         <span>{t('common.cancel')}</span>
@@ -275,7 +276,7 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="submit"
                         disabled={!counterCount || !Number.isFinite(floatNum) || floatNum < 0 || isSubmitting || !activeSite?.id || occupiedCounters.has(selectedCounter) || hasOpenShiftForCashier}
-                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent tracking-tight"
+                        className="w-full sm:w-auto sm:flex-2 min-h-11 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer touch-manipulation border border-transparent tracking-tight"
                     >
                         <DollarSign size={15} />
                         <span>{isSubmitting ? t('pos.starting') : `${t('pos.startCounter', { counter: selectedCounter })} (${CURRENCY_SYMBOL} ${floatNum.toLocaleString()})`}</span>

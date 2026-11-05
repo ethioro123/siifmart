@@ -94,6 +94,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
             onClose={onClose}
             title={t('pos.zeroTrustVoidTitle')}
             size="md"
+            mobileFullScreen={true}
         >
             <div className="space-y-4">
                 {/* Warning Banner */}
@@ -141,7 +142,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="min-h-11 flex-1 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="min-h-11 flex-1 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -149,7 +150,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                         type="button"
                         onClick={handleConfirmVoid}
                         disabled={supervisorPin.length < 4 || isSubmitting}
-                        className="min-h-11 flex-2 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 disabled:opacity-40 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                        className="min-h-11 flex-2 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 disabled:opacity-40 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
                         {t('pos.authorizeAndVoid')}

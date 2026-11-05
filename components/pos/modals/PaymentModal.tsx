@@ -67,6 +67,7 @@ export const PaymentModal: React.FC = () => {
             onClose={() => setIsPaymentModalOpen(false)}
             title={t('pos.processPayment')}
             size="md"
+            mobileFullScreen={true}
         >
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
                 {/* Total Amount Card */}
@@ -96,7 +97,7 @@ export const PaymentModal: React.FC = () => {
                                         setAmountTendered((Math.round(total * 100) / 100).toString());
                                     }
                                 }}
-                                className={`min-h-24 p-4 rounded-2xl border flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
+                                className={`min-h-24 p-4 rounded-2xl border flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                     isSelected
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)] shadow-sm'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-strong)]'
@@ -157,7 +158,7 @@ export const PaymentModal: React.FC = () => {
                                         type="button"
                                         onClick={() => setAmountTendered(amt.toString())}
                                         aria-pressed={isSelected}
-                                        className={`min-h-11 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
+                                        className={`min-h-11 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 shadow-xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                             isSelected
                                                 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)]'
@@ -205,7 +206,7 @@ export const PaymentModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsPaymentModalOpen(false)}
-                        className="min-h-11 flex-1 py-3 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 flex-1 py-3 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-bold text-sm transition-all cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -213,7 +214,7 @@ export const PaymentModal: React.FC = () => {
                         type="button"
                         onClick={handleComplete}
                         disabled={!canComplete}
-                        className="min-h-11 flex-[2] py-3 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 flex-[2] py-3 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 touch-manipulation flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {isProcessing ? (
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />

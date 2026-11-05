@@ -127,17 +127,18 @@ export const ReturnModal: React.FC = () => {
             onClose={handleClose}
             title={isPinStep ? "Central HQ Cash Refund Authorization" : "Returns & Refund Manager (Zero-Trust)"}
             size="lg"
+            mobileFullScreen={true}
         >
             <div className="space-y-6">
                 {isPinStep ? (
                     <div className="space-y-6 animate-in fade-in">
                         <div className="p-4 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-start gap-3">
-                            <ShieldAlert className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={22} />
+                            <ShieldAlert className="text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={22} />
                             <div className="space-y-1">
-                                <h4 className="text-sm font-black text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase tracking-wider">
+                                <h4 className="text-sm font-black text-[var(--theme-status-danger-text)] uppercase tracking-wider">
                                     Central HQ Authorization OTP Required
                                 </h4>
-                                <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] leading-relaxed">
+                                <p className="text-xs text-[var(--theme-status-danger-text)] leading-relaxed">
                                     Zero-Trust Anti-Collusion Policy: Store Manager PIN cannot authorize cash withdrawals from the drawer. A cash refund of <b>{CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}</b> requires a 6-digit One-Time Passcode (OTP) issued directly by Central HQ Finance or the Store Owner.
                                 </p>
                             </div>
@@ -170,7 +171,7 @@ export const ReturnModal: React.FC = () => {
                             />
                         </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)]">
+                        <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-2.5 sm:gap-3 pt-4 border-t border-[var(--theme-border)]">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -178,7 +179,7 @@ export const ReturnModal: React.FC = () => {
                                     setHqOtp('');
                                     setPinError('');
                                 }}
-                                className="px-4 py-2.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer"
+                                className="w-full sm:w-auto min-h-11 px-4 py-2.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer touch-manipulation flex items-center justify-center"
                             >
                                 {t('pos.backToTenders')}
                             </button>
@@ -186,7 +187,7 @@ export const ReturnModal: React.FC = () => {
                                 type="button"
                                 onClick={handleVerifyHqOtp}
                                 disabled={(refundMethod === 'CASH' ? hqOtp.length !== 6 : hqOtp.length < 4) || isProcessing}
-                                className="px-6 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                                className="w-full sm:w-auto min-h-11 px-6 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer touch-manipulation text-xs uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
                                 {t('pos.verifyHqOtpAndDispense')}
@@ -314,7 +315,7 @@ export const ReturnModal: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setRefundMethod('STORE_CREDIT')}
-                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'STORE_CREDIT'
+                                        className={`min-h-11 p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer touch-manipulation flex items-center justify-center ${refundMethod === 'STORE_CREDIT'
                                             ? 'bg-[var(--theme-text-primary)] text-[var(--theme-bg-app)] border-[var(--theme-text-primary)] shadow-xs'
                                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                                             }`}
@@ -325,9 +326,9 @@ export const ReturnModal: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={() => setRefundMethod('M_PESA')}
-                                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'M_PESA'
+                                            className={`min-h-11 p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer touch-manipulation flex items-center justify-center ${refundMethod === 'M_PESA'
                                                 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-success-border)] shadow-xs'
-                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-success-border)]'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-status-success-border)]'
                                                 }`}
                                         >
                                             M-Pesa (Safaricom)
@@ -337,9 +338,9 @@ export const ReturnModal: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setRefundMethod('TELEBIRR')}
-                                                className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
+                                                className={`min-h-11 p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer touch-manipulation flex items-center justify-center ${refundMethod === 'TELEBIRR'
                                                     ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-info-border)] shadow-xs'
-                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-info-border)]'
+                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-status-info-border)]'
                                                     }`}
                                             >
                                                 Telebirr
@@ -347,7 +348,7 @@ export const ReturnModal: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setRefundMethod('CBE_BIRR')}
-                                                className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CBE_BIRR'
+                                                className={`min-h-11 p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer touch-manipulation flex items-center justify-center ${refundMethod === 'CBE_BIRR'
                                                     ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-border-accent)] shadow-xs'
                                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-accent)]'
                                                     }`}
@@ -359,9 +360,9 @@ export const ReturnModal: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setRefundMethod('CASH')}
-                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CASH'
+                                        className={`min-h-11 p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer touch-manipulation flex items-center justify-center ${refundMethod === 'CASH'
                                             ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-danger-border)] shadow-xs'
-                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]'
+                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                             }`}
                                     >
                                         Cash (HQ OTP)
@@ -395,8 +396,8 @@ export const ReturnModal: React.FC = () => {
 
                             {totalRefundAmount > 0 && (
                                 <div className={`p-3 rounded-lg flex items-start gap-3 border ${refundMethod === 'CASH'
-                                    ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
-                                    : 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                                    ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]'
+                                    : 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
                                     }`}>
                                     <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                                     <p className="text-xs font-medium leading-relaxed">
@@ -412,7 +413,7 @@ export const ReturnModal: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setFoundSaleForReturn(null)}
-                                    className="flex-1 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl hover:bg-[var(--theme-bg-card-hover)] transition-colors font-bold text-xs uppercase tracking-wider cursor-pointer"
+                                    className="min-h-11 flex-1 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl hover:bg-[var(--theme-bg-card-hover)] transition-colors font-bold text-xs uppercase tracking-wider cursor-pointer touch-manipulation flex items-center justify-center"
                                 >
                                     Cancel
                                 </button>
@@ -420,8 +421,8 @@ export const ReturnModal: React.FC = () => {
                                     type="button"
                                     onClick={handleInitiateRefund}
                                     disabled={totalRefundAmount === 0 || isProcessing || (refundMethod !== 'CASH' && !customerPhone.trim())}
-                                    className={`flex-1 py-3 text-[var(--theme-text-primary)] font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:shadow-none text-xs uppercase tracking-wider ${refundMethod === 'CASH'
-                                        ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]'
+                                    className={`min-h-11 flex-1 py-3 text-[var(--theme-text-primary)] font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:shadow-none text-xs uppercase tracking-wider touch-manipulation ${refundMethod === 'CASH'
+                                        ? 'bg-[var(--theme-status-danger-bg)]'
                                         : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                                         }`}
                                 >

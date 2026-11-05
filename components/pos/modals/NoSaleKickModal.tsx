@@ -84,6 +84,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
             onClose={onClose}
             title={t('pos.manualDrawerKickTitle')}
             size="md"
+            mobileFullScreen={true}
         >
             <div className="space-y-4">
                 <div className="p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-3">
@@ -129,7 +130,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors"
+                        className="flex-1 min-h-11 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -137,7 +138,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                         type="button"
                         onClick={handleConfirmKick}
                         disabled={supervisorPin.length < 4 || isSubmitting}
-                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                        className="flex-2 min-h-11 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <KeyRound size={16} />}
                         {t('pos.authorizeDrawerKick')}
