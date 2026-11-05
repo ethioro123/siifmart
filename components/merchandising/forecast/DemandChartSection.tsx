@@ -19,7 +19,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
     totalSales
 }) => {
     return (
-        <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm">
+        <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm">
             <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">

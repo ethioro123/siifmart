@@ -50,7 +50,7 @@ export const RulesTab: React.FC = () => {
          {/* Left: Pricing Rules List & Filters */}
          <div className="lg:col-span-2 space-y-4">
             {/* Header info & explanation of manual review workflow */}
-            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
                <div>
                   <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Pricing Rules & Proposals</h3>
                   <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -60,7 +60,7 @@ export const RulesTab: React.FC = () => {
                <button
                   type="button"
                   onClick={() => setIsRuleModalOpen(true)}
-                  className="px-3.5 py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm transition-all"
+                  className="px-4 py-2.5 min-h-11 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm transition-all w-full sm:w-auto"
                >
                   <Plus size={15} />
                   <span>Create Rule</span>
@@ -100,10 +100,10 @@ export const RulesTab: React.FC = () => {
                         setPricingRulesSearch(e.target.value);
                         setPricingRulesPage(1);
                      }}
-                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)]"
+                     className="w-full h-11 sm:h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)]"
                   />
                </div>
-               <div className="flex items-center gap-1 shrink-0">
+               <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
                   {(['all', 'enabled', 'paused'] as const).map(status => (
                      <button
                         aria-pressed={pricingRulesStatus === status}
@@ -113,7 +113,7 @@ export const RulesTab: React.FC = () => {
                            setPricingRulesStatus(status);
                            setPricingRulesPage(1);
                         }}
-                        className={`px-2.5 py-1.5 text-xs font-medium rounded-xl capitalize transition-colors cursor-pointer ${
+                        className={`min-h-11 sm:min-h-0 py-2 sm:py-1.5 px-3 flex-1 sm:flex-initial text-center justify-center text-xs font-medium rounded-xl capitalize transition-colors cursor-pointer ${
                            pricingRulesStatus === status
                               ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-sm'
                               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
@@ -140,7 +140,7 @@ export const RulesTab: React.FC = () => {
                pricingRules.map(rule => (
                   <div
                      key={rule.id}
-                     className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[var(--theme-accent)]/40 group"
+                     className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[var(--theme-accent)]/40 group"
                   >
                      <div className="flex items-start gap-4">
                         <div
@@ -189,12 +189,12 @@ export const RulesTab: React.FC = () => {
                      </div>
 
                      {/* Rule Actions */}
-                     <div className="flex items-center gap-2 self-end sm:self-center">
+                     <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                         <button
                            type="button"
                            onClick={() => runPricingRule(rule)}
                            disabled={isSubmitting || isSimulating || pricingRulesMutating}
-                           className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
+                           className="min-h-11 px-3.5 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-semibold flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
                            aria-label={`Preview proposals for rule ${rule.name}`}
                            title={rule.isActive ? 'Generate & preview price proposals' : 'Preview proposals (test paused rule)'}
                         >
@@ -268,7 +268,7 @@ export const RulesTab: React.FC = () => {
          </div>
 
          {/* Right: Rule Simulator Card */}
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border)]">
                   <div className="flex items-center gap-3">
@@ -339,7 +339,7 @@ export const RulesTab: React.FC = () => {
                   type="button"
                   onClick={handleRunSimulation}
                   disabled={isSimulating || isSubmitting || pricingRulesMutating}
-                  className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
+                  className="w-full min-h-11 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
                >
                   {isSimulating ? <RefreshCw className="animate-spin" size={15} /> : <Zap size={15} />}
                   <span>{isSimulating ? 'Calculating scenario…' : 'Run Simulation'}</span>

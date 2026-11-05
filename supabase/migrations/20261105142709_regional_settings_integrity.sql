@@ -74,11 +74,11 @@ BEGIN
  SELECT * INTO r FROM public.regions WHERE code=p_code;
  IF r.code IS NULL THEN RAISE EXCEPTION 'Region unavailable' USING ERRCODE='42501'; END IF;
  SELECT * INTO home FROM public.sites WHERE id=actor.site_id;
- IF actor.role<>'group_ceo' AND NOT (
+ IF actor.role<>'group_ceo' AND NOT coalesce((
    upper(home.country)=upper(r.country) AND (
     actor.role IN('country_managing_director','country_operations_director','country_finance_director','country_commercial_director','country_supply_chain_director','group_coo','group_cfo','group_cco','group_csco')
     OR (actor.role IN('regional_operations_manager','regional_procurement_manager','regional_finance_manager','regional_supply_chain_manager','regional_logistics_manager') AND coalesce(actor.region_code,home.region_code)=r.code)
-   )) IS TRUE THEN RAISE EXCEPTION 'Regional budget is outside your authority' USING ERRCODE='42501'; END IF;
+   )),false) THEN RAISE EXCEPTION 'Regional budget is outside your authority' USING ERRCODE='42501'; END IF;
  month_start:=date_trunc('month',statement_timestamp() AT TIME ZONE CASE r.country WHEN 'RW' THEN 'Africa/Kigali' ELSE 'Africa/Nairobi' END)::date;
  SELECT coalesce(sum(po.total_amount),0) INTO spend FROM public.purchase_orders po LEFT JOIN public.sites s ON s.id=po.site_id
  WHERE coalesce(po.region_code,s.region_code)=r.code AND upper(po.country_code)=upper(r.country)

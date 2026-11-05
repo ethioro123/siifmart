@@ -14,188 +14,31 @@ describe('regionsService - Dynamic Budget & Operations', () => {
         vi.clearAllMocks();
     });
 
-    it('calculates dynamic budget status with real-time spend and cap alerts', async () => {
-        // Mock getRegionByCode
-        const mockRegion = {
-            code: 'ke_mombasa',
-            name: 'Mombasa Coastal Region',
-            country: 'Kenya',
-            default_currency: 'KES',
-            monthly_procurement_budget: 1000000, // 1M KES
-            autonomous_po_limit: 150000,        // 150k KES
-            status: 'active'
-        };
-
-        const mockSites = [{ id: 'site-001' }, { id: 'site-002' }];
-        const mockPOs = [
-            { total_amount: 500000, status: 'approved' },
-            { total_amount: 380000, status: 'completed' }
-        ];
-
-        const poChain: any = {
-            select: vi.fn(() => poChain),
-            in: vi.fn(() => poChain),
-            gte: vi.fn(() => poChain),
-            lt: vi.fn(() => poChain),
-            then: (resolve: any) => Promise.resolve({ data: mockPOs, error: null }).then(resolve)
-        };
-
-        // Mock Supabase chained calls
-        (supabase.from as any).mockImplementation((table: string) => {
-            if (table === 'regions') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    maybeSingle: vi.fn().mockResolvedValue({ data: mockRegion, error: null })
-                };
-            }
-            if (table === 'sites') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockResolvedValue({ data: mockSites, error: null })
-                };
-            }
-            if (table === 'purchase_orders') {
-                return poChain;
-            }
-            return {
-                select: vi.fn().mockReturnThis()
-            };
-        });
-
-        const status = await regionsService.getRegionBudgetStatus('ke_mombasa');
-
-        expect(status).not.toBeNull();
-        expect(status?.regionCode).toBe('ke_mombasa');
-        expect(status?.monthlyBudget).toBe(1000000);
-        expect(status?.autonomousPoLimit).toBe(150000);
-        // Total spent: 500,000 + 380,000 = 880,000
-        expect(status?.currentMonthSpend).toBe(880000);
-        expect(status?.remainingBudget).toBe(120000);
-        // 88% used -> should trigger isNearCap (>= 85%)
-        expect(status?.percentUsed).toBe(88);
-        expect(status?.isNearCap).toBe(true);
-        expect(status?.isOverBudget).toBe(false);
+    it('requests a server-side total without downloading purchase orders', async () => {
+        const summary = { regionCode: 'MBA', currentMonthSpend: 880000, monthlyBudget: 1000000, isNearCap: true };
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: summary, error: null } as never);
+        expect(await regionsService.getRegionBudgetStatus('MBA')).toEqual(summary);
+        expect(supabase.rpc).toHaveBeenCalledWith('get_region_budget_status', { p_code: 'MBA' });
+        expect(supabase.from).not.toHaveBeenCalled();
     });
-
-    it('flags isOverBudget when spend exceeds configured dynamic cap', async () => {
-        const mockRegion = {
-            code: 'ke_nairobi',
-            name: 'Nairobi Metro Region',
-            country: 'Kenya',
-            default_currency: 'KES',
-            monthly_procurement_budget: 500000,
-            autonomous_po_limit: 100000,
-            status: 'active'
-        };
-
-        const mockSites = [{ id: 'site-hq' }];
-        const mockPOs = [{ total_amount: 550000, status: 'approved' }];
-
-        const poChain: any = {
-            select: vi.fn(() => poChain),
-            in: vi.fn(() => poChain),
-            gte: vi.fn(() => poChain),
-            lt: vi.fn(() => poChain),
-            then: (resolve: any) => Promise.resolve({ data: mockPOs, error: null }).then(resolve)
-        };
-
-        (supabase.from as any).mockImplementation((table: string) => {
-            if (table === 'regions') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    maybeSingle: vi.fn().mockResolvedValue({ data: mockRegion, error: null })
-                };
-            }
-            if (table === 'sites') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockResolvedValue({ data: mockSites, error: null })
-                };
-            }
-            if (table === 'purchase_orders') {
-                return poChain;
-            }
-            return {};
-        });
-
-        const status = await regionsService.getRegionBudgetStatus('ke_nairobi');
-
-        expect(status?.isOverBudget).toBe(true);
-        expect(status?.remainingBudget).toBe(0);
+    it('propagates a denied summary instead of reporting zero spend', async () => {
+        const error = new Error('Budget access denied');
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error } as never);
+        await expect(regionsService.getRegionBudgetStatus('MBA')).rejects.toBe(error);
     });
-
-    it('throws error when sites query fails during budget calculation', async () => {
-        const mockRegion = {
-            code: 'ke_nairobi',
-            name: 'Nairobi Metro Region',
-            country: 'KE',
-            default_currency: 'KES',
-            monthly_procurement_budget: 500000,
-            status: 'active'
-        };
-
-        (supabase.from as any).mockImplementation((table: string) => {
-            if (table === 'regions') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    maybeSingle: vi.fn().mockResolvedValue({ data: mockRegion, error: null })
-                };
-            }
-            if (table === 'sites') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockResolvedValue({ data: null, error: { message: 'Network timeout' } })
-                };
-            }
-            return {};
-        });
-
-        await expect(regionsService.getRegionBudgetStatus('ke_nairobi')).rejects.toThrow('Unable to fetch sites for region budget: Network timeout');
+    it('rejects a summary for a different region', async () => {
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: { regionCode: 'ADD', currentMonthSpend: 0 }, error: null } as never);
+        await expect(regionsService.getRegionBudgetStatus('MBA')).rejects.toThrow('Invalid regional budget response');
     });
-
-    it('throws error when purchase orders query fails during budget calculation', async () => {
-        const mockRegion = {
-            code: 'ke_nairobi',
-            name: 'Nairobi Metro Region',
-            country: 'KE',
-            default_currency: 'KES',
-            monthly_procurement_budget: 500000,
-            status: 'active'
-        };
-
-        const mockSites = [{ id: 'site-hq' }];
-
-        (supabase.from as any).mockImplementation((table: string) => {
-            if (table === 'regions') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    maybeSingle: vi.fn().mockResolvedValue({ data: mockRegion, error: null })
-                };
-            }
-            if (table === 'sites') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockResolvedValue({ data: mockSites, error: null })
-                };
-            }
-            if (table === 'purchase_orders') {
-                const poErrChain: any = {
-                    select: vi.fn(() => poErrChain),
-                    in: vi.fn(() => poErrChain),
-                    gte: vi.fn(() => poErrChain),
-                    lt: vi.fn(() => poErrChain),
-                    then: (resolve: any, reject: any) => Promise.resolve({ data: null, error: { message: 'PO query timeout' } }).then(resolve, reject)
-                };
-                return poErrChain;
-            }
-            return {};
-        });
-
-        await expect(regionsService.getRegionBudgetStatus('ke_nairobi')).rejects.toThrow('Unable to fetch PO spend for region budget: PO query timeout');
+    it('preserves a configured zero autonomous expense limit when loading lists and records', async () => {
+        const row = { code: 'MBA', country: 'KE', autonomous_expense_limit: 0 };
+        const chain = { select: vi.fn(), eq: vi.fn(), order: vi.fn(), maybeSingle: vi.fn() };
+        chain.select.mockReturnValue(chain); chain.eq.mockReturnValue(chain);
+        chain.order.mockResolvedValue({ data: [row], error: null });
+        chain.maybeSingle.mockResolvedValue({ data: row, error: null });
+        vi.mocked(supabase.from).mockReturnValue(chain as never);
+        expect((await regionsService.getRegions('KE'))[0].autonomous_expense_limit).toBe(0);
+        expect((await regionsService.getRegionByCode('MBA'))?.autonomous_expense_limit).toBe(0);
     });
 
     it('propagates database error when getRegions fails', async () => {

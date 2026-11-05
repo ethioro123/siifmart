@@ -23,7 +23,10 @@ export const regionalAdminDirectoryService = {
                 .eq('role', 'regional_operations_manager').eq('status', 'Active').in('site_id', sites.map(site => site.id))
                 .order('id').range(offset, offset + pageSize - 1);
             if (error) throw error;
-            for (const row of data ?? []) employees.push({ ...row, siteId: row.site_id, regionCode: row.region_code, country });
+            for (const row of data ?? []) {
+                const regionCode = row.region_code || sites.find(site => site.id === row.site_id)?.region_code;
+                employees.push({ ...row, siteId: row.site_id, regionCode, region_code: regionCode, country });
+            }
             if (!data || data.length < pageSize) break;
         }
         return { sites, employees };

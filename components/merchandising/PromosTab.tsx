@@ -102,7 +102,7 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
   return (
     <section className="space-y-5" aria-label="Campaign proposals">
       {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3.5 sm:p-5 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-[var(--theme-text-primary)]">Campaign Plans & Governance</h3>
@@ -115,15 +115,15 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
         {onCreate && <button
           type="button"
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm hover:opacity-95 transition-opacity"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2.5 min-h-11 text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm hover:opacity-95 transition-opacity w-full sm:w-auto"
         >
           <Plus size={15} /> Propose Campaign
         </button>}
       </div>
 
       {/* Filter Tabs & Pagination Summary */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
           {(['pending', 'approved', 'rejected', 'all'] as StatusTab[]).map((tab) => (
             <button
               key={tab}
@@ -132,7 +132,7 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
                 setStatusFilter(tab);
                 setCurrentPage(1);
               }}
-              className={`rounded-xl px-3 py-1.5 text-xs font-semibold capitalize transition-all ${
+              className={`rounded-xl px-3.5 sm:px-3 py-2 sm:py-1.5 min-h-11 sm:min-h-0 shrink-0 whitespace-nowrap text-xs font-semibold capitalize transition-all ${
                 statusFilter === tab
                   ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                   : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -143,14 +143,14 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
           ))}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)]">
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-[var(--theme-text-secondary)] w-full sm:w-auto">
           <span>Showing {proposals.length} of {totalCount} records</span>
           <div className="flex items-center gap-1 ml-2">
             <button
               type="button"
               disabled={currentPage <= 1 || isLoading}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="p-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] disabled:opacity-40"
+              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 sm:p-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] disabled:opacity-40 flex items-center justify-center"
               aria-label="Previous page"
             >
               <ChevronLeft size={14} />
@@ -160,7 +160,7 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
               type="button"
               disabled={currentPage >= totalPages || isLoading}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="p-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] disabled:opacity-40"
+              className="min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 sm:p-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] disabled:opacity-40 flex items-center justify-center"
               aria-label="Next page"
             >
               <ChevronRight size={14} />
@@ -285,7 +285,7 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
                     type="button"
                     disabled={approve.isPending || reject.isPending}
                     onClick={() => handleApprove(proposal)}
-                    className="flex-1 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
+                    className="flex-1 min-h-11 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50 flex items-center justify-center text-center"
                   >
                     Approve Plan
                   </button>
@@ -293,7 +293,7 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
                     type="button"
                     disabled={approve.isPending || reject.isPending}
                     onClick={() => setRejectModalProposal(proposal)}
-                    className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-50"
+                    className="min-h-11 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-4 py-2 text-xs font-semibold transition-colors disabled:opacity-50 flex items-center justify-center text-center"
                   >
                     Reject
                   </button>
