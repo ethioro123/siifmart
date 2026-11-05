@@ -47,8 +47,8 @@ DO $$ DECLARE before_total numeric; after_total numeric; BEGIN
  PERFORM set_config('request.jwt.claim.sub','e1000000-0000-4000-8000-000000000003',true);
  SELECT (public.ar_aging_totals('ET')->>'totalOutstanding')::numeric INTO before_total;
  PERFORM set_config('request.jwt.claim.sub','',true);
- INSERT INTO public.ar_invoices(invoice_number,site_id,country_code,total_amount,balance_due,currency,status,due_date)
- SELECT 'AUDIT-'||gen_random_uuid(),'c1111111-1111-4000-8000-000000000112','ET',100,100,'ETB','Issued',current_date+30 FROM generate_series(1,26);
+ INSERT INTO public.ar_invoices(customer_id,customer_name,invoice_number,site_id,country_code,total_amount,balance_due,currency,status,due_date)
+ SELECT 'AUDIT-CUSTOMER','Audit customer','AUDIT-'||gen_random_uuid(),'c1111111-1111-4000-8000-000000000112','ET',100,100,'ETB','Issued',current_date+30 FROM generate_series(1,26);
  PERFORM set_config('request.jwt.claim.sub','e1000000-0000-4000-8000-000000000003',true);
  SELECT (public.ar_aging_totals('ET')->>'totalOutstanding')::numeric INTO after_total;
  ASSERT after_total-before_total=2600,'AR aggregate omitted invoices';
