@@ -256,7 +256,7 @@ BEGIN
  VALUES('PICK_LINE_VERIFIED','Fulfillment',public.get_my_employee_id(),j.site_id::text,j.country_code,'wms_job',j.id::text,
   jsonb_build_object('line',p_item_index,'productId',p.id,'quantity',p_quantity,'sourceBin',p.location,'shortageReason',reason)::text);
  RETURN to_jsonb(j);
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION private.complete_pick_job(p_job_id uuid)
  RETURNS jsonb
@@ -324,7 +324,7 @@ BEGIN
  INSERT INTO public.system_logs(action,module,employee_id,site_id,country_code,entity_type,entity_id,details)
  VALUES('PICK_COMPLETED','Fulfillment',public.get_my_employee_id(),j.site_id::text,j.country_code,'wms_job',j.id::text,jsonb_build_object('packJobId',pack.id,'noStockPicked',pack.id IS NULL)::text);
  RETURN jsonb_build_object('job',to_jsonb(j),'pack',CASE WHEN pack.id IS NOT NULL THEN to_jsonb(pack) ELSE NULL END);
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION private.authorized_pick(p_job_id uuid)
  RETURNS wms_jobs
@@ -346,7 +346,7 @@ BEGIN
   OR NOT EXISTS(SELECT 1 FROM public.job_assignments a WHERE a.job_id=j.id AND a.employee_id=e.id)
  THEN RAISE EXCEPTION 'Picking requires the assigned employee at this facility' USING ERRCODE='42501'; END IF;
  RETURN j;
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION private.guard_verified_picking()
  RETURNS trigger
@@ -383,7 +383,7 @@ BEGIN
   idx:=idx+1;
  END LOOP;
  RETURN NEW;
-END; $function$
+END; $function$;
 
 -- JavaScript signed Int32 hash parity, including negative overflow.
 CREATE OR REPLACE FUNCTION private.pick_location_barcode(p_code text,p_location text) RETURNS text

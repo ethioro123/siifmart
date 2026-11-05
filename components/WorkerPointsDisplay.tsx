@@ -199,7 +199,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                             <p className="text-center text-xs text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                                 {levelInfo.pointsToNext > 0
                                     ? <><strong className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{levelInfo.pointsToNext}</strong> points to reach <strong className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{levelInfo.nextLevel.title}</strong></>
-                                    : <span className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-bold">🎉 Maximum Level Achieved!</span>
+                                    : <span className="text-[var(--theme-accent)] font-bold">Maximum Level Achieved</span>
                                 }
                             </p>
                         </div>
@@ -235,9 +235,9 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
 
                     {/* Time Period Points */}
                     <div className="grid grid-cols-3 gap-3">
-                        <TimeCard label="Today" points={points.todayPoints} icon="🌟" />
-                        <TimeCard label="This Week" points={points.weeklyPoints} icon="📊" />
-                        <TimeCard label="This Month" points={points.monthlyPoints} icon="📅" />
+                        <TimeCard label="Today" points={points.todayPoints} icon={<Sparkles size={18} />} />
+                        <TimeCard label="This Week" points={points.weeklyPoints} icon={<TrendingUp size={18} />} />
+                        <TimeCard label="This Month" points={points.monthlyPoints} icon={<Clock size={18} />} />
                     </div>
 
                     {/* Bonus Earnings Section */}
@@ -332,23 +332,27 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
     );
 }
 
-function TimeCard({ label, points, icon }: { label: string; points: number; icon: string }) {
+function TimeCard({ label, points, icon }: { label: string; points: number; icon: React.ReactNode }) {
     return (
-        <div className="bg-gradient-to-br from-[var(--theme-accent)] to-[var(--theme-accent)] from-[var(--theme-accent)] to-[var(--theme-accent)] rounded-xl p-3 border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] text-center shadow-sm">
-            <span className="text-xl">{icon}</span>
-            <p className="text-xl font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">+{points.toLocaleString()}</p>
-            <p className="text-[10px] text-[var(--theme-text-muted)] text-[var(--theme-text-muted)] uppercase">{label}</p>
+        <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-3 border border-[var(--theme-border)] text-center shadow-xs">
+            <div className="flex items-center justify-center text-[var(--theme-accent)] mb-1">{icon}</div>
+            <p className="text-xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-1">+{points.toLocaleString()}</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase">{label}</p>
         </div>
     );
 }
 
 function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
     return (
-        <div className="bg-gradient-to-br from-[var(--theme-status-warning)] to-[var(--theme-status-warning)] rounded-xl p-3 border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] hover:border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/5 transition-all group cursor-pointer">
-            <div className="text-2xl mb-1">{getAchievementIcon(achievement.type)}</div>
-            <p className="text-sm font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] truncate">{achievement.name}</p>
-            <p className="text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] truncate">{achievement.description}</p>
-            <p className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
+        <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-3 border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 hover:bg-[var(--theme-bg-card)] transition-all group cursor-pointer shadow-xs">
+            <div className="flex items-center justify-center h-8 mb-1">
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
+                    {getAchievementIcon(achievement.type)}
+                </span>
+            </div>
+            <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">{achievement.name}</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] truncate">{achievement.description}</p>
+            <p className="text-[10px] text-[var(--theme-status-warning-text)] mt-1 font-mono font-bold tabular-nums">+{achievement.pointsAwarded} pts</p>
         </div>
     );
 }

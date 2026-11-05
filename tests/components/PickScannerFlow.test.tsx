@@ -36,7 +36,7 @@ describe('verified picking scanner',()=>{
   fireEvent.submit(qty.closest('form')!);expect(save).not.toHaveBeenCalled();
   fireEvent.change(screen.getByRole('textbox',{name:'Shortage reason'}),{target:{value:'Bin physically empty'}});
   fireEvent.submit(qty.closest('form')!);
-  await waitFor(()=>expect(save).toHaveBeenCalledWith('',0,'Bin physically empty'));
+  await waitFor(()=>expect(save).toHaveBeenCalledWith('',0,'Bin physically empty',{batch:'',expiry:'',verified:false}));
  });
  it('does not turn the empty-bin action into an unscanned positive pick',async()=>{
   const {save}=setup();await scanBay();

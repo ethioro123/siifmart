@@ -1,3 +1,4 @@
+import {PickLotVerification,PickLotProof,emptyPickLotProof} from './components/PickLotVerification';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
@@ -23,7 +24,7 @@ interface PickScannerProps {
     products?: Product[];
     onClose: () => void;
     onScanLocation: (location: string) => void;
-    onScanItem: (barcode: string, quantity?: number, shortageReason?: string) => Promise<void>;
+    onScanItem: (barcode: string, quantity?: number, shortageReason?: string,lotProof?:PickLotProof) => Promise<void>;
     onCompleteJob?: (job: WMSJob) => void;
     isProcessing: boolean;
     expectedPrefix?: string;
@@ -48,6 +49,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     const { t } = useLanguage();
     const { effectiveCountry, settings } = useData();
     const { requirePickQuantityEntry } = resolveFulfillmentScanningPolicy(settings, effectiveCountry);
+    const [lotProof,setLotProof]=useState<PickLotProof>(emptyPickLotProof);
+    useEffect(()=>setLotProof(emptyPickLotProof),[job.id,currentItem]);
     const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [qtyVal, setQtyVal] = useState('');
@@ -288,7 +291,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         setIsSubmitting(true);
         try {
             if (quantity !== 0 && !barcode) throw new Error('Scan the product before recording a positive quantity.');
-            await onScanItem(quantity === 0 ? '' : extractSkuFromScan(barcode), quantity, quantity !== undefined && quantity < remainingPickQuantity(currentItem) ? shortageReason.trim() : undefined);
+            if(quantity!==0&&!lotProof.verified)throw new Error(t('warehouse.fefoVerifyRequired'));
+            await onScanItem(quantity === 0 ? '' : extractSkuFromScan(barcode), quantity, quantity !== undefined && quantity < remainingPickQuantity(currentItem) ? shortageReason.trim() : undefined,lotProof);
             const itemName = currentItem?.name || 'Item';
             setSuccessMsg(`Pick saved: ${itemName}`);
             setShowSuccess(true);
@@ -379,7 +383,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         getItemMeasureQty={getItemMeasureQty}
                         t={t}
                     />
-
+                    {currentItem&&<div className="mt-3 w-full max-w-2xl shrink-0"><PickLotVerification batch={currentItem.batchNumber ?? currentProduct?.batchNumber} expiry={currentItem.expiryDate ?? currentProduct?.expiryDate} location={currentItem.location} value={lotProof} onChange={setLotProof} disabled={step==='LOCATION'||isProcessing||isSubmitting}/></div>}
                 </div>
                 <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
                     <div className="mx-auto w-full max-w-2xl">

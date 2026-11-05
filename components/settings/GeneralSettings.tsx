@@ -121,7 +121,7 @@ export default function GeneralSettings() {
             ? {
                 storeName: 'SIIFMART',
                 slogan: slogan.trim(),
-                brandColor: '#00FF9D',
+                brandColor: '#10B981',
                 logoUrl: '',
                 country: activeCountry,
             }

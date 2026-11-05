@@ -1,3 +1,4 @@
+import type {PickLotProof} from './pick/components/PickLotVerification';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useFulfillment } from './FulfillmentContext';
@@ -124,7 +125,7 @@ export const PickTab: React.FC = () => {
         verifiedLocation.current = barcode;
     };
 
-    const handleScanItem = async (barcode: string, quantity?: number, shortageReason?: string) => {
+    const handleScanItem = async (barcode: string, quantity?: number, shortageReason?: string,lotProof?:PickLotProof) => {
         if (!selectedJob || !currentScannerItem) throw new Error('Refresh the picking job.');
         if (pickSaveLock.current) throw new Error('A picking line is already being saved.');
         const index = (currentScannerItem ? selectedJob.lineItems.indexOf(currentScannerItem) : 0);
@@ -137,7 +138,7 @@ export const PickTab: React.FC = () => {
             const saved = await pickExecution.mutateAsync({
                 jobId: selectedJob.id, itemIndex: index,
                 quantity: (currentScannerItem.pickedQty || 0) + scanned, expectedQuantity: currentScannerItem.expectedQty,
-                locationBarcode: verifiedLocation.current, itemBarcode: barcode, shortageReason
+                locationBarcode: verifiedLocation.current, itemBarcode: barcode, shortageReason, batch:lotProof?.batch,expiry:lotProof?.expiry,lotVerified:lotProof?.verified
             });
             setSelectedJob(saved);
             refreshJobs();

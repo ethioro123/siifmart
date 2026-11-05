@@ -50,11 +50,11 @@ export const getLevelInfo = (totalPoints: number) => {
     return { currentLevel, nextLevel, pointsToNext, progressPercent };
 };
 
-// Get rank medal color
+// Get rank medal style
 export const getRankStyle = (rank: number) => {
-    if (rank === 1) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '🥇' };
-    if (rank === 2) return { bg: 'from-[var(--theme-accent)] to-[var(--theme-accent)]', text: 'text-[var(--theme-text-primary)]', icon: '🥈' };
-    if (rank === 3) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '🥉' };
+    if (rank === 1) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '#1' };
+    if (rank === 2) return { bg: 'from-[var(--theme-accent)] to-[var(--theme-accent)]', text: 'text-[var(--theme-text-primary)]', icon: '#2' };
+    if (rank === 3) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '#3' };
     return { bg: 'from-[var(--theme-accent)] to-[var(--theme-accent)]', text: 'text-[var(--theme-text-primary)]', icon: `#${rank}` };
 };
 
@@ -75,21 +75,21 @@ export const getLevelColor = (level: number) => {
     return colors[Math.min(level - 1, colors.length - 1)];
 };
 
-// Achievement icons
+// Achievement identifier badges (Rule 4 compliant: Zero Emoji)
 export const getAchievementIcon = (type: string) => {
     const icons: Record<string, string> = {
-        first_job: '🎉',
-        speed_demon: '⚡',
-        perfect_accuracy: '🎯',
-        streak_3: '🔥',
-        streak_7: '🔥🔥',
-        streak_30: '🔥🔥🔥',
-        centurion: '💯',
-        veteran: '⭐',
-        legend: '👑',
-        early_bird: '🌅',
-        night_owl: '🦉',
-        team_player: '🤝',
+        first_job: 'JOB-1',
+        speed_demon: 'FAST',
+        perfect_accuracy: '100%',
+        streak_3: '3D',
+        streak_7: '7D',
+        streak_30: '30D',
+        centurion: '100',
+        veteran: 'VET',
+        legend: 'MAX',
+        early_bird: 'AM',
+        night_owl: 'PM',
+        team_player: 'TEAM',
     };
-    return icons[type] || '🏆';
+    return icons[type] || 'ACHV';
 };

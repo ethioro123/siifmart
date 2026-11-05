@@ -37,7 +37,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Zone</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)]"
               value={testLocation.zone}
               onChange={(e) => setTestLocation({ ...testLocation, zone: e.target.value })}
               aria-label="Test Zone"
@@ -50,7 +50,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Aisle</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)]"
               value={parseInt(testLocation.aisle, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, aisle: e.target.value.padStart(2, '0') })}
               aria-label="Test Aisle"
@@ -65,7 +65,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Bay</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)]"
               value={parseInt(testLocation.bay, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, bay: e.target.value.padStart(2, '0') })}
               aria-label="Test Bay"
