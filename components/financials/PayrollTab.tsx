@@ -15,6 +15,7 @@ import { payrollRunsService } from '../../services/payroll-runs.service';
 import type { PayrollRun } from '../../types';
 import SalaryApprovalQueueModal from '../employees/SalaryApprovalQueueModal';
 import { PayrollSummaryCard } from './payroll/PayrollSummaryCard';
+import { PayrollMobileList } from './PayrollMobileList';
 import { getEmployeeJobTitle } from '../../utils/roles';
 
 export const PayrollTab: React.FC = () => {
@@ -155,8 +156,18 @@ export const PayrollTab: React.FC = () => {
                         </select>
                     </div>
 
-                    {/* Table */}
-                    <div className="overflow-x-auto">
+                    {/* Mobile Card List View */}
+                    <div className="block md:hidden">
+                        <PayrollMobileList
+                            employees={paginatedEmployees}
+                            currencySymbol={currencySymbol}
+                            calculateEmployeeBonus={calculateEmployeeBonus}
+                            getEmployeeJobTitle={getEmployeeJobTitle}
+                        />
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left text-xs">
                             <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] uppercase text-[11px] font-medium text-[var(--theme-text-secondary)] tracking-wider">
                                 <tr>

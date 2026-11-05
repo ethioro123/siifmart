@@ -30,7 +30,7 @@ export default function ResetPasswordModal({
         <Modal isOpen={isOpen} onClose={onClose} title="Reset Security Credentials" size="sm">
             <div className="space-y-4">
                 <p className="text-[var(--theme-text-secondary)] text-sm">
-                    Set a new secure password for <span className="text-[var(--theme-text-primary)] font-bold">{employee.name}</span>. The user will be notified upon update.
+                    Set a new secure password for <span className="text-[var(--theme-text-primary)] font-bold">{employee.name}</span>.
                 </p>
                 <div className="relative">
                     <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)]" size={16} />
@@ -39,6 +39,8 @@ export default function ResetPasswordModal({
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
                         autoComplete="new-password"
+                        minLength={12}
+                        maxLength={128}
                         className="w-full min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-[var(--theme-text-primary)] text-sm focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 outline-none font-mono placeholder:text-[var(--theme-text-muted)] transition-all"
                         placeholder="New Secure Password"
                     />

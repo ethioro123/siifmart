@@ -25,6 +25,7 @@ RESET ROLE;SELECT set_config('request.jwt.claim.sub','988fb8ef-8053-415b-9032-2a
 DO $$ DECLARE run public.payroll_runs%ROWTYPE; replay public.payroll_runs%ROWTYPE; BEGIN
  run:=public.payroll_command(current_setting('test.payroll'),'settle','Audit-only bank evidence independently checked','AUDIT-'||current_setting('test.payroll'));
  replay:=public.payroll_command(run.id,'settle','Audit-only evidence replay',run.settlement_reference);
+ ASSERT public.payroll_review_export(run.id)->>'runId'=run.id,'Approved review export unavailable';
  ASSERT run.status='disbursed' AND replay.expense_id=run.expense_id AND run.disbursed_at=replay.disbursed_at;
 END $$;
 RESET ROLE;

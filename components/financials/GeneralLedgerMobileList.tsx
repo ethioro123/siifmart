@@ -1,21 +1,12 @@
 import React from 'react';
 import { Loader2, BookOpen } from 'lucide-react';
-import type { ChartOfAccount } from '../../types';
-
-interface TrialBalanceRow {
-    accountCode: string;
-    accountName: string;
-    category: string;
-    debitTotal: number;
-    creditTotal: number;
-    netBalance: number;
-}
+import type { AccountRecord, TrialBalanceRow } from '../../types';
 
 interface GeneralLedgerMobileListProps {
     selectedView: 'trial_balance' | 'coa';
     loading: boolean;
     trialBalance: TrialBalanceRow[];
-    accounts: ChartOfAccount[];
+    accounts: AccountRecord[];
     currencySymbol: string;
 }
 

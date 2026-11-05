@@ -240,9 +240,9 @@ export function computeWeeklyCashflow(filteredSales: any[], filteredExpenses: an
 export function exportSovereignBankFile(
     country: string,
     currencySymbol: string,
-    employees: any[],
-    calculateBonus: (emp: any) => number
-) {
+    employees: Employee[],
+    calculateBonus: (emp: Employee) => number
+): never {
     throw new Error('Bank payment exports require verified recipient details and an approved payroll snapshot. Use the payroll review export.');
 }
 

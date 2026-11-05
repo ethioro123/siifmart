@@ -26,6 +26,7 @@ import {
 import { useFinance } from './FinanceContext';
 import { budgetReconciliationService } from '../../services/budget-reconciliation.service';
 import TenderReconciliationModal from './TenderReconciliationModal';
+import { BudgetTenderMobileList } from './BudgetTenderMobileList';
 import type { TenderReconciliationRecord, DepartmentBudgetRecord } from '../../types';
 import { isAdminSite } from '../../utils/countryAdmin';
 
@@ -205,7 +206,16 @@ export const BudgetTab: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Mobile Card List View */}
+                <div className="block md:hidden">
+                    <BudgetTenderMobileList
+                        tenderRecords={tenderRecords}
+                        currencySymbol={currencySymbol}
+                    />
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left font-mono">
                         <thead className="bg-[var(--theme-bg-subtle)]/75 font-sans border-b border-[var(--theme-border)]">
                             <tr>
