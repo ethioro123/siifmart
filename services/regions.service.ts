@@ -105,7 +105,7 @@ export const regionsService = {
                 monthly_procurement_budget: Number(r.monthly_procurement_budget || 0),
                 autonomous_po_limit: r.autonomous_po_limit == null ? undefined : Number(r.autonomous_po_limit),
                 monthly_expense_budget: Number(r.monthly_expense_budget || 0),
-                autonomous_expense_limit: Number(r.autonomous_expense_limit || 2000000),
+                autonomous_expense_limit: Number(r.autonomous_expense_limit ?? 0),
                 status: r.status || 'active',
                 created_at: r.created_at,
                 updated_at: r.updated_at
@@ -189,7 +189,7 @@ export const regionsService = {
                 monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
                 autonomous_po_limit: data.autonomous_po_limit == null ? undefined : Number(data.autonomous_po_limit),
                 monthly_expense_budget: Number(data.monthly_expense_budget || 0),
-                autonomous_expense_limit: Number(data.autonomous_expense_limit || 2000000),
+                autonomous_expense_limit: Number(data.autonomous_expense_limit ?? 0),
                 status: data.status || 'active',
                 created_at: data.created_at,
                 updated_at: data.updated_at
@@ -321,79 +321,12 @@ export const regionsService = {
      * Evaluates actual current-month PO spend against the database-configured budget cap.
      */
     async getRegionBudgetStatus(regionCode: string): Promise<RegionBudgetStatus | null> {
-        try {
-            const region = await this.getRegionByCode(regionCode);
-            if (!region) return null;
-
-            // 1. Get all sites in this region
-            const { data: sitesData, error: sitesErr } = await supabase
-                .from('sites')
-                .select('id')
-                .eq('region_code', regionCode);
-
-            if (sitesErr) {
-                logger.error('regionsService', `Failed to fetch sites for region ${regionCode}`, sitesErr);
-                throw new Error(`Unable to fetch sites for region budget: ${sitesErr.message}`);
-            }
-
-            const siteIds = (sitesData || []).map(s => s.id);
-
-            let currentMonthSpend = 0;
-
-            if (siteIds.length > 0) {
-                // 2. Calculate beginning of current calendar month
-                const timezone = getCountryProfile(region.country).timezone;
-                const dateParts = new Intl.DateTimeFormat('en-CA', {
-                    timeZone: timezone,
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).formatToParts(new Date());
-                const datePart = (type: 'year' | 'month' | 'day') => dateParts.find(part => part.type === type)?.value;
-                const year = datePart('year');
-                const month = datePart('month');
-                if (!year || !month) throw new Error(`Unable to determine the ${region.country} business date`);
-                const startOfMonth = `${year}-${month}-01`;
-                const nextMonthDate = new Date(Date.UTC(Number(year), Number(month), 1));
-                const endOfMonth = `${nextMonthDate.getUTCFullYear()}-${String(nextMonthDate.getUTCMonth() + 1).padStart(2, '0')}-01`;
-
-                // 3. Query purchase orders for these sites within the current month
-                const { data: poData, error: poErr } = await supabase
-                    .from('purchase_orders')
-                    .select('total_amount')
-                    .in('site_id', siteIds)
-                    .gte('order_date', startOfMonth)
-                    .lt('order_date', endOfMonth)
-                    .in('status', ['Approved', 'Ordered', 'Partially Received', 'Received']);
-
-                if (poErr) {
-                    logger.error('regionsService', 'Failed to fetch PO spend for region budget check', poErr);
-                    throw new Error(`Unable to fetch PO spend for region budget: ${poErr.message}`);
-                } else if (poData) {
-                    currentMonthSpend = poData.reduce((sum, po) => sum + Number(po.total_amount || 0), 0);
-                }
-            }
-
-            const monthlyBudget = Number(region.monthly_procurement_budget || 0);
-            const remainingBudget = Math.max(0, monthlyBudget - currentMonthSpend);
-            const percentUsed = monthlyBudget > 0 ? (currentMonthSpend / monthlyBudget) * 100 : 0;
-
-            return {
-                regionCode: region.code,
-                regionName: region.name,
-                currency: region.default_currency || getCountryProfile(region.country).currencyCode,
-                monthlyBudget,
-                autonomousPoLimit: Number(region.autonomous_po_limit ?? 0),
-                currentMonthSpend,
-                remainingBudget,
-                percentUsed,
-                isOverBudget: monthlyBudget > 0 && currentMonthSpend >= monthlyBudget,
-                isNearCap: percentUsed >= 85
-            };
-        } catch (err) {
-            logger.error('regionsService', `Exception in getRegionBudgetStatus ${regionCode}`, err as Error);
-            throw err;
+        const { data, error } = await supabase.rpc('get_region_budget_status', { p_code: regionCode });
+        if (error) throw error;
+        if (!data || data.regionCode !== regionCode || !Number.isFinite(Number(data.currentMonthSpend))) {
+            throw new Error('Invalid regional budget response');
         }
+        return data as RegionBudgetStatus;
     },
 
     /**

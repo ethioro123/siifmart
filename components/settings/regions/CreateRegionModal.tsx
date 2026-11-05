@@ -1,6 +1,8 @@
+import { isEligibleRegionalHub, isEligibleRegionalManager } from '../../../utils/regionalAdministration';
+import type { RegionalAdminEmployee } from '../../../types/regionalAdministration';
 import React, { useEffect, useState, useMemo } from 'react';
 import { X, Building2, MapPin, DollarSign, ShieldAlert, Check, Sparkles, AlertTriangle } from 'lucide-react';
-import type { Region, Site, Employee } from '../../../types';
+import type { Region, Site } from '../../../types';
 import type { CreateRegionInput } from '../../../services/regions.service';
 import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
@@ -19,7 +21,7 @@ interface CreateRegionModalProps {
     country: string; // 'KE', 'ET', 'UG', 'RW', 'TZ'
     currency: string; // 'KES', 'ETB', etc.
     sites: Site[];
-    employees: Employee[];
+    employees: RegionalAdminEmployee[];
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     existingRegions?: Region[];
     existingRegionCodes?: string[];
@@ -93,13 +95,13 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
         const employeeCountry = e.country || e.country_code;
         if (!employeeCountry) return false;
         const empCountry = normalizeCountryCode(employeeCountry);
-        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_operations_manager';
+        const isRegionalManager = isEligibleRegionalManager(e, formatRegionCode(code, selectedCountry));
         const isActive = !e.status || ['active', 'enabled'].includes(e.status.toLowerCase());
         return empCountry === selectedCountry && isRegionalManager && isActive;
     });
 
     const currencyCode = activeProfile.currencyCode;
-    const administrationSites = countrySites.filter(s => ['administration', 'administrative'].includes(s.type?.toLowerCase()));
+    const administrationSites = countrySites.filter(s => isEligibleRegionalHub(s, formatRegionCode(code, selectedCountry), existingRegions || []));
 
     // Smart auto-generation for Region Name
     const handleNameChange = (newName: string) => {
@@ -264,7 +266,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">
                     {/* Region Name & Code */}
-                    <div className="grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Region Name *
@@ -354,7 +356,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             Administrative Hub Site
                         </label>
                         <select
-                            value={adminHubSiteId}
+                            aria-label="Administrative hub site"
+                                value={adminHubSiteId}
                             onChange={(e) => setAdminHubSiteId(e.target.value)}
                             className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         >
@@ -373,7 +376,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             Regional Operations Manager Appointment
                         </label>
                         <select
-                            value={regionalManagerId}
+                            aria-label="Regional Operations Manager"
+                                value={regionalManagerId}
                             onChange={(e) => setRegionalManagerId(e.target.value)}
                             className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         >
@@ -414,6 +418,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         setAutonomousExpenseLimit={setAutonomousExpenseLimit}
                     />
 
+                    <p className="text-xs text-[var(--theme-text-secondary)]">Manager choices require an active Regional Operations Manager assigned to this region in Employees. Assign staffing after creating a new region.</p>
                     {/* Footer Actions */}
                     <div className="pt-2 flex items-center justify-end gap-2">
                         <button

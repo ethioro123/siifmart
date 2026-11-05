@@ -22,12 +22,16 @@ export function PriceGroupLocations({ product }: { product: Product }) {
         <p className="text-xs text-[var(--theme-text-secondary)]">Matching locations and lot records. Open a location to review its product details and price approval scope.</p>
         {product.sku && query.isLoading && <p role="status">Loading locations…</p>}
         {query.isError && <p role="alert">Locations could not be loaded. <button type="button" onClick={() => void query.refetch()} className="underline min-h-11">Retry</button></p>}
-        {!query.isError && rows.map(record => <div key={record.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
+        {!query.isError && rows.map(record => <div key={record.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
             <div className="text-sm text-[var(--theme-text-primary)]"><p className="font-medium">{productSiteName(record, sites)}</p>
                 <p className="text-xs text-[var(--theme-text-secondary)]">{record.batchNumber ? `Lot ${record.batchNumber}` : 'Location record'} · {record.stock.toLocaleString()} {record.unit || 'units'} in stock</p></div>
-            <div className="flex items-center gap-4"><span className="text-sm tabular-nums text-[var(--theme-text-primary)]">{currencySymbol} {Math.round(effectivePrice(record) ?? 0).toLocaleString()}</span>
-                <button type="button" onClick={() => setEditingProduct(record)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] text-sm text-[var(--theme-text-primary)]">Propose price</button>
-                <button type="button" onClick={() => openProductControl(record)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] text-sm text-[var(--theme-text-primary)] focus-visible:outline focus-visible:outline-2">Review location</button></div>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                <span className="text-sm font-semibold tabular-nums text-[var(--theme-text-primary)]">{currencySymbol} {Math.round(effectivePrice(record) ?? 0).toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => setEditingProduct(record)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] text-xs sm:text-sm text-[var(--theme-text-primary)]">Propose price</button>
+                    <button type="button" onClick={() => openProductControl(record)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] text-xs sm:text-sm text-[var(--theme-text-primary)] focus-visible:outline focus-visible:outline-2">Review location</button>
+                </div>
+            </div>
         </div>)}
         {editingProduct && <LocationPriceEditor key={editingProduct.id} product={editingProduct} onClose={() => setEditingProduct(null)} />}
         {!query.isFetching && !query.isError && !rows.length && <p>No matching location records.</p>}

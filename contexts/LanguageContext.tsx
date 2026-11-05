@@ -89,7 +89,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
             const sanitized = sanitizeLanguageForCountry(prev, country);
             if (sanitized !== prev) {
                 try {
-                    localStorage.setItem('siifmart_language', sanitized);
+                    if(explicitLanguage.current)localStorage.setItem('siifmart_language', sanitized);
                 } catch {}
             }
             return sanitized;
@@ -111,6 +111,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         explicitLanguage.current=true;
         const sanitized = sanitizeLanguageForCountry(lang, country);
         setLocalLanguage(sanitized);
+        try{localStorage.setItem('siifmart_language',sanitized);}catch{logger.warn('LanguageContext','Language preference could not be stored');}
     };
 
     const isOromo = language === 'or';

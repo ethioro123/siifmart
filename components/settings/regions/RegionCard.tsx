@@ -1,16 +1,17 @@
+import type { RegionalAdminEmployee } from '../../../types/regionalAdministration';
 import React, { useEffect, useState } from 'react';
 import {
     Building2, UserCheck, ShieldAlert, CheckCircle2,
     Sliders, MapPin, Store, AlertTriangle
 } from 'lucide-react';
-import type { Region, Site, Employee } from '../../../types';
-import { regionsService, RegionBudgetStatus } from '../../../services/regions.service';
+import type { Region, Site } from '../../../types';
+import { useRegionBudgetStatus } from '../../../hooks/useRegionBudgetStatus';
 import { getCountryProfile } from '../../../utils/localization';
 
 interface RegionCardProps {
     region: Region;
     sites: Site[];
-    employees: Employee[];
+    employees: RegionalAdminEmployee[];
     onEdit: (region: Region) => void;
     canManageGovernance?: boolean;
 }
@@ -22,39 +23,10 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     onEdit,
     canManageGovernance = false
 }) => {
-    const [budgetStatus, setBudgetStatus] = useState<RegionBudgetStatus | null>(null);
-    const [isLoadingBudget, setIsLoadingBudget] = useState<boolean>(true);
-    const [budgetError, setBudgetError] = useState<boolean>(false);
-
-    useEffect(() => {
-        let isMounted = true;
-        async function fetchBudget() {
-            setIsLoadingBudget(true);
-            setBudgetError(false);
-            try {
-                const status = await regionsService.getRegionBudgetStatus(region.code);
-                if (isMounted) {
-                    if (!status) {
-                        setBudgetError(true);
-                    } else {
-                        setBudgetStatus(status);
-                    }
-                }
-            } catch {
-                if (isMounted) {
-                    setBudgetError(true);
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoadingBudget(false);
-                }
-            }
-        }
-        fetchBudget();
-        return () => {
-            isMounted = false;
-        };
-    }, [region.code, region.monthly_procurement_budget]);
+    const budget = useRegionBudgetStatus(region);
+    const budgetStatus = budget.data;
+    const isLoadingBudget = budget.isPending;
+    const budgetError = budget.isError;
 
     // Find assigned sites
     const assignedSites = sites.filter(
@@ -123,7 +95,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                 </div>
 
                 {/* Regional Administration Details */}
-                <div className="grid-cols-2 gap-3 py-3 border-y border-[var(--theme-border)] text-xs mb-4">
+                <div className="grid grid-cols-2 gap-3 py-3 border-y border-[var(--theme-border)] text-xs mb-4">
                     <div>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] block">Admin Hub Site</span>
                         <span className="font-medium text-[var(--theme-text-primary)] truncate block mt-0.5">
@@ -210,13 +182,13 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <div className="mt-3 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px]">
                         <span className="text-[var(--theme-text-secondary)]">Autonomous PO Limit:</span>
                         <span className="font-mono font-medium text-[var(--theme-text-primary)]">
-                            {autonomousLimit == null ? 'Not configured' : autonomousLimit > 0 ? `${autonomousLimit.toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
+                            {autonomousLimit == null ? 'Not configured' : autonomousLimit > 0 ? `${autonomousLimit.toLocaleString()} ${currency}` : '0 (Country/HQ approval required)'}
                         </span>
                     </div>
                     <div className="mt-1.5 pt-1.5 border-t border-[var(--theme-border)]/40 flex items-center justify-between text-[11px]">
                         <span className="text-[var(--theme-text-secondary)]">Autonomous Expense Limit:</span>
                         <span className="font-mono font-medium text-[var(--theme-text-primary)]">
-                            {(region.autonomous_expense_limit ?? 25000) > 0 ? `${(region.autonomous_expense_limit ?? 25000).toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
+                            {(region.autonomous_expense_limit ?? 25000) > 0 ? `${(region.autonomous_expense_limit ?? 25000).toLocaleString()} ${currency}` : '0 (Country/HQ approval required)'}
                         </span>
                     </div>
                 </div>

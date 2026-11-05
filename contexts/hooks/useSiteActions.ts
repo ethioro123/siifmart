@@ -1,3 +1,5 @@
+import {mergeConfirmedGeneralSettings} from '../../utils/generalSettings';
+import type {Country} from '../../utils/localization';
 import { useCallback } from 'react';
 import type { Site, SystemConfig, SystemLog } from '../../types';
 import { sitesService, systemConfigService } from '../../services/supabase.service';
@@ -135,6 +137,6 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         }
     }, [sites, logSystemEvent, addNotification, setSites]);
 
-    const applyConfirmedSettings=useCallback((confirmed:SystemConfig)=>setSettings(confirmed),[setSettings]);
+    const applyConfirmedSettings=useCallback((confirmed:SystemConfig,country:Country,keys:ReadonlyArray<keyof SystemConfig>)=>setSettings(current=>mergeConfirmedGeneralSettings(current,confirmed,country,keys)),[setSettings]);
     return { applyConfirmedSettings,updateSettings, setActiveSite, getTaxForSite, addSite, updateSite, deleteSite };
 }

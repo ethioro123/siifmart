@@ -102,15 +102,15 @@ export default function Pricing() {
 
    return (
       <MerchandisingProvider value={state}>
-         <div className="space-y-6">
+         <div className="p-3.5 sm:p-6 md:p-8 space-y-4 sm:space-y-6 pb-24 sm:pb-32">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                     <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shadow-xs">
-                        <Tags size={20} />
+                  <div className="flex items-center gap-2.5 sm:gap-3 mb-1">
+                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shadow-xs shrink-0">
+                        <Tags size={18} className="sm:w-5 sm:h-5" />
                      </div>
-                     <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] tracking-tight">
+                     <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-[var(--theme-text-primary)] tracking-tight">
                         Merchandising Intelligence
                      </h2>
                   </div>
@@ -118,14 +118,14 @@ export default function Pricing() {
                      Pricing and promotion planning, markdown review, and store display execution.
                   </p>
                </div>
-               <div className="flex items-center gap-2.5 flex-wrap">
+               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                   <ProductApprovalInboxButton />
-                  <div className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full flex items-center gap-2">
+                  <div className="px-3 sm:px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full flex items-center gap-2 min-h-[36px]">
                      <Target size={14} className="text-[var(--theme-accent)]" />
                      <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{activeTab === 'pricing' ? 'Page Price Index:' : 'Price Index:'}</span>
                      <span className="text-xs font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{priceIndex}</span>
                   </div>
-                  <div className="px-3.5 py-1.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-full flex items-center gap-2">
+                  <div className="px-3 sm:px-3.5 py-1.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-full flex items-center gap-2 min-h-[36px]">
                      <TrendingUp size={14} className="text-[var(--theme-status-success-text)]" aria-hidden="true" />
                      <span className="text-xs text-[var(--theme-status-success-text)] font-medium">{activeTab === 'pricing' ? 'Page Avg Margin:' : 'Avg Margin:'}</span>
                      <span className="text-xs font-semibold text-[var(--theme-status-success-text)] font-mono tabular-nums">{avgMargin}</span>
@@ -144,15 +144,15 @@ export default function Pricing() {
             />
 
             {/* Segmented Control Tabs */}
-            <div role="group" aria-label="Merchandising sections" className="flex w-full max-w-full flex-nowrap overflow-x-auto p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1">
-               <button type="button" aria-pressed={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')} className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${activeTab === 'reviews' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-transparent'}`}>
+            <div role="group" aria-label="Merchandising sections" className="flex w-full max-w-full flex-nowrap overflow-x-auto no-scrollbar p-1 rounded-2xl sm:rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 touch-manipulation">
+               <button type="button" aria-pressed={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')} className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${activeTab === 'reviews' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-transparent'}`}>
                   <ClipboardCheck size={14} /> Proposals
                </button>
                <button
                   type="button"
                   aria-pressed={activeTab === 'pricing'}
                   onClick={() => setActiveTab('pricing')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'pricing'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -165,7 +165,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'forecast'}
                   onClick={() => setActiveTab('forecast')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'forecast'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -178,7 +178,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'markdown'}
                   onClick={() => setActiveTab('markdown')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'markdown'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -191,7 +191,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'rules'}
                   onClick={() => setActiveTab('rules')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'rules'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -204,7 +204,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'planogram'}
                   onClick={() => setActiveTab('planogram')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'planogram'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -217,7 +217,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'promos'}
                   onClick={() => setActiveTab('promos')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'promos'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -230,7 +230,7 @@ export default function Pricing() {
                   type="button"
                   aria-pressed={activeTab === 'shelf-tags'}
                   onClick={() => setActiveTab('shelf-tags')}
-                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-3.5 sm:px-4 rounded-xl sm:rounded-full text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'shelf-tags'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'

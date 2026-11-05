@@ -1,7 +1,8 @@
 import {beforeEach,describe,expect,it,vi} from 'vitest';
 import {supabase} from '../../lib/supabase';
 import {generalSettingsService} from '../../services/general-settings.service';
-import {resolveCountryGeneralSettings} from '../../utils/generalSettings';
+import type {SystemConfig} from '../../types';
+import {mergeConfirmedGeneralSettings,resolveCountryGeneralSettings} from '../../utils/generalSettings';
 vi.mock('../../lib/supabase',()=>({supabase:{rpc:vi.fn(),from:vi.fn()}}));
 beforeEach(()=>vi.clearAllMocks());
 describe('country settings transactions',()=>{
@@ -13,5 +14,11 @@ describe('country settings transactions',()=>{
  });
  it('saves an intentionally empty slogan without touching branding assets',async()=>{vi.mocked(supabase.rpc).mockResolvedValue({data:{saved:true,settings:{country_configs:{ET:{slogan:''}}}},error:null} as never);const result=await generalSettingsService.save('retry','ET','branding',{slogan:''});expect(result.countryConfigs?.ET?.slogan).toBe('');expect(supabase.rpc).toHaveBeenCalledWith('save_general_settings_section',expect.objectContaining({p_changes:{slogan:''}}));});
  it('propagates failure and refuses an unconfirmed response',async()=>{vi.mocked(supabase.rpc).mockResolvedValue({data:null,error:new Error('Audit write failed')} as never);await expect(generalSettingsService.save('retry','ET','branding',{slogan:'Test'})).rejects.toThrow('Audit write failed');vi.mocked(supabase.rpc).mockResolvedValue({data:null,error:null} as never);await expect(generalSettingsService.save('retry','ET','branding',{slogan:'Test'})).rejects.toThrow('not confirmed');});
+ it('does not roll another country or section back when responses arrive out of order',()=>{
+  const current={enableWMS:true,countryConfigs:{ET:{slogan:'Old',supportPhone:'Current phone'},KE:{slogan:'New KE'}}} as unknown as SystemConfig;
+  const response={countryConfigs:{ET:{slogan:'Confirmed',supportPhone:'Old phone'},KE:{slogan:'Old KE'}}} as unknown as SystemConfig;
+  const merged=mergeConfirmedGeneralSettings(current,response,'ET',['slogan']);
+  expect(merged.enableWMS).toBe(true);expect(merged.countryConfigs?.ET?.supportPhone).toBe('Current phone');expect(merged.countryConfigs?.KE?.slogan).toBe('New KE');expect(merged.countryConfigs?.ET?.slogan).toBe('Confirmed');
+ });
  it('keeps blank country values and does not borrow another country legal identity',()=>{const values=resolveCountryGeneralSettings({country:'ET',slogan:'ET slogan',posReceiptTaxId:'ET-ID',countryConfigs:{ET:{slogan:''},KE:{}}},'ET');expect(values.slogan).toBe('');const ke=resolveCountryGeneralSettings({country:'ET',posReceiptTaxId:'ET-ID',supportPhone:'+25100000'},'KE');expect(ke.posReceiptTaxId).not.toBe('ET-ID');expect(ke.supportPhone).not.toBe('+25100000');});
 });

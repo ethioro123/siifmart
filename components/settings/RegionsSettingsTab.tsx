@@ -8,7 +8,7 @@ import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { normalizeCountryCode } from '../../utils/siteIdGenerator';
 import type { Region } from '../../types';
-import { regionsService } from '../../services/regions.service';
+import { useRegionalSettingsData } from '../../hooks/useRegionalSettingsData';
 import { RegionCard } from './regions/RegionCard';
 import { CreateRegionModal } from './regions/CreateRegionModal';
 import { EditRegionModal } from './regions/EditRegionModal';
@@ -16,8 +16,6 @@ import { EditRegionModal } from './regions/EditRegionModal';
 export default function RegionsSettingsTab() {
     const { user } = useStore();
     const {
-        sites,
-        employees,
         effectiveCountry,
         settings,
         refreshData,
@@ -34,9 +32,12 @@ export default function RegionsSettingsTab() {
     const countryProfile = getCountryProfile(selectedCountry);
     const currency = countryProfile.currency || 'KES';
 
-    const [regions, setRegions] = useState<Region[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [loadError, setLoadError] = useState<string | null>(null);
+    const queries = useRegionalSettingsData(user?.id || '', selectedCountry);
+    const regions = queries.regions.data || [];
+    const sites = queries.directory.data?.sites || [];
+    const employees = queries.directory.data?.employees || [];
+    const isLoading = queries.regions.isPending || queries.directory.isPending;
+    const loadError = queries.regions.error?.message || queries.directory.error?.message || null;
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'planning'>('all');
 
@@ -44,32 +45,11 @@ export default function RegionsSettingsTab() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [editingRegion, setEditingRegion] = useState<Region | null>(null);
 
-    const loadRegions = useCallback(async () => {
-        setIsLoading(true);
-        setLoadError(null);
-        try {
-            const list = await regionsService.getRegions(selectedCountry);
-            setRegions(list);
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Failed to load regional administrations';
-            setLoadError(msg);
-            setRegions([]);
-            addNotification('alert', msg);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [selectedCountry, addNotification]);
-
-    useEffect(() => {
-        loadRegions();
-    }, [loadRegions]);
-
-    // Handle updates and refresh
+    const loadRegions = async () => { await Promise.all([queries.regions.refetch(), queries.directory.refetch()]); };
+    useEffect(() => { setIsCreateModalOpen(false); setEditingRegion(null); }, [selectedCountry]);
     const handleCreatedOrUpdated = async () => {
         await loadRegions();
-        if (refreshData) {
-            refreshData();
-        }
+        refreshData?.();
     };
 
     // Filter regions
@@ -112,7 +92,7 @@ export default function RegionsSettingsTab() {
     return (
         <div className="space-y-6">
             {/* Header / Intro */}
-            <div className="flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                 <div>
                     <div className="flex items-center gap-2">
                         <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
@@ -126,7 +106,7 @@ export default function RegionsSettingsTab() {
                         Establish regional administrative units with delegated procurement, finance, and logistics authority under National HQ command.
                     </p>
                 </div>
-                <div className="flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={loadRegions}
@@ -149,7 +129,7 @@ export default function RegionsSettingsTab() {
             </div>
 
             {/* KPI Summary Deck */}
-            <div className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                 <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Active Regions</span>
@@ -178,13 +158,13 @@ export default function RegionsSettingsTab() {
 
                 <div className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
-                        <span>Governed Sites</span>
+                        <span>Governed visible sites</span>
                         <Store size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                         {governedSitesCount}
                         <span className="text-xs font-normal text-[var(--theme-text-secondary)] ml-1">
-                            / {countrySites.length} country sites
+                            / {countrySites.length} visible sites
                         </span>
                     </p>
                 </div>
@@ -195,16 +175,16 @@ export default function RegionsSettingsTab() {
                         <Shield size={15} className="text-[var(--theme-status-warning-text)]" />
                     </div>
                     <p className="text-xs font-medium text-[var(--theme-text-primary)] tracking-tight mt-1">
-                        100% Zero-Trust Active
+                        Country-scoped authority
                     </p>
                     <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">
-                        Dynamic caps require 4-eyes sign-off
+                        Authorized leadership changes are applied and audit logged.
                     </p>
                 </div>
             </div>
 
             {/* Filter & Search Toolbar */}
-            <div className="flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="relative w-full sm:w-72">
                     <Search size={14} className="absolute left-3 top-2.5 text-[var(--theme-text-secondary)]" />
                     <input
@@ -287,7 +267,7 @@ export default function RegionsSettingsTab() {
                     )}
                 </div>
             ) : (
-                <div className="grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     {filteredRegions.map(region => (
                         <RegionCard
                             key={region.code}
@@ -321,6 +301,7 @@ export default function RegionsSettingsTab() {
                     onClose={() => setEditingRegion(null)}
                     onUpdated={handleCreatedOrUpdated}
                     region={editingRegion}
+                    regions={regions}
                     sites={countrySites}
                     employees={countryEmployees}
                     addNotification={addNotification}

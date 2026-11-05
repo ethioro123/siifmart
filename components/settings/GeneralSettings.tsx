@@ -108,18 +108,20 @@ function GeneralSettingsForm() {
                 country: activeCountry,
             };
 
-        try { await mutation.mutateAsync({
+        let confirmed;
+        try { confirmed=await mutation.mutateAsync({
             section,
             targetCountry: activeCountry,
             data: dataPayload,
         }); }catch{return;}
 
+        const saved=resolveCountryGeneralSettings(confirmed,activeCountry);
         if (section === 'branding') {
-            sloganDraft.acknowledge(slogan,slogan.trim());
-            showToast('Corporate slogan updated successfully', 'success');
+            sloganDraft.acknowledge(slogan,saved.slogan);
+            showToast(`Slogan saved for ${getCountryProfile(activeCountry).name}.`, 'success');
         } else {
-            legalDraft.acknowledge(legal,Object.fromEntries(Object.entries(legal).map(([key,value])=>[key,value.trim()])) as typeof legal);
-            showToast('Legal entity details saved successfully', 'success');
+            legalDraft.acknowledge(legal,{legalBusinessName:saved.legalBusinessName,taxVatNumber:saved.taxVatNumber,taxId:saved.posReceiptTaxId,registeredAddress:saved.registeredAddress,supportContact:saved.supportContact,supportPhone:saved.supportPhone});
+            showToast(`Legal details saved for ${getCountryProfile(activeCountry).name}.`, 'success');
         }
     };
 

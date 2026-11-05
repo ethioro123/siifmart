@@ -48,6 +48,8 @@ export function useCreateRegionMutation() {
     onSuccess: (newRegion) => {
       queryClient.invalidateQueries({ queryKey: ['regions'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
+      queryClient.invalidateQueries({ queryKey: ['regional-admin-directory'] });
+      queryClient.invalidateQueries({ queryKey: ['region-budget'] });
       logger.info('useRegionMutations', `Region ${newRegion.code} provisioned successfully`);
     },
     onError: (err) => {
@@ -78,6 +80,8 @@ export function useUpdateRegionMutation() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['regions'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
+      queryClient.invalidateQueries({ queryKey: ['regional-admin-directory'] });
+      queryClient.invalidateQueries({ queryKey: ['region-budget'] });
     },
     onError: (err) => {
       logger.error('useRegionMutations', 'Region update mutation failed', err as Error);

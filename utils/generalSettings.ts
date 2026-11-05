@@ -18,3 +18,9 @@ export function resolveCountryGeneralSettings(settings:Partial<SystemConfig>|nul
   language:sanitizeLanguageForCountry(partition.language??same?.language,country)
  };
 }
+
+export function mergeConfirmedGeneralSettings(current:SystemConfig,confirmed:SystemConfig,country:Country,keys:ReadonlyArray<keyof SystemConfig>):SystemConfig{
+ const saved=confirmed.countryConfigs?.[country]||{};
+ const patch=Object.fromEntries(keys.filter(key=>Object.prototype.hasOwnProperty.call(saved,key)).map(key=>[key,saved[key]]));
+ return {...current,countryConfigs:{...current.countryConfigs,[country]:{...current.countryConfigs?.[country],...patch}}};
+}

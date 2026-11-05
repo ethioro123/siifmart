@@ -25,14 +25,14 @@ export const PricingTab: React.FC = () => {
    const activeFilterCount = Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '').length;
 
    return (
-      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl shadow-sm isolate overflow-hidden transition-all duration-300">
-         <div className="p-5 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-panel)]">
-            <div className="flex flex-wrap gap-3 items-center justify-between">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl sm:rounded-3xl shadow-sm isolate overflow-hidden transition-all duration-300">
+         <div className="p-3.5 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-panel)]">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between">
                {/* Search Bar */}
-               <div className="relative flex-1 min-w-[260px] max-w-md">
+               <div className="relative w-full sm:flex-1 sm:min-w-[240px] sm:max-w-md">
                   <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                   <input
-                     className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 outline-none placeholder:text-[var(--theme-text-muted)] font-medium transition-all"
+                     className="w-full h-11 sm:h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 outline-none placeholder:text-[var(--theme-text-muted)] font-medium transition-all"
                      placeholder="Search inventory system by product or SKU..."
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
@@ -44,7 +44,7 @@ export const PricingTab: React.FC = () => {
                <button
                   type="button"
                   onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                  className={`h-10 px-4 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
+                  className={`min-h-11 sm:h-10 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
                      isFilterPanelOpen || activeFilterCount > 0
                         ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                         : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)]'
@@ -66,12 +66,12 @@ export const PricingTab: React.FC = () => {
                </button>
 
                {/* Quick Action Tools */}
-               <div className="flex items-center gap-2">
+               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   <button
                      type="button"
                      onClick={() => applyPsychologicalPricing('5')}
                      disabled={isSubmitting || catalogLoading}
-                     className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
+                     className="min-h-11 sm:h-10 px-3.5 flex-1 sm:flex-initial justify-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
                      title="Preview matching location records for selected products or this product page"
                   >
                      {isSubmitting ? (
@@ -85,7 +85,7 @@ export const PricingTab: React.FC = () => {
                      type="button"
                      onClick={() => applyPsychologicalPricing('0')}
                      disabled={isSubmitting || catalogLoading}
-                     className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
+                     className="min-h-11 sm:h-10 px-3.5 flex-1 sm:flex-initial justify-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
                      title="Preview matching location records for selected products or this product page"
                   >
                      {isSubmitting ? (
@@ -99,7 +99,7 @@ export const PricingTab: React.FC = () => {
                      <button
                         type="button"
                         onClick={applyBulkSale}
-                        className="h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 flex items-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
+                        className="min-h-11 sm:h-10 px-4 w-full sm:w-auto justify-center rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 flex items-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                      >
                         <Percent size={13} /> Bulk Promo ({selectedIds.size})
                      </button>
@@ -111,10 +111,10 @@ export const PricingTab: React.FC = () => {
             <PricingFiltersPanel />
          </div>
 
-         <p className="px-5 py-3 text-sm text-[var(--theme-text-secondary)]">{catalogLoading ? 'Loading authorized catalog…' : `${catalogCount} product records match. ${selectedIds.size} selected on this page.`} Actions show a preview before submission.</p>
-         {catalogError && <p role="alert" className="px-5 py-3 text-sm text-[var(--theme-danger)]">Could not load catalog: {catalogError}</p>}
-         {!catalogLoading && !catalogError && catalogCount === 0 && <p className="px-5 py-3 text-sm">No products match your search in your authorized locations.</p>}
-         <p className="px-5 py-3 text-xs text-[var(--theme-text-secondary)]">One row per product. Ranges cover matching locations. Bulk actions preview every matching location record before submission.</p>
+         <p className="px-3.5 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm text-[var(--theme-text-secondary)]">{catalogLoading ? 'Loading authorized catalog…' : `${catalogCount} product records match. ${selectedIds.size} selected on this page.`} Actions show a preview before submission.</p>
+         {catalogError && <p role="alert" className="px-3.5 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm text-[var(--theme-danger)]">Could not load catalog: {catalogError}</p>}
+         {!catalogLoading && !catalogError && catalogCount === 0 && <p className="px-3.5 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm">No products match your search in your authorized locations.</p>}
+         <p className="px-3.5 sm:px-5 py-2 sm:py-3 text-xs text-[var(--theme-text-secondary)]">One row per product. Ranges cover matching locations. Bulk actions preview every matching location record before submission.</p>
          {/* Products Table grid list */}
          <PricingProductsTable />
 

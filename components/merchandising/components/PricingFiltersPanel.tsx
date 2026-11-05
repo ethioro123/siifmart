@@ -24,7 +24,7 @@ export const PricingFiltersPanel: React.FC = () => {
     }
 
     return (
-        <div className="mt-4 p-6 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shadow-sm animate-in slide-in-from-top-3 duration-200">
+        <div className="mt-4 p-3.5 sm:p-6 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 shadow-sm animate-in slide-in-from-top-3 duration-200">
             {/* Categories Section */}
             <div className="space-y-3.5">
                 <div className="flex items-center gap-2 pb-2 border-b border-[var(--theme-border)]">
@@ -94,14 +94,14 @@ export const PricingFiltersPanel: React.FC = () => {
                             <input
                                 type="number"
                                 placeholder="Min"
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
                                 value={filters.minPrice}
                                 onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
                             />
                             <input
                                 type="number"
                                 placeholder="Max"
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
                                 value={filters.maxPrice}
                                 onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
                             />
@@ -113,14 +113,14 @@ export const PricingFiltersPanel: React.FC = () => {
                             <input
                                 type="number"
                                 placeholder="Min %"
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
                                 value={filters.minMargin}
                                 onChange={(e) => setFilters({ ...filters, minMargin: e.target.value })}
                             />
                             <input
                                 type="number"
                                 placeholder="Max %"
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
                                 value={filters.maxMargin}
                                 onChange={(e) => setFilters({ ...filters, maxMargin: e.target.value })}
                             />
@@ -207,7 +207,7 @@ export const PricingFiltersPanel: React.FC = () => {
                         });
                         setSearchTerm('');
                     }}
-                    className="w-full h-9 text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all flex items-center justify-center gap-1.5 rounded-xl border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
+                    className="w-full min-h-11 sm:h-9 text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all flex items-center justify-center gap-1.5 rounded-xl border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
                     <RefreshCw size={13} className="group-hover:rotate-180 transition-transform duration-500" />
                     <span>Reset All Filters</span>

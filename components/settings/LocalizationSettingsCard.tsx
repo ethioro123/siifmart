@@ -51,7 +51,6 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
             return;
         }
 
-        const profile = getCountryProfile(selectedCountry);
         const cleanLang = sanitizeLanguageForCountry(language, selectedCountry);
 
         const payload: Partial<SystemConfig> = {
@@ -64,15 +63,17 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
         };
 
         const submitted=draft.value;
-        try { await mutation.mutateAsync({
+        let confirmed;
+        try { confirmed=await mutation.mutateAsync({
             section: 'localization',
             targetCountry: selectedCountry,
             data: payload,
         }); }catch{return;}
         if(!alive.current)return;
-        draft.acknowledge(submitted);
+        const saved=resolveCountryGeneralSettings(confirmed,selectedCountry);
+        draft.acknowledge(submitted,{currency:saved.currency,timezone:saved.timezone,dateFormat:saved.dateFormat,language:saved.language});
 
-        setContextLanguage(cleanLang as 'en' | 'am' | 'or');
+        setContextLanguage(saved.language);
         showToast(`Market localization updated for ${activeProfile.name}`, 'success');
     };
 
@@ -210,13 +211,13 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         </div>
                         <select
                             value={language}
-                            disabled={isKenya || !isCeo}
+                            disabled={selectedCountry!=='ET' || !isCeo || isSaving}
                             onChange={(e) => setLanguage(e.target.value)}
                             className="w-full h-10 bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="en">English (Official System Language)</option>
-                            {!isKenya && <option value="am">አማርኛ (Amharic)</option>}
-                            {!isKenya && <option value="or">Afaan Oromoo (Oromo)</option>}
+                            {selectedCountry==='ET' && <option value="am">አማርኛ (Amharic)</option>}
+                            {selectedCountry==='ET' && <option value="or">Afaan Oromoo (Oromo)</option>}
                         </select>
                         <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             {isKenya

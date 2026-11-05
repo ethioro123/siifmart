@@ -1,6 +1,8 @@
+import { isEligibleRegionalHub, isEligibleRegionalManager } from '../../../utils/regionalAdministration';
+import type { RegionalAdminEmployee } from '../../../types/regionalAdministration';
 import React, { useState } from 'react';
 import { X, Building2, DollarSign, ShieldAlert, Check, Store, CheckSquare, Square } from 'lucide-react';
-import type { Region, Site, Employee } from '../../../types';
+import type { Region, Site } from '../../../types';
 import type { UpdateRegionInput } from '../../../services/regions.service';
 import { useUpdateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
@@ -11,8 +13,9 @@ interface EditRegionModalProps {
     onClose: () => void;
     onUpdated: () => void;
     region: Region;
+    regions?: Region[];
     sites: Site[];
-    employees: Employee[];
+    employees: RegionalAdminEmployee[];
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
 }
 
@@ -21,6 +24,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     onClose,
     onUpdated,
     region,
+    regions = [],
     sites,
     employees,
     addNotification
@@ -57,11 +61,11 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
         const employeeCountry = e.country || e.country_code;
         if (!employeeCountry) return false;
         const empCountry = normalizeCountryCode(employeeCountry);
-        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_operations_manager';
+        const isRegionalManager = isEligibleRegionalManager(e, region.code);
         const isActive = !e.status || ['active', 'enabled'].includes(e.status.toLowerCase());
         return empCountry === normRegionCountry && isRegionalManager && isActive;
     });
-    const administrationSites = countrySites.filter(s => ['administration', 'administrative'].includes(s.type?.toLowerCase()));
+    const administrationSites = countrySites.filter(s => isEligibleRegionalHub(s, region.code, regions));
     const currency = region.default_currency || getCountryProfile(normRegionCountry).currencyCode;
 
     const toggleSite = (siteId: string) => {
@@ -179,7 +183,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">
                     {/* Basic Info */}
-                    <div className="grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Region Name
@@ -209,12 +213,13 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                     </div>
 
                     {/* Admin Hub & Regional Operations Manager */}
-                    <div className="grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Administrative Hub Site
                             </label>
                             <select
+                                aria-label="Administrative hub site"
                                 value={adminHubSiteId}
                                 onChange={(e) => setAdminHubSiteId(e.target.value)}
                                 className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
@@ -232,6 +237,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                 Regional Operations Manager
                             </label>
                             <select
+                                aria-label="Regional Operations Manager"
                                 value={regionalManagerId}
                                 onChange={(e) => setRegionalManagerId(e.target.value)}
                                 className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
@@ -271,7 +277,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </h4>
                         </div>
 
-                        <div className="grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
                                     Monthly Procurement Budget ({currency})
@@ -300,7 +306,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </div>
                         </div>
 
-                        <div className="grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
                                     Monthly Expense Budget ({currency})
@@ -332,7 +338,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         <div className="flex items-start gap-1.5 text-[11px] text-[var(--theme-text-secondary)]">
                             <ShieldAlert size={13} className="shrink-0 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-0.5" />
                             <span>
-                                Setting autonomous limits to 0 mandates National HQ sign-off on all regional transactions. Raising limits expands decentralized autonomy.
+                                A zero autonomous limit requires escalation to the authorized country or group approver. Raising limits expands decentralized autonomy.
                             </span>
                         </div>
                     </div>
@@ -387,6 +393,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         </div>
                     </div>
 
+                    <p className="text-xs text-[var(--theme-text-secondary)]">Manager choices require an active Regional Operations Manager assigned to this region in Employees. Assign staffing after creating a new region.</p>
                     {/* Footer Actions */}
                     <div className="pt-2 flex items-center justify-end gap-2">
                         <button
